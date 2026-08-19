@@ -1,0 +1,6 @@
+{
+  "name": "Visit Manager - Technical Field Operations",
+  "description": "Technical field operations management for machine replacements, maintenance visits, brake swaps, consumable alerts, and Sinclair report generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
