@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    container_name: visitas_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-gestor_visitas}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - carlino_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gestor_visitas_backend
+    restart: always
+    ports:
+        - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-1234}@db:5432/${DB_NAME:-gestor_visitas}
+    depends_on:
+      - db
+    networks:
+      - carlino_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sinclair_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - carlino_net
+
+volumes:
+  postgres_data:
+
+networks:
+  carlino_net:
+    driver: bridge
