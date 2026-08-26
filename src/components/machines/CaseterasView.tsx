@@ -4,29 +4,30 @@
  * Adheres strictly to SDD and Clean Code standards
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { Layers, Plus, Trash2, MapPin, History, Search } from "lucide-react";
+import { coreApi } from "../../services/apiClient";
 import {
-  Layers,
-  Plus,
-  Trash2,
-  MapPin,
-  History,
-  Search,
-} from 'lucide-react';
-import { coreApi } from '../../services/apiClient';
-import { Casetera, Empaque, Movimiento, Reemplazo, Status } from '../../types/domain';
-import { MachineModal } from './MachineModal';
+  Casetera,
+  Empaque,
+  Movimiento,
+  Reemplazo,
+  Status,
+} from "../../types/domain";
+import { MachineModal } from "./MachineModal";
 
 export const CaseterasView: React.FC = () => {
   const [caseteras, setCaseteras] = useState<Casetera[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
 
   // History modal
-  const [selectedCasetera, setSelectedCasetera] = useState<Casetera | null>(null);
+  const [selectedCasetera, setSelectedCasetera] = useState<Casetera | null>(
+    null,
+  );
   const [reemplazos, setReemplazos] = useState<Reemplazo[]>([]);
   const [movements, setMovements] = useState<Movimiento[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
@@ -52,12 +53,13 @@ export const CaseterasView: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm(`¿Está seguro de eliminar la Casetera Nº ${id}?`)) return;
+    if (!window.confirm(`¿Está seguro de eliminar la Casetera Nº ${id}?`))
+      return;
     try {
       await coreApi.deleteCasetera(id);
       loadData();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error al eliminar');
+      alert(e instanceof Error ? e.message : "Error al eliminar");
     }
   };
 
@@ -71,8 +73,10 @@ export const CaseterasView: React.FC = () => {
       ]);
       setReemplazos(
         allReemplazos.filter(
-          (r) => r.retirado_id === String(cas.id) || r.instalado_id === String(cas.id)
-        )
+          (r) =>
+            r.retirado_id === String(cas.id) ||
+            r.instalado_id === String(cas.id),
+        ),
       );
       setMovements(movs.filter((m) => m.machine_id === String(cas.id)));
     } catch {
@@ -88,8 +92,10 @@ export const CaseterasView: React.FC = () => {
   const filtered = caseteras.filter((c) => {
     const matchesSearch =
       String(c.id).includes(searchTerm) ||
-      getEmpaqueName(c.ubicacion).toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || c.estado === statusFilter;
+      getEmpaqueName(c.ubicacion)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || c.estado === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -144,7 +150,9 @@ export const CaseterasView: React.FC = () => {
                     <Layers className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">Casetera #{cas.id}</h3>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      Casetera #{cas.id}
+                    </h3>
                     <span className="text-[10px] text-slate-400 uppercase font-mono">
                       Cassette Sinclair
                     </span>
@@ -154,10 +162,10 @@ export const CaseterasView: React.FC = () => {
                 <span
                   className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                     cas.estado === Status.USING
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : cas.estado === Status.READY
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "bg-amber-50 text-amber-700 border border-amber-200"
                   }`}
                 >
                   {cas.estado}
@@ -214,7 +222,7 @@ export const CaseterasView: React.FC = () => {
                   Historial de Casetera #{selectedCasetera.id}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Registro de reemplazos e intervenciones técnicas (RF04, RF19)
+                  Registro de reemplazos e intervenciones técnicas
                 </p>
               </div>
               <button
@@ -227,13 +235,20 @@ export const CaseterasView: React.FC = () => {
 
             <div className="space-y-3">
               {reemplazos.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No hay reemplazos registrados para esta casetera.</p>
+                <p className="text-xs text-slate-400 italic">
+                  No hay reemplazos registrados para esta casetera.
+                </p>
               ) : (
                 reemplazos.map((r) => (
-                  <div key={r.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                  <div
+                    key={r.id}
+                    className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  >
                     <div className="flex items-center justify-between font-semibold">
                       <span className="text-teal-700">{r.empaque_nombre}</span>
-                      <span className="text-slate-500 text-[10px]">{r.fecha}</span>
+                      <span className="text-slate-500 text-[10px]">
+                        {r.fecha}
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200 text-slate-700">
                       <div>

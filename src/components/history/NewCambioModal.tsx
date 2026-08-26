@@ -4,7 +4,7 @@
  * Adheres strictly to SDD and Clean Code standards
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   X,
   Save,
@@ -15,9 +15,16 @@ import {
   AlertCircle,
   Search,
   CheckCircle2,
-} from 'lucide-react';
-import { coreApi } from '../../services/apiClient';
-import { Cabezal, CreateCambioDTO, Empaque, Freno, Status, Tecnico } from '../../types/domain';
+} from "lucide-react";
+import { coreApi } from "../../services/apiClient";
+import {
+  Cabezal,
+  CreateCambioDTO,
+  Empaque,
+  Freno,
+  Status,
+  Tecnico,
+} from "../../types/domain";
 
 interface NewCambioModalProps {
   isOpen: boolean;
@@ -35,15 +42,19 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
   const [cabezales, setCabezales] = useState<Cabezal[]>([]);
   const [frenos, setFrenos] = useState<Freno[]>([]);
 
-  const [cabezalSearch, setCabezalSearch] = useState<string>('');
-  const [cabezalId, setCabezalId] = useState<string>('');
-  const [frenoRetiradoId, setFrenoRetiradoId] = useState<string>('');
-  const [frenoInstaladoId, setFrenoInstaladoId] = useState<string>('');
-  const [lugar, setLugar] = useState<'En emplazamiento' | 'Taller'>('En emplazamiento');
-  const [empaqueId, setEmpaqueId] = useState<string>('');
-  const [tecnicoId, setTecnicoId] = useState<string>('');
-  const [fecha, setFecha] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [motivo, setMotivo] = useState<string>('');
+  const [cabezalSearch, setCabezalSearch] = useState<string>("");
+  const [cabezalId, setCabezalId] = useState<string>("");
+  const [frenoRetiradoId, setFrenoRetiradoId] = useState<string>("");
+  const [frenoInstaladoId, setFrenoInstaladoId] = useState<string>("");
+  const [lugar, setLugar] = useState<"En emplazamiento" | "Taller">(
+    "En emplazamiento",
+  );
+  const [empaqueId, setEmpaqueId] = useState<string>("");
+  const [tecnicoId, setTecnicoId] = useState<string>("");
+  const [fecha, setFecha] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  );
+  const [motivo, setMotivo] = useState<string>("");
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -87,19 +98,24 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
   const filteredCabezales = cabezales.filter(
     (c) =>
       c.id.toLowerCase().includes(cabezalSearch.toLowerCase()) ||
-      c.ubicacion.toLowerCase().includes(cabezalSearch.toLowerCase())
+      c.ubicacion.toLowerCase().includes(cabezalSearch.toLowerCase()),
   );
 
   const handleSelectCabezal = (selectedCabId: string) => {
     setCabezalId(selectedCabId);
     const cab = cabezales.find((c) => c.id === selectedCabId);
     if (cab) {
-      setFrenoRetiradoId(cab.freno_actual_id || 'FRN-301');
-      if (cab.ubicacion === 'EMP-04' || cab.ubicacion.toLowerCase().includes('taller')) {
-        setLugar('Taller');
+      setFrenoRetiradoId(cab.freno_actual_id || "FRN-301");
+      if (
+        cab.ubicacion === "EMP-04" ||
+        cab.ubicacion.toLowerCase().includes("taller")
+      ) {
+        setLugar("Taller");
       } else {
-        setLugar('En emplazamiento');
-        const matchedEmpaque = empaques.find((e) => e.id === cab.ubicacion || e.nombre === cab.ubicacion);
+        setLugar("En emplazamiento");
+        const matchedEmpaque = empaques.find(
+          (e) => e.id === cab.ubicacion || e.nombre === cab.ubicacion,
+        );
         if (matchedEmpaque) {
           setEmpaqueId(matchedEmpaque.id);
         }
@@ -112,23 +128,25 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
     setErrorMessage(null);
 
     if (!cabezalId.trim()) {
-      setErrorMessage('Debe seleccionar el Cabezal intervenido.');
+      setErrorMessage("Debe seleccionar el Cabezal intervenido.");
       return;
     }
     if (!frenoRetiradoId.trim()) {
-      setErrorMessage('Debe especificar el Freno retirado del cabezal.');
+      setErrorMessage("Debe especificar el Freno retirado del cabezal.");
       return;
     }
     if (!frenoInstaladoId.trim()) {
-      setErrorMessage('Debe especificar el nuevo Freno a instalar.');
+      setErrorMessage("Debe especificar el nuevo Freno a instalar.");
       return;
     }
     if (frenoRetiradoId === frenoInstaladoId) {
-      setErrorMessage('El freno retirado y el instalado no pueden ser el mismo.');
+      setErrorMessage(
+        "El freno retirado y el instalado no pueden ser el mismo.",
+      );
       return;
     }
     if (!motivo.trim()) {
-      setErrorMessage('Debe describir el motivo técnico del cambio.');
+      setErrorMessage("Debe describir el motivo técnico del cambio.");
       return;
     }
 
@@ -139,7 +157,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
         freno_retirado_id: frenoRetiradoId,
         freno_instalado_id: frenoInstaladoId,
         lugar,
-        empaque_id: lugar === 'En emplazamiento' ? empaqueId : undefined,
+        empaque_id: lugar === "En emplazamiento" ? empaqueId : undefined,
         motivo,
         fecha,
         tecnico_id: tecnicoId || undefined,
@@ -149,7 +167,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setErrorMessage(err.message || 'Error al registrar el cambio de freno.');
+      setErrorMessage(err.message || "Error al registrar el cambio de freno.");
     } finally {
       setIsSubmitting(false);
     }
@@ -180,7 +198,10 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
         </div>
 
         {/* Modal Form Content */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-5 text-xs">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto flex-1 space-y-5 text-xs"
+        >
           {errorMessage && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-center gap-2 font-medium">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -196,7 +217,9 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Fecha de la Operación</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Fecha de la Operación
+                </label>
                 <input
                   type="date"
                   value={fecha}
@@ -206,7 +229,9 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Técnico Responsable</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Técnico Responsable
+                </label>
                 <select
                   value={tecnicoId}
                   onChange={(e) => setTecnicoId(e.target.value)}
@@ -231,26 +256,28 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Tipo de Emplazamiento</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Tipo de Emplazamiento
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setLugar('En emplazamiento')}
+                    onClick={() => setLugar("En emplazamiento")}
                     className={`py-2 px-3 rounded-xl font-bold border transition text-center ${
-                      lugar === 'En emplazamiento'
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      lugar === "En emplazamiento"
+                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
                     En Planta
                   </button>
                   <button
                     type="button"
-                    onClick={() => setLugar('Taller')}
+                    onClick={() => setLugar("Taller")}
                     className={`py-2 px-3 rounded-xl font-bold border transition text-center ${
-                      lugar === 'Taller'
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      lugar === "Taller"
+                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
                     En Taller Sinclair
@@ -258,11 +285,13 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                 </div>
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Planta de Referencia</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Planta de Referencia
+                </label>
                 <select
                   value={empaqueId}
                   onChange={(e) => setEmpaqueId(e.target.value)}
-                  disabled={lugar === 'Taller'}
+                  disabled={lugar === "Taller"}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 disabled:opacity-50"
                 >
                   {empaques.map((emp) => (
@@ -285,7 +314,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
             {/* Cabezal Selection with Search Autocomplete */}
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Cabezal Intervenido (Printhead) *
+                Cabezal Intervenido *
               </label>
               <div className="space-y-2">
                 {/* Autocomplete search input */}
@@ -307,10 +336,13 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-mono font-bold"
                   required
                 >
-                  <option value="">-- Seleccione un Cabezal ({cabezales.length} existentes) --</option>
+                  <option value="">
+                    -- Seleccione un Cabezal ({cabezales.length} existentes) --
+                  </option>
                   {filteredCabezales.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.id} — Ubicación: {c.ubicacion} | Estado: {c.estado} | Freno actual: {c.freno_actual_id || 'Ninguno'}
+                      {c.id} — Ubicación: {c.ubicacion} | Estado: {c.estado} |
+                      Freno actual: {c.freno_actual_id || "Ninguno"}
                     </option>
                   ))}
                 </select>
@@ -327,12 +359,15 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                   type="text"
                   placeholder="Ej. FRN-303"
                   value={frenoRetiradoId}
-                  onChange={(e) => setFrenoRetiradoId(e.target.value.toUpperCase())}
+                  onChange={(e) =>
+                    setFrenoRetiradoId(e.target.value.toUpperCase())
+                  }
                   className="w-full p-2 bg-white border border-rose-300 rounded-lg text-slate-900 font-mono font-bold"
                   required
                 />
                 <p className="text-[11px] text-rose-700">
-                  Freno que estaba montado en {cabezalId || 'el cabezal'}. Pasará a <strong>En Reparación (Pending)</strong>.
+                  Freno que estaba montado en {cabezalId || "el cabezal"}.
+                  Pasará a <strong>En Reparación (Pending)</strong>.
                 </p>
               </div>
 
@@ -348,7 +383,9 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                     className="w-full p-2 bg-white border border-emerald-300 rounded-lg text-slate-900 font-mono font-bold"
                     required
                   >
-                    <option value="">-- Seleccione Freno Listo ({readyFrenos.length}) --</option>
+                    <option value="">
+                      -- Seleccione Freno Listo ({readyFrenos.length}) --
+                    </option>
                     {readyFrenos.map((f) => (
                       <option key={f.id} value={f.id}>
                         {f.id} ({f.estado} - Ubicación: {f.ubicacion})
@@ -360,12 +397,15 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                     type="text"
                     placeholder="O escriba ID manual (ej. FRN-301)"
                     value={frenoInstaladoId}
-                    onChange={(e) => setFrenoInstaladoId(e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      setFrenoInstaladoId(e.target.value.toUpperCase())
+                    }
                     className="w-full p-1.5 bg-white border border-emerald-200 rounded text-slate-700 font-mono text-[11px]"
                   />
                 </div>
                 <p className="text-[11px] text-emerald-700">
-                  Pasará a estado <strong>En Uso (Using)</strong> montado en el cabezal {cabezalId || 'seleccionado'}.
+                  Pasará a estado <strong>En Uso (Using)</strong> montado en el
+                  cabezal {cabezalId || "seleccionado"}.
                 </p>
               </div>
             </div>
@@ -400,7 +440,9 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
               className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-500/20 flex items-center gap-2 transition disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {isSubmitting ? 'Guardando Cambio...' : 'Confirmar & Registrar Cambio de Freno'}
+              {isSubmitting
+                ? "Guardando Cambio..."
+                : "Confirmar & Registrar Cambio de Freno"}
             </button>
           </div>
         </form>

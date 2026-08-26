@@ -4,7 +4,7 @@
  * Adheres strictly to SDD and Clean Code standards
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Disc,
   Plus,
@@ -14,17 +14,17 @@ import {
   Calendar,
   Search,
   Cpu,
-} from 'lucide-react';
-import { coreApi } from '../../services/apiClient';
-import { Cambio, Empaque, Freno, Movimiento, Status } from '../../types/domain';
-import { MachineModal } from './MachineModal';
+} from "lucide-react";
+import { coreApi } from "../../services/apiClient";
+import { Cambio, Empaque, Freno, Movimiento, Status } from "../../types/domain";
+import { MachineModal } from "./MachineModal";
 
 export const FrenosView: React.FC = () => {
   const [frenos, setFrenos] = useState<Freno[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
 
   // History modal
@@ -59,7 +59,7 @@ export const FrenosView: React.FC = () => {
       await coreApi.deleteFreno(id);
       loadData();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error al eliminar');
+      alert(e instanceof Error ? e.message : "Error al eliminar");
     }
   };
 
@@ -73,8 +73,10 @@ export const FrenosView: React.FC = () => {
       ]);
       setCambios(
         allCambios.filter(
-          (c) => c.retirado_freno_id === freno.id || c.instalado_freno_id === freno.id
-        )
+          (c) =>
+            c.retirado_freno_id === freno.id ||
+            c.instalado_freno_id === freno.id,
+        ),
       );
       setMovements(movs.filter((m) => m.machine_id === freno.id));
     } catch {
@@ -90,8 +92,8 @@ export const FrenosView: React.FC = () => {
   const filtered = frenos.filter((f) => {
     const matchesSearch =
       f.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (f.cabezal_id || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || f.estado === statusFilter;
+      (f.cabezal_id || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || f.estado === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -146,7 +148,9 @@ export const FrenosView: React.FC = () => {
                     <Disc className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">{freno.id}</h3>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      {freno.id}
+                    </h3>
                     <span className="text-[10px] text-slate-400 uppercase font-mono">
                       Conjunto Freno Sinclair
                     </span>
@@ -156,10 +160,10 @@ export const FrenosView: React.FC = () => {
                 <span
                   className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                     freno.estado === Status.USING
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : freno.estado === Status.READY
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "bg-amber-50 text-amber-700 border border-amber-200"
                   }`}
                 >
                   {freno.estado}
@@ -171,14 +175,16 @@ export const FrenosView: React.FC = () => {
                   <span className="text-slate-400 flex items-center gap-1">
                     <Calendar className="w-3 h-3" /> Fecha inicio:
                   </span>
-                  <span className="font-medium text-slate-900">{freno.fecha_inicio}</span>
+                  <span className="font-medium text-slate-900">
+                    {freno.fecha_inicio}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400 flex items-center gap-1">
                     <Cpu className="w-3 h-3" /> Cabezal actual:
                   </span>
                   <span className="font-mono font-medium text-indigo-700">
-                    {freno.cabezal_id || 'En stock / Taller'}
+                    {freno.cabezal_id || "En stock / Taller"}
                   </span>
                 </div>
               </div>
@@ -222,7 +228,7 @@ export const FrenosView: React.FC = () => {
                   Historial de Cambios: Freno {selectedFreno.id}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Registro de instalaciones, desmontajes y traslados (RF08, RF20)
+                  Registro de instalaciones, desmontajes y traslados
                 </p>
               </div>
               <button
@@ -235,15 +241,22 @@ export const FrenosView: React.FC = () => {
 
             <div className="space-y-3">
               {cambios.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No hay registros de cambio para este freno.</p>
+                <p className="text-xs text-slate-400 italic">
+                  No hay registros de cambio para este freno.
+                </p>
               ) : (
                 cambios.map((c) => (
-                  <div key={c.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                  <div
+                    key={c.id}
+                    className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  >
                     <div className="flex items-center justify-between font-semibold">
                       <span className="text-indigo-700 font-mono">
                         Cabezal {c.cabezal_id} ({c.lugar})
                       </span>
-                      <span className="text-slate-500 text-[10px]">{c.fecha}</span>
+                      <span className="text-slate-500 text-[10px]">
+                        {c.fecha}
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200 text-slate-700">
                       <div>

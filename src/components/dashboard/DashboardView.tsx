@@ -5,7 +5,7 @@
  * Adheres strictly to SDD and Clean Code standards.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Activity,
   AlertCircle,
@@ -30,11 +30,22 @@ import {
   Search,
   Check,
   RefreshCw,
-} from 'lucide-react';
-import { coreApi, visitsApi } from '../../services/apiClient';
-import { Cabezal, Casetera, Empaque, Freno, Tecnico, Visita, Status } from '../../types/domain';
-import { SinclairReportModal } from '../visits/SinclairReportModal';
-import { downloadVisitPDF, downloadVisitsAsZip } from '../../utils/pdfGenerator';
+} from "lucide-react";
+import { coreApi, visitsApi } from "../../services/apiClient";
+import {
+  Cabezal,
+  Casetera,
+  Empaque,
+  Freno,
+  Tecnico,
+  Visita,
+  Status,
+} from "../../types/domain";
+import { SinclairReportModal } from "../visits/SinclairReportModal";
+import {
+  downloadVisitPDF,
+  downloadVisitsAsZip,
+} from "../../utils/pdfGenerator";
 
 interface DashboardViewProps {
   onNavigate: (view: string) => void;
@@ -49,21 +60,29 @@ interface TechnicianMetric {
   lastVisit: string | null;
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewVisit }) => {
+export const DashboardView: React.FC<DashboardViewProps> = ({
+  onNavigate,
+  onNewVisit,
+}) => {
   const [stats, setStats] = useState<any>(null);
   const [recentVisits, setRecentVisits] = useState<Visita[]>([]);
   const [allVisits, setAllVisits] = useState<Visita[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [cabezales, setCabezales] = useState<Cabezal[]>([]);
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
-  const [selectedVisitReport, setSelectedVisitReport] = useState<Visita | null>(null);
+  const [selectedVisitReport, setSelectedVisitReport] = useState<Visita | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   // Date Filter & ZIP Export State
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const [isExportingZip, setIsExportingZip] = useState<boolean>(false);
-  const [exportProgress, setExportProgress] = useState<{ current: number; total: number } | null>(null);
+  const [exportProgress, setExportProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
   const [zipSuccessMsg, setZipSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -73,13 +92,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [statsData, visitsData, empData, cabData, tecData] = await Promise.all([
-        coreApi.getDashboardStats().catch(() => null),
-        visitsApi.getAllVisits().catch(() => []),
-        coreApi.getEmpaques().catch(() => []),
-        coreApi.getCabezales().catch(() => []),
-        coreApi.getTecnicos().catch(() => []),
-      ]);
+      const [statsData, visitsData, empData, cabData, tecData] =
+        await Promise.all([
+          coreApi.getDashboardStats().catch(() => null),
+          visitsApi.getAllVisits().catch(() => []),
+          coreApi.getEmpaques().catch(() => []),
+          coreApi.getCabezales().catch(() => []),
+          coreApi.getTecnicos().catch(() => []),
+        ]);
 
       setStats(statsData);
       setAllVisits(visitsData);
@@ -97,29 +117,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
   // Filter visits by date
   const filteredVisitsForExport = allVisits.filter((visit) => {
     if (!visit.fecha) return true;
-    const visitDate = visit.fecha.split('T')[0];
+    const visitDate = visit.fecha.split("T")[0];
     if (startDate && visitDate < startDate) return false;
     if (endDate && visitDate > endDate) return false;
     return true;
   });
 
-  const handleApplyQuickFilter = (preset: 'all' | 'month' | 'last30' | 'year') => {
+  const handleApplyQuickFilter = (
+    preset: "all" | "month" | "last30" | "year",
+  ) => {
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = today.toISOString().split("T")[0];
 
-    if (preset === 'all') {
-      setStartDate('');
-      setEndDate('');
-    } else if (preset === 'month') {
-      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+    if (preset === "all") {
+      setStartDate("");
+      setEndDate("");
+    } else if (preset === "month") {
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
+        .toISOString()
+        .split("T")[0];
       setStartDate(firstDay);
       setEndDate(todayStr);
-    } else if (preset === 'last30') {
-      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    } else if (preset === "last30") {
+      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
       setStartDate(thirtyDaysAgo);
       setEndDate(todayStr);
-    } else if (preset === 'year') {
-      const firstDayYear = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
+    } else if (preset === "year") {
+      const firstDayYear = new Date(today.getFullYear(), 0, 1)
+        .toISOString()
+        .split("T")[0];
       setStartDate(firstDayYear);
       setEndDate(todayStr);
     }
@@ -127,7 +155,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
 
   const handleExportZip = async () => {
     if (filteredVisitsForExport.length === 0) {
-      alert('No hay reportes de visitas en el rango de fechas seleccionado.');
+      alert("No hay reportes de visitas en el rango de fechas seleccionado.");
       return;
     }
 
@@ -140,11 +168,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
       });
 
       setZipSuccessMsg(
-        `Se exportaron exitosamente ${filteredVisitsForExport.length} reportes en formato PDF dentro del archivo ZIP.`
+        `Se exportaron exitosamente ${filteredVisitsForExport.length} reportes en formato PDF dentro del archivo ZIP.`,
       );
       setTimeout(() => setZipSuccessMsg(null), 5000);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error al generar el archivo ZIP');
+      alert(
+        err instanceof Error ? err.message : "Error al generar el archivo ZIP",
+      );
     } finally {
       setIsExportingZip(false);
       setExportProgress(null);
@@ -152,19 +182,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
   };
 
   const operationalCabezales = cabezales.filter(
-    (c) => c.estado === Status.USING || c.estado === Status.READY
+    (c) => c.estado === Status.USING || c.estado === Status.READY,
   ).length;
-  const pendingCabezales = cabezales.filter((c) => c.estado === Status.PENDING).length;
+  const pendingCabezales = cabezales.filter(
+    (c) => c.estado === Status.PENDING,
+  ).length;
   const totalBancos = empaques.reduce((sum, e) => sum + e.bancos.length, 0);
 
   // Compute metrics per technician
   const technicianMetrics: TechnicianMetric[] = tecnicos.map((tec) => {
-    const tecVisits = allVisits.filter((v) => v.tecnicos.some((t) => t.id === tec.id));
-    const totalDist = tecVisits.reduce((sum, v) => sum + (v.empaque?.distancia || 0), 0);
+    const tecVisits = allVisits.filter((v) =>
+      v.tecnicos.some((t) => t.id === tec.id),
+    );
+    const totalDist = tecVisits.reduce(
+      (sum, v) => sum + (v.empaque?.distancia || 0),
+      0,
+    );
     const totalHours = tecVisits.reduce((sum, v) => {
       const estHours = v.reporte?.estructura?.reduce(
         (hSum, item) => hSum + (item.tiempo_servicio || 0),
-        0
+        0,
       );
       return sum + (estHours || 0);
     }, 0);
@@ -178,11 +215,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
       visitasCount: tecVisits.length,
       totalDistanceKm: totalDist,
       totalServiceHours: Number(totalHours.toFixed(1)),
-      lastVisit: sortedDates.length > 0 ? new Date(sortedDates[0]).toLocaleDateString() : null,
+      lastVisit:
+        sortedDates.length > 0
+          ? new Date(sortedDates[0]).toLocaleDateString()
+          : null,
     };
   });
 
-  const totalKilometersAll = technicianMetrics.reduce((sum, t) => sum + t.totalDistanceKm, 0);
+  const totalKilometersAll = technicianMetrics.reduce(
+    (sum, t) => sum + t.totalDistanceKm,
+    0,
+  );
   const totalVisitsCount = allVisits.length;
 
   return (
@@ -194,9 +237,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
             <span className="px-3 py-1 bg-blue-700/50 border border-blue-400/30 rounded-full text-xs font-semibold uppercase tracking-wider text-blue-200 inline-block mb-2">
               Sinclair Field Operations Control
             </span>
-            <h1 className="text-2xl font-bold">Estadísticas &amp; Exportación de Reportes</h1>
+            <h1 className="text-2xl font-bold">
+              Estadísticas &amp; Exportación de Reportes
+            </h1>
             <p className="text-sm text-blue-100/80 mt-1 max-w-xl">
-              Métricas operativas de campo, trazabilidad por técnico y descarga de reportes PDF en formato ZIP.
+              Métricas operativas de campo, trazabilidad por técnico y descarga
+              de reportes PDF en formato ZIP.
             </p>
           </div>
 
@@ -211,7 +257,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
             </button>
             <button
               id="btn-dash-view-equipment"
-              onClick={() => onNavigate('equipment-location')}
+              onClick={() => onNavigate("equipment-location")}
               className="px-4 py-2.5 bg-blue-700/60 hover:bg-blue-700 text-white font-semibold rounded-xl border border-blue-400/30 transition flex items-center gap-2 text-sm"
             >
               <Building className="w-4 h-4" />
@@ -225,10 +271,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Plantas Activas</span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              Plantas Activas
+            </span>
             <Building className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="text-2xl font-black text-slate-900">{empaques.length}</div>
+          <div className="text-2xl font-black text-slate-900">
+            {empaques.length}
+          </div>
           <div className="text-xs text-slate-500 mt-1 font-medium">
             {totalBancos} Bancos Sinclair instalados
           </div>
@@ -236,40 +286,56 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Cabezales Operativos</span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              Cabezales Operativos
+            </span>
             <Cpu className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-slate-900">
-            {operationalCabezales}{' '}
-            <span className="text-sm font-normal text-slate-400">/ {cabezales.length}</span>
+            {operationalCabezales}{" "}
+            <span className="text-sm font-normal text-slate-400">
+              / {cabezales.length}
+            </span>
           </div>
           <div className="text-xs text-emerald-600 mt-1 font-semibold flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" />
             {cabezales.length > 0
               ? `${Math.round((operationalCabezales / cabezales.length) * 100)}% disponibilidad`
-              : 'Sin datos'}
+              : "Sin datos"}
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Cabezales Pendientes</span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              Cabezales Pendientes
+            </span>
             <Wrench className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="text-2xl font-black text-slate-900">{pendingCabezales}</div>
+          <div className="text-2xl font-black text-slate-900">
+            {pendingCabezales}
+          </div>
           <div className="text-xs text-amber-600 mt-1 font-semibold flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5" />
-            {pendingCabezales > 0 ? 'En revisión o depósito' : 'Todos operativos'}
+            {pendingCabezales > 0
+              ? "En revisión o depósito"
+              : "Todos operativos"}
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Técnicos Activos</span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              Técnicos Activos
+            </span>
             <Users className="w-4 h-4 text-indigo-600" />
           </div>
-          <div className="text-2xl font-black text-slate-900">{tecnicos.length}</div>
-          <div className="text-xs text-slate-500 mt-1 font-medium">Personal de campo certificado</div>
+          <div className="text-2xl font-black text-slate-900">
+            {tecnicos.length}
+          </div>
+          <div className="text-xs text-slate-500 mt-1 font-medium">
+            Personal de campo certificado
+          </div>
         </div>
       </div>
 
@@ -285,7 +351,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                 Exportación Masiva en ZIP de Reportes PDF
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Genera un archivo comprimido (.zip) con los reportes técnicos oficiales de Sinclair en formato PDF individuales.
+                Genera un archivo comprimido (.zip) con los reportes técnicos
+                oficiales de Sinclair en formato PDF individuales.
               </p>
             </div>
           </div>
@@ -302,7 +369,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                   <RefreshCw className="w-4 h-4 animate-spin" />
                   {exportProgress
                     ? `Generando (${exportProgress.current}/${exportProgress.total})...`
-                    : 'Preparando ZIP...'}
+                    : "Preparando ZIP..."}
                 </>
               ) : (
                 <>
@@ -333,32 +400,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
             <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => handleApplyQuickFilter('all')}
+                onClick={() => handleApplyQuickFilter("all")}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
                   !startDate && !endDate
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
                 }`}
               >
                 Todas
               </button>
               <button
                 type="button"
-                onClick={() => handleApplyQuickFilter('last30')}
+                onClick={() => handleApplyQuickFilter("last30")}
                 className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition"
               >
                 Últimos 30 días
               </button>
               <button
                 type="button"
-                onClick={() => handleApplyQuickFilter('month')}
+                onClick={() => handleApplyQuickFilter("month")}
                 className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition"
               >
                 Este Mes
               </button>
               <button
                 type="button"
-                onClick={() => handleApplyQuickFilter('year')}
+                onClick={() => handleApplyQuickFilter("year")}
                 className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition"
               >
                 Este Año
@@ -411,10 +478,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
         {/* Filtered Reports Mini-Table */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-            <span>Listado de Reportes a incluir en el ZIP ({filteredVisitsForExport.length})</span>
+            <span>
+              Listado de Reportes a incluir en el ZIP (
+              {filteredVisitsForExport.length})
+            </span>
             {startDate || endDate ? (
               <span className="text-slate-500 font-normal text-[11px]">
-                Filtro activo: {startDate || 'Inicio'} hasta {endDate || 'Hoy'}
+                Filtro activo: {startDate || "Inicio"} hasta {endDate || "Hoy"}
               </span>
             ) : null}
           </div>
@@ -441,13 +511,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                         </span>
                         <span className="text-slate-400">•</span>
                         <span className="font-semibold text-slate-700 truncate">
-                          {visit.empaque?.nombre || 'Planta'}
+                          {visit.empaque?.nombre || "Planta"}
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
-                        <span>{new Date(visit.fecha).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(visit.fecha).toLocaleDateString()}
+                        </span>
                         <span>•</span>
-                        <span>{visit.tecnicos.map((t) => t.nombre).join(', ')}</span>
+                        <span>
+                          {visit.tecnicos.map((t) => t.nombre).join(", ")}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -487,7 +561,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
               Últimas Visitas Registradas
             </h2>
             <button
-              onClick={() => onNavigate('visits')}
+              onClick={() => onNavigate("visits")}
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
             >
               Ver todas ({recentVisits.length})
@@ -498,7 +572,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
           <div className="space-y-3">
             {recentVisits.length === 0 ? (
               <div className="text-center py-8 text-slate-400 text-xs">
-                No hay visitas registradas aún. Haga clic en "Nueva Visita" para comenzar.
+                No hay visitas registradas aún. Haga clic en "Nueva Visita" para
+                comenzar.
               </div>
             ) : (
               recentVisits.map((visit) => {
@@ -517,13 +592,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                         </span>
                       </div>
                       <div className="text-slate-500 flex items-center gap-3">
-                        <span>Fecha: {new Date(visit.fecha).toLocaleDateString()}</span>
-                        <span>•</span>
                         <span>
-                          Técnicos: {visit.tecnicos.map((t) => t.nombre).join(', ')}
+                          Fecha: {new Date(visit.fecha).toLocaleDateString()}
                         </span>
                         <span>•</span>
-                        <span>Vehículo: {typeof visit.vehiculo === 'object' ? `${visit.vehiculo?.marca || ''} ${visit.vehiculo?.modelo || ''}` : visit.vehiculo}</span>
+                        <span>
+                          Técnicos:{" "}
+                          {visit.tecnicos.map((t) => t.nombre).join(", ")}
+                        </span>
+                        <span>•</span>
+                        <span>
+                          Vehículo:{" "}
+                          {typeof visit.vehiculo === "object"
+                            ? `${visit.vehiculo?.marca || ""} ${visit.vehiculo?.modelo || ""}`
+                            : visit.vehiculo}
+                        </span>
                       </div>
                     </div>
 
@@ -550,7 +633,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
               Inventario de Flota
             </h2>
             <button
-              onClick={() => onNavigate('cabezales')}
+              onClick={() => onNavigate("cabezales")}
               className="text-xs font-semibold text-blue-600 hover:text-blue-800"
             >
               Gestionar
@@ -559,7 +642,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
 
           <div className="space-y-3">
             <div
-              onClick={() => onNavigate('cabezales')}
+              onClick={() => onNavigate("cabezales")}
               className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-between cursor-pointer transition"
             >
               <div className="flex items-center gap-3">
@@ -567,15 +650,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                   <Cpu className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-slate-900">Cabezales (Printheads)</div>
-                  <div className="text-[10px] text-slate-500">{cabezales.length} registrados</div>
+                  <div className="font-bold text-xs text-slate-900">
+                    Cabezales
+                  </div>
+                  <div className="text-[10px] text-slate-500">
+                    {cabezales.length} registrados
+                  </div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </div>
 
             <div
-              onClick={() => onNavigate('caseteras')}
+              onClick={() => onNavigate("caseteras")}
               className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-between cursor-pointer transition"
             >
               <div className="flex items-center gap-3">
@@ -583,15 +670,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-slate-900">Caseteras (Cassettes)</div>
-                  <div className="text-[10px] text-slate-500">Historial de traslados</div>
+                  <div className="font-bold text-xs text-slate-900">
+                    Caseteras
+                  </div>
+                  <div className="text-[10px] text-slate-500">
+                    Historial de traslados
+                  </div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </div>
 
             <div
-              onClick={() => onNavigate('frenos')}
+              onClick={() => onNavigate("frenos")}
               className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-between cursor-pointer transition"
             >
               <div className="flex items-center gap-3">
@@ -599,15 +690,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                   <Disc className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-slate-900">Frenos (Brakes)</div>
-                  <div className="text-[10px] text-slate-500">Acoplados y repuestos</div>
+                  <div className="font-bold text-xs text-slate-900">Frenos</div>
+                  <div className="text-[10px] text-slate-500">
+                    Acoplados y repuestos
+                  </div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </div>
 
             <div
-              onClick={() => onNavigate('consumibles')}
+              onClick={() => onNavigate("consumibles")}
               className="p-3 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-between cursor-pointer transition"
             >
               <div className="flex items-center gap-3">
@@ -615,8 +708,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                   <Wrench className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-slate-900">Consumibles &amp; Repuestos</div>
-                  <div className="text-[10px] text-slate-500">Control de stock y alertas</div>
+                  <div className="font-bold text-xs text-slate-900">
+                    Consumibles &amp; Repuestos
+                  </div>
+                  <div className="text-[10px] text-slate-500">
+                    Control de stock y alertas
+                  </div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -634,17 +731,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
               Métricas por Técnico: Visitas y Distancia Recorrida
             </h2>
             <p className="text-xs text-slate-500">
-              Control de traslados logísticos a plantas de empaque, horas de servicio y productividad
+              Control de traslados logísticos a plantas de empaque, horas de
+              servicio y productividad
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
             <div>
-              Total Visitas: <span className="font-bold text-slate-900">{totalVisitsCount}</span>
+              Total Visitas:{" "}
+              <span className="font-bold text-slate-900">
+                {totalVisitsCount}
+              </span>
             </div>
             <div className="text-slate-300">|</div>
             <div>
-              Total Km Recorridos:{' '}
-              <span className="font-bold text-blue-700 font-mono">{totalKilometersAll.toLocaleString()} km</span>
+              Total Km Recorridos:{" "}
+              <span className="font-bold text-blue-700 font-mono">
+                {totalKilometersAll.toLocaleString()} km
+              </span>
             </div>
           </div>
         </div>
@@ -664,15 +767,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {technicianMetrics.map((item) => {
                 return (
-                  <tr key={item.tecnico.id} className="hover:bg-slate-50/80 transition">
+                  <tr
+                    key={item.tecnico.id}
+                    className="hover:bg-slate-50/80 transition"
+                  >
                     <td className="p-3">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">
                           {item.tecnico.nombre.charAt(0)}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900">{item.tecnico.nombre}</div>
-                          <div className="text-[10px] text-slate-400 font-mono">{item.tecnico.id}</div>
+                          <div className="font-bold text-slate-900">
+                            {item.tecnico.nombre}
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-mono">
+                            {item.tecnico.id}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -694,7 +804,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, onNewV
                       {item.totalServiceHours} hs
                     </td>
                     <td className="p-3 text-center text-slate-500">
-                      {item.lastVisit || 'Sin registros'}
+                      {item.lastVisit || "Sin registros"}
                     </td>
                   </tr>
                 );

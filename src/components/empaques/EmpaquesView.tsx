@@ -4,7 +4,7 @@
  * Adheres strictly to SDD and Clean Code standards with Admin-only edit protection.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   MapPin,
   Plus,
@@ -18,18 +18,18 @@ import {
   Navigation,
   Lock,
   ShieldCheck,
-} from 'lucide-react';
-import { coreApi } from '../../services/apiClient';
-import { Empaque } from '../../types/domain';
-import { EmpaqueModal } from './EmpaqueModal';
-import { useAuth } from '../../context/AuthContext';
+} from "lucide-react";
+import { coreApi } from "../../services/apiClient";
+import { Empaque } from "../../types/domain";
+import { EmpaqueModal } from "./EmpaqueModal";
+import { useAuth } from "../../context/AuthContext";
 
 export const EmpaquesView: React.FC = () => {
   const { user, isAdmin } = useAuth();
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [unvisitedAlerts, setUnvisitedAlerts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEmpaque, setEditingEmpaque] = useState<Empaque | null>(null);
 
@@ -55,7 +55,9 @@ export const EmpaquesView: React.FC = () => {
 
   const handleCreate = () => {
     if (!isAdmin) {
-      alert('Acceso denegado: Solo los administradores pueden crear nuevos empaques (RF10).');
+      alert(
+        "Acceso denegado: Solo los administradores pueden crear nuevos empaques.",
+      );
       return;
     }
     setEditingEmpaque(null);
@@ -64,7 +66,9 @@ export const EmpaquesView: React.FC = () => {
 
   const handleEdit = (emp: Empaque) => {
     if (!isAdmin) {
-      alert('Acceso denegado: Solo los administradores pueden modificar los datos de los empaques (RF10).');
+      alert(
+        "Acceso denegado: Solo los administradores pueden modificar los datos de los empaques.",
+      );
       return;
     }
     setEditingEmpaque(emp);
@@ -73,15 +77,18 @@ export const EmpaquesView: React.FC = () => {
 
   const handleDelete = async (id: string, name: string) => {
     if (!isAdmin) {
-      alert('Acceso denegado: Solo los administradores pueden eliminar empaques (RF10).');
+      alert(
+        "Acceso denegado: Solo los administradores pueden eliminar empaques.",
+      );
       return;
     }
-    if (!window.confirm(`¿Está seguro de eliminar el empaque "${name}"?`)) return;
+    if (!window.confirm(`¿Está seguro de eliminar el empaque "${name}"?`))
+      return;
     try {
       await coreApi.deleteEmpaque(id);
       loadData();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error al eliminar empaque');
+      alert(e instanceof Error ? e.message : "Error al eliminar empaque");
     }
   };
 
@@ -91,7 +98,10 @@ export const EmpaquesView: React.FC = () => {
 
   const filtered = empaques.filter((e) => {
     const term = searchTerm.toLowerCase();
-    return e.nombre.toLowerCase().includes(term) || e.ubicacion.toLowerCase().includes(term);
+    return (
+      e.nombre.toLowerCase().includes(term) ||
+      e.ubicacion.toLowerCase().includes(term)
+    );
   });
 
   return (
@@ -102,10 +112,12 @@ export const EmpaquesView: React.FC = () => {
           <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div className="text-xs">
             <h4 className="font-bold text-amber-900">
-              Alerta de Mantenimiento Preventivo (RF15): {unvisitedAlerts.length} Empaques sin Visita ({'>'}15 días)
+              Alerta de Mantenimiento Preventivo: {unvisitedAlerts.length}{" "}
+              Empaques sin Visita ({">"}15 días)
             </h4>
             <p className="text-amber-800 mt-0.5">
-              Los siguientes empaques tienen servicio activo contratado pero superaron el intervalo límite de inspección técnica:
+              Los siguientes empaques tienen servicio activo contratado pero
+              superaron el intervalo límite de inspección técnica:
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
               {unvisitedAlerts.map((a) => (
@@ -113,7 +125,11 @@ export const EmpaquesView: React.FC = () => {
                   key={a.empaque_id}
                   className="px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded font-semibold text-[11px]"
                 >
-                  {a.nombre} ({a.dias_sin_visita === 999 ? 'Nunca visitado' : `${a.dias_sin_visita} días`})
+                  {a.nombre} (
+                  {a.dias_sin_visita === 999
+                    ? "Nunca visitado"
+                    : `${a.dias_sin_visita} días`}
+                  )
                 </span>
               ))}
             </div>
@@ -146,7 +162,6 @@ export const EmpaquesView: React.FC = () => {
           ) : (
             <div className="text-[11px] text-slate-500 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 font-medium flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-slate-400" />
-              Solo Administrador puede crear o modificar empaques (RF10)
             </div>
           )}
         </div>
@@ -156,14 +171,15 @@ export const EmpaquesView: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.map((emp) => {
           const alert = isUnvisitedAlert(emp.id);
-          const totalLineas = emp.bancos?.reduce((acc, b) => acc + (b.lineas || 0), 0) || 0;
+          const totalLineas =
+            emp.bancos?.reduce((acc, b) => acc + (b.lineas || 0), 0) || 0;
 
           return (
             <div
               key={emp.id}
               id={`card-empaque-${emp.id}`}
               className={`bg-white p-5 rounded-2xl border transition shadow-xs flex flex-col justify-between ${
-                alert ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200'
+                alert ? "border-amber-300 bg-amber-50/20" : "border-slate-200"
               }`}
             >
               <div>
@@ -177,7 +193,9 @@ export const EmpaquesView: React.FC = () => {
                         {emp.nombre}
                         {alert && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                            {alert.dias_sin_visita === 999 ? 'Sin visitas' : `+${alert.dias_sin_visita}d sin visita`}
+                            {alert.dias_sin_visita === 999
+                              ? "Sin visitas"
+                              : `+${alert.dias_sin_visita}d sin visita`}
                           </span>
                         )}
                       </h3>
@@ -188,32 +206,42 @@ export const EmpaquesView: React.FC = () => {
                   <span
                     className={`px-2 py-0.5 rounded-full text-[11px] font-semibold flex-shrink-0 ${
                       emp.servicio
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-slate-100 text-slate-600'
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-slate-100 text-slate-600"
                     }`}
                   >
-                    {emp.servicio ? 'Servicio Activo' : 'Sin Abono'}
+                    {emp.servicio ? "Servicio Activo" : "Sin Abono"}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 rounded-xl text-xs text-slate-700 mb-3">
                   <div>
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Distancia</span>
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">
+                      Distancia
+                    </span>
                     <span className="font-medium flex items-center gap-1">
-                      <Navigation className="w-3 h-3 text-slate-400" /> {emp.distancia} km
+                      <Navigation className="w-3 h-3 text-slate-400" />{" "}
+                      {emp.distancia} km
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Bancos Sinclair</span>
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">
+                      Bancos Sinclair
+                    </span>
                     <span className="font-medium flex items-center gap-1">
-                      <Layers className="w-3 h-3 text-slate-400" /> {emp.bancos?.length || 0} ({totalLineas} líneas)
+                      <Layers className="w-3 h-3 text-slate-400" />{" "}
+                      {emp.bancos?.length || 0} ({totalLineas} líneas)
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Última Visita</span>
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">
+                      Última Visita
+                    </span>
                     <span className="font-medium flex items-center gap-1">
                       <Calendar className="w-3 h-3 text-slate-400" />
-                      {emp.ultima_visita ? new Date(emp.ultima_visita).toLocaleDateString() : 'Ninguna'}
+                      {emp.ultima_visita
+                        ? new Date(emp.ultima_visita).toLocaleDateString()
+                        : "Ninguna"}
                     </span>
                   </div>
                 </div>
@@ -221,8 +249,12 @@ export const EmpaquesView: React.FC = () => {
                 {/* Bancos Preview */}
                 {emp.bancos && emp.bancos.length > 0 && (
                   <div className="text-[11px] text-slate-500 mb-2">
-                    <span className="font-semibold text-slate-700">Detalle Bancos: </span>
-                    {emp.bancos.map((b) => `${b.id} (${b.lineas} líns)`).join(' · ')}
+                    <span className="font-semibold text-slate-700">
+                      Detalle Bancos:{" "}
+                    </span>
+                    {emp.bancos
+                      .map((b) => `${b.id} (${b.lineas} líns)`)
+                      .join(" · ")}
                   </div>
                 )}
               </div>
@@ -238,7 +270,7 @@ export const EmpaquesView: React.FC = () => {
                       id={`btn-edit-empaque-${emp.id}`}
                       onClick={() => handleEdit(emp)}
                       className="px-2.5 py-1.5 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 border border-slate-200 hover:border-blue-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
-                      title="Editar empaque y bancos (RF10)"
+                      title="Editar empaque y bancos"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                       Editar
@@ -255,7 +287,6 @@ export const EmpaquesView: React.FC = () => {
                 ) : (
                   <div className="text-[11px] text-slate-400 flex items-center gap-1">
                     <Lock className="w-3 h-3 text-slate-400" />
-                    Edición por Admin (RF10)
                   </div>
                 )}
               </div>
@@ -266,7 +297,7 @@ export const EmpaquesView: React.FC = () => {
 
       {/* Modal */}
       <EmpaqueModal
-        key={editingEmpaque?.id || 'new-empaque'}
+        key={editingEmpaque?.id || "new-empaque"}
         empaque={editingEmpaque}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -4,7 +4,7 @@
  * Adheres strictly to SDD and Clean Code standards
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Cpu,
   Plus,
@@ -17,17 +17,23 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
-} from 'lucide-react';
-import { coreApi } from '../../services/apiClient';
-import { Cabezal, Empaque, Movimiento, Servicio, Status } from '../../types/domain';
-import { MachineModal } from './MachineModal';
+} from "lucide-react";
+import { coreApi } from "../../services/apiClient";
+import {
+  Cabezal,
+  Empaque,
+  Movimiento,
+  Servicio,
+  Status,
+} from "../../types/domain";
+import { MachineModal } from "./MachineModal";
 
 export const CabezalesView: React.FC = () => {
   const [cabezales, setCabezales] = useState<Cabezal[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
 
   // History modal state
@@ -62,7 +68,7 @@ export const CabezalesView: React.FC = () => {
       await coreApi.deleteCabezal(id);
       loadData();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error al eliminar');
+      alert(e instanceof Error ? e.message : "Error al eliminar");
     }
   };
 
@@ -75,7 +81,11 @@ export const CabezalesView: React.FC = () => {
         coreApi.getServicios(),
       ]);
       const filteredMovs = movs.filter((m) => m.machine_id === cab.id);
-      setMovements(filteredMovs.length > 0 ? filteredMovs : cab.historial_movimientos || []);
+      setMovements(
+        filteredMovs.length > 0
+          ? filteredMovs
+          : cab.historial_movimientos || [],
+      );
       setServices(srvs.filter((s) => s.machine_id === cab.id));
     } catch {
       setMovements(cab.historial_movimientos || []);
@@ -90,8 +100,10 @@ export const CabezalesView: React.FC = () => {
   const filtered = cabezales.filter((c) => {
     const matchesSearch =
       c.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      getEmpaqueName(c.ubicacion).toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || c.estado === statusFilter;
+      getEmpaqueName(c.ubicacion)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || c.estado === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -146,9 +158,11 @@ export const CabezalesView: React.FC = () => {
                     <Cpu className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">{cab.id}</h3>
+                    <h3 className="font-bold text-slate-900 text-sm">
+                      {cab.id}
+                    </h3>
                     <span className="text-[10px] text-slate-400 uppercase font-mono">
-                      Printhead Sinclair
+                      Cabezal Sinclair
                     </span>
                   </div>
                 </div>
@@ -156,10 +170,10 @@ export const CabezalesView: React.FC = () => {
                 <span
                   className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                     cab.estado === Status.USING
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : cab.estado === Status.READY
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "bg-amber-50 text-amber-700 border border-amber-200"
                   }`}
                 >
                   {cab.estado}
@@ -180,7 +194,7 @@ export const CabezalesView: React.FC = () => {
                     <Disc className="w-3 h-3" /> Freno asignado:
                   </span>
                   <span className="font-mono font-medium text-blue-700">
-                    {cab.freno_actual_id || 'Sin freno acoplado'}
+                    {cab.freno_actual_id || "Sin freno acoplado"}
                   </span>
                 </div>
               </div>
@@ -191,7 +205,8 @@ export const CabezalesView: React.FC = () => {
                 onClick={() => handleOpenHistory(cab)}
                 className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800"
               >
-                <History className="w-3.5 h-3.5" /> Historial ({cab.historial_movimientos.length})
+                <History className="w-3.5 h-3.5" /> Historial (
+                {cab.historial_movimientos.length})
               </button>
               <button
                 onClick={() => handleDelete(cab.id)}
@@ -238,22 +253,32 @@ export const CabezalesView: React.FC = () => {
             {/* Movements */}
             <div className="mb-6">
               <h4 className="text-xs font-bold uppercase text-slate-500 mb-2 flex items-center gap-1">
-                <History className="w-3.5 h-3.5" /> Movimientos Registrados (RF16)
+                <History className="w-3.5 h-3.5" /> Movimientos Registrados
               </h4>
               {movements.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No hay traslados registrados para este equipo.</p>
+                <p className="text-xs text-slate-400 italic">
+                  No hay traslados registrados para este equipo.
+                </p>
               ) : (
                 <div className="space-y-2">
                   {movements.map((m) => (
-                    <div key={m.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    <div
+                      key={m.id}
+                      className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                    >
                       <div className="flex items-center justify-between font-semibold">
                         <span className="text-blue-700">
-                          {getEmpaqueName(m.origen)} → {getEmpaqueName(m.destino)}
+                          {getEmpaqueName(m.origen)} →{" "}
+                          {getEmpaqueName(m.destino)}
                         </span>
-                        <span className="text-slate-500 text-[10px]">{m.fecha}</span>
+                        <span className="text-slate-500 text-[10px]">
+                          {m.fecha}
+                        </span>
                       </div>
                       <p className="text-slate-700 mt-1">{m.motivo}</p>
-                      <div className="text-[10px] text-slate-400 mt-1">Técnico: {m.tecnico_nombre}</div>
+                      <div className="text-[10px] text-slate-400 mt-1">
+                        Técnico: {m.tecnico_nombre}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -263,22 +288,32 @@ export const CabezalesView: React.FC = () => {
             {/* Services */}
             <div>
               <h4 className="text-xs font-bold uppercase text-slate-500 mb-2 flex items-center gap-1">
-                <Wrench className="w-3.5 h-3.5" /> Servicios Realizados (RF18)
+                <Wrench className="w-3.5 h-3.5" /> Servicios Realizados
               </h4>
               {services.length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No hay servicios técnicos registrados aún.</p>
+                <p className="text-xs text-slate-400 italic">
+                  No hay servicios técnicos registrados aún.
+                </p>
               ) : (
                 <div className="space-y-2">
                   {services.map((s) => (
-                    <div key={s.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    <div
+                      key={s.id}
+                      className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                    >
                       <div className="flex items-center justify-between font-semibold">
                         <span className="text-slate-900">{s.resumen}</span>
-                        <span className="text-slate-500 text-[10px]">{s.fecha}</span>
+                        <span className="text-slate-500 text-[10px]">
+                          {s.fecha}
+                        </span>
                       </div>
                       <p className="text-slate-600 mt-1">{s.trabajo_hecho}</p>
                       {s.consumibles.length > 0 && (
                         <div className="mt-2 pt-2 border-t border-slate-200 text-[10px] text-slate-500">
-                          Consumibles: {s.consumibles.map((c) => `${c.nombre} (${c.cantidad})`).join(', ')}
+                          Consumibles:{" "}
+                          {s.consumibles
+                            .map((c) => `${c.nombre} (${c.cantidad})`)
+                            .join(", ")}
                         </div>
                       )}
                     </div>

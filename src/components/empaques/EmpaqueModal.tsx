@@ -5,7 +5,7 @@
  * Adheres strictly to SDD and Clean Code standards with Admin-only validation.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   X,
   Save,
@@ -20,7 +20,7 @@ import {
   Building,
   Link as LinkIcon,
   Navigation,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Banco,
   CreateEmpaqueDTO,
@@ -28,9 +28,9 @@ import {
   InitialCabezalInput,
   InitialCaseteraInput,
   Status,
-} from '../../types/domain';
-import { coreApi } from '../../services/apiClient';
-import { useAuth } from '../../context/AuthContext';
+} from "../../types/domain";
+import { coreApi } from "../../services/apiClient";
+import { useAuth } from "../../context/AuthContext";
 
 interface EmpaqueModalProps {
   empaque?: Empaque | null;
@@ -48,8 +48,8 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
   const { isAdmin } = useAuth();
 
   // Plant fields
-  const [nombre, setNombre] = useState<string>('');
-  const [ubicacion, setUbicacion] = useState<string>('');
+  const [nombre, setNombre] = useState<string>("");
+  const [ubicacion, setUbicacion] = useState<string>("");
   const [latitud, setLatitud] = useState<number>(-38.95);
   const [longitud, setLongitud] = useState<number>(-68.0);
   const [distancia, setDistancia] = useState<number>(20);
@@ -67,8 +67,8 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (empaque) {
-        setNombre(empaque.nombre || '');
-        setUbicacion(empaque.ubicacion || '');
+        setNombre(empaque.nombre || "");
+        setUbicacion(empaque.ubicacion || "");
         setLatitud(empaque.latitud !== undefined ? empaque.latitud : -38.95);
         setLongitud(empaque.longitud !== undefined ? empaque.longitud : -68.0);
         setDistancia(empaque.distancia !== undefined ? empaque.distancia : 20);
@@ -76,18 +76,24 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
         setBancos(
           empaque.bancos && empaque.bancos.length > 0
             ? JSON.parse(JSON.stringify(empaque.bancos))
-            : [{ id: 'BNC-01', fecha_instalacion: '2024-01-01', lineas: 4 }]
+            : [{ id: "BNC-01", fecha_instalacion: "2024-01-01", lineas: 4 }],
         );
         setCabezales([]);
         setCaseteras([]);
       } else {
-        setNombre('');
-        setUbicacion('');
+        setNombre("");
+        setUbicacion("");
         setLatitud(-38.95);
         setLongitud(-68.0);
         setDistancia(20);
         setServicio(true);
-        setBancos([{ id: 'BNC-01', fecha_instalacion: new Date().toISOString().split('T')[0], lineas: 4 }]);
+        setBancos([
+          {
+            id: "BNC-01",
+            fecha_instalacion: new Date().toISOString().split("T")[0],
+            lineas: 4,
+          },
+        ]);
         // Default initial setup
         setCabezales([
           {
@@ -95,7 +101,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
             estado: Status.USING,
             freno_id: `FRN-${Math.floor(200 + Math.random() * 800)}`,
             freno_estado: Status.USING,
-            freno_fecha_inicio: new Date().toISOString().split('T')[0],
+            freno_fecha_inicio: new Date().toISOString().split("T")[0],
           },
         ]);
         setCaseteras([
@@ -117,7 +123,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
       ...prev,
       {
         id: `BNC-0${prev.length + 1}`,
-        fecha_instalacion: new Date().toISOString().split('T')[0],
+        fecha_instalacion: new Date().toISOString().split("T")[0],
         lineas: 4,
       },
     ]);
@@ -127,7 +133,11 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
     setBancos((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleBancoChange = (idx: number, field: keyof Banco, val: string | number) => {
+  const handleBancoChange = (
+    idx: number,
+    field: keyof Banco,
+    val: string | number,
+  ) => {
     setBancos((prev) => {
       const copy = [...prev];
       copy[idx] = { ...copy[idx], [field]: val };
@@ -145,7 +155,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
         estado: Status.USING,
         freno_id: `FRN-${randomSuffix + 100}`,
         freno_estado: Status.USING,
-        freno_fecha_inicio: new Date().toISOString().split('T')[0],
+        freno_fecha_inicio: new Date().toISOString().split("T")[0],
       },
     ]);
   };
@@ -154,7 +164,11 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
     setCabezales((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleCabezalChange = (idx: number, field: keyof InitialCabezalInput, val: any) => {
+  const handleCabezalChange = (
+    idx: number,
+    field: keyof InitialCabezalInput,
+    val: any,
+  ) => {
     setCabezales((prev) => {
       const copy = [...prev];
       copy[idx] = { ...copy[idx], [field]: val };
@@ -174,7 +188,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
         const randomSuffix = Math.floor(200 + Math.random() * 799);
         current.freno_id = `FRN-${randomSuffix}`;
         current.freno_estado = Status.USING;
-        current.freno_fecha_inicio = new Date().toISOString().split('T')[0];
+        current.freno_fecha_inicio = new Date().toISOString().split("T")[0];
       }
       return copy;
     });
@@ -196,7 +210,11 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
     setCaseteras((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleCaseteraChange = (idx: number, field: keyof InitialCaseteraInput, val: any) => {
+  const handleCaseteraChange = (
+    idx: number,
+    field: keyof InitialCaseteraInput,
+    val: any,
+  ) => {
     setCaseteras((prev) => {
       const copy = [...prev];
       copy[idx] = { ...copy[idx], [field]: val };
@@ -206,7 +224,10 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
 
   // Auto-generate suggested equipment based on total lines of banks
   const handleAutoSuggestEquipment = () => {
-    const totalLines = bancos.reduce((sum, b) => sum + (Number(b.lineas) || 0), 0);
+    const totalLines = bancos.reduce(
+      (sum, b) => sum + (Number(b.lineas) || 0),
+      0,
+    );
     const count = Math.max(1, Math.min(totalLines || 4, 12));
 
     const newCabs: InitialCabezalInput[] = [];
@@ -221,7 +242,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
         estado: Status.USING,
         freno_id: `FRN-${baseCab + 100 + i}`,
         freno_estado: Status.USING,
-        freno_fecha_inicio: new Date().toISOString().split('T')[0],
+        freno_fecha_inicio: new Date().toISOString().split("T")[0],
       });
       newCas.push({
         id: baseCas + i,
@@ -238,33 +259,45 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
     setErrorMsg(null);
 
     if (!isAdmin) {
-      setErrorMsg('Operación denegada: Solo los administradores pueden guardar modificaciones en los empaques (RF10).');
+      setErrorMsg(
+        "Operación denegada: Solo los administradores pueden guardar modificaciones en los empaques.",
+      );
       return;
     }
 
     if (!nombre.trim() || !ubicacion.trim()) {
-      setErrorMsg('Nombre y ubicación son obligatorios.');
+      setErrorMsg("Nombre y ubicación son obligatorios.");
       return;
     }
 
     // Validate duplicate Cabezal IDs in input
-    const cabIds = cabezales.map((c) => c.id.trim().toUpperCase()).filter(Boolean);
+    const cabIds = cabezales
+      .map((c) => c.id.trim().toUpperCase())
+      .filter(Boolean);
     if (new Set(cabIds).size !== cabIds.length) {
-      setErrorMsg('Existen Cabezales con identificadores duplicados en el listado.');
+      setErrorMsg(
+        "Existen Cabezales con identificadores duplicados en el listado.",
+      );
       return;
     }
 
     // Validate duplicate Freno IDs in input
-    const frenoIds = cabezales.map((c) => c.freno_id?.trim().toUpperCase()).filter(Boolean);
+    const frenoIds = cabezales
+      .map((c) => c.freno_id?.trim().toUpperCase())
+      .filter(Boolean);
     if (new Set(frenoIds).size !== frenoIds.length) {
-      setErrorMsg('Existen Frenos con identificadores duplicados en el listado.');
+      setErrorMsg(
+        "Existen Frenos con identificadores duplicados en el listado.",
+      );
       return;
     }
 
     // Validate duplicate Casetera IDs in input
     const casIds = caseteras.map((c) => Number(c.id)).filter((n) => !isNaN(n));
     if (new Set(casIds).size !== casIds.length) {
-      setErrorMsg('Existen Caseteras con números de serie duplicados en el listado.');
+      setErrorMsg(
+        "Existen Caseteras con números de serie duplicados en el listado.",
+      );
       return;
     }
 
@@ -290,7 +323,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
           servicio,
           bancos,
           cabezales: cabezales.filter((c) => c.id.trim().length > 0),
-          caseteras: caseteras.filter((c) => c.id !== undefined && !isNaN(Number(c.id))),
+          caseteras: caseteras.filter(
+            (c) => c.id !== undefined && !isNaN(Number(c.id)),
+          ),
         };
         await coreApi.createEmpaque(dto);
       }
@@ -298,7 +333,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Error al guardar empaque');
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al guardar empaque",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -320,16 +357,15 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
         <div className="pb-3 border-b border-slate-100 mb-3">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-slate-900">
-              {empaque ? `Editar Empaque: ${empaque.nombre}` : 'Nuevo Empaque / Planta'}
+              {empaque
+                ? `Editar Empaque: ${empaque.nombre}`
+                : "Nuevo Empaque / Planta"}
             </h2>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-              RF10 / RF11
-            </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             {empaque
               ? `Actualice los datos y la configuración de bancos para ${empaque.id}`
-              : 'Defina la ubicación, bancos de etiquetado y toda la maquinaria inicial (Cabezales con Freno y Caseteras).'}
+              : "Defina la ubicación, bancos de etiquetado y toda la maquinaria inicial (Cabezales con Freno y Caseteras)."}
           </p>
         </div>
 
@@ -340,10 +376,15 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs overflow-y-auto flex-1 pr-1">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 text-xs overflow-y-auto flex-1 pr-1"
+        >
           {/* 1. DATOS GENERALES */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Nombre del Empaque *</label>
+            <label className="block font-semibold text-slate-700 mb-1">
+              Nombre del Empaque *
+            </label>
             <input
               type="text"
               value={nombre}
@@ -355,7 +396,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Dirección / Ubicación *</label>
+            <label className="block font-semibold text-slate-700 mb-1">
+              Dirección / Ubicación *
+            </label>
             <input
               type="text"
               value={ubicacion}
@@ -368,7 +411,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Distancia desde Base (km)</label>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Distancia desde Base (km)
+              </label>
               <input
                 type="number"
                 min="0"
@@ -378,10 +423,12 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Estado de Abono</label>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Estado de Abono
+              </label>
               <select
-                value={servicio ? 'true' : 'false'}
-                onChange={(e) => setServicio(e.target.value === 'true')}
+                value={servicio ? "true" : "false"}
+                onChange={(e) => setServicio(e.target.value === "true")}
                 className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
                 <option value="true">Servicio Activo</option>
@@ -392,7 +439,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Latitud GPS</label>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Latitud GPS
+              </label>
               <input
                 type="number"
                 step="any"
@@ -402,7 +451,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Longitud GPS</label>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Longitud GPS
+              </label>
               <input
                 type="number"
                 step="any"
@@ -418,7 +469,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5 font-bold text-slate-800">
                 <Layers className="w-4 h-4 text-blue-600" />
-                Bancos de Etiquetado Sinclair (RF11)
+                Bancos de Etiquetado Sinclair
               </div>
               <button
                 type="button"
@@ -438,20 +489,24 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                   <input
                     type="text"
                     value={b.id}
-                    onChange={(e) => handleBancoChange(idx, 'id', e.target.value)}
+                    onChange={(e) =>
+                      handleBancoChange(idx, "id", e.target.value)
+                    }
                     placeholder="ID Banco"
                     className="w-24 p-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 font-mono text-xs font-bold"
                     required
                   />
                   <div className="flex items-center gap-1 flex-1">
-                    <span className="text-[10px] text-slate-500 font-medium">Líneas:</span>
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      Líneas:
+                    </span>
                     <input
                       type="number"
                       min="1"
                       max="12"
                       value={b.lineas}
                       onChange={(e) =>
-                        handleBancoChange(idx, 'lineas', Number(e.target.value))
+                        handleBancoChange(idx, "lineas", Number(e.target.value))
                       }
                       className="w-14 p-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 font-mono text-center text-xs font-bold"
                     />
@@ -459,7 +514,13 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                   <input
                     type="date"
                     value={b.fecha_instalacion}
-                    onChange={(e) => handleBancoChange(idx, 'fecha_instalacion', e.target.value)}
+                    onChange={(e) =>
+                      handleBancoChange(
+                        idx,
+                        "fecha_instalacion",
+                        e.target.value,
+                      )
+                    }
                     className="w-32 p-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-mono"
                   />
                   {bancos.length > 1 && (
@@ -496,7 +557,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    {cabezales.length} Cabezales ({cabezales.filter((c) => c.freno_id).length} con Freno) · {caseteras.length} Caseteras
+                    {cabezales.length} Cabezales (
+                    {cabezales.filter((c) => c.freno_id).length} con Freno) ·{" "}
+                    {caseteras.length} Caseteras
                   </p>
                 </div>
 
@@ -531,7 +594,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
               {/* Unified List of all Machines */}
               {totalMachinesCount === 0 ? (
                 <div className="p-4 bg-white rounded-xl border border-dashed border-slate-300 text-center text-slate-500 text-xs">
-                  No hay máquinas configuradas aún para este empaque.{' '}
+                  No hay máquinas configuradas aún para este empaque.{" "}
                   <div className="flex items-center justify-center gap-2 mt-2">
                     <button
                       type="button"
@@ -563,11 +626,15 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                         </span>
 
                         <div className="flex items-center gap-1.5 flex-1 min-w-[130px]">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">ID:</span>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">
+                            ID:
+                          </span>
                           <input
                             type="text"
                             value={cab.id}
-                            onChange={(e) => handleCabezalChange(idx, 'id', e.target.value)}
+                            onChange={(e) =>
+                              handleCabezalChange(idx, "id", e.target.value)
+                            }
                             placeholder="CAB-101"
                             className="w-28 p-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-mono text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             required
@@ -583,13 +650,17 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                           onClick={() => handleToggleFreno(idx)}
                           className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition flex-shrink-0 ${
                             cab.freno_id
-                              ? 'bg-violet-100 text-violet-800 border border-violet-300'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              ? "bg-violet-100 text-violet-800 border border-violet-300"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                           }`}
                           title="Acoplar o remover freno a este cabezal"
                         >
                           <Disc className="w-3 h-3" />
-                          <span>{cab.freno_id ? 'Freno Acoplado' : '+ Acoplar Freno'}</span>
+                          <span>
+                            {cab.freno_id
+                              ? "Freno Acoplado"
+                              : "+ Acoplar Freno"}
+                          </span>
                         </button>
 
                         <button
@@ -607,13 +678,21 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                         <div className="pl-3 pr-2 py-1.5 bg-violet-50/70 border border-violet-200 rounded-lg flex flex-wrap items-center gap-2 text-xs">
                           <div className="flex items-center gap-1 text-violet-900 font-bold">
                             <LinkIcon className="w-3 h-3 text-violet-600" />
-                            <span className="text-[10px] uppercase">Freno ID:</span>
+                            <span className="text-[10px] uppercase">
+                              Freno ID:
+                            </span>
                           </div>
 
                           <input
                             type="text"
                             value={cab.freno_id}
-                            onChange={(e) => handleCabezalChange(idx, 'freno_id', e.target.value)}
+                            onChange={(e) =>
+                              handleCabezalChange(
+                                idx,
+                                "freno_id",
+                                e.target.value,
+                              )
+                            }
                             placeholder="FRN-201"
                             className="w-24 p-1 bg-white border border-violet-300 rounded-md text-violet-950 font-mono text-xs font-bold"
                             required
@@ -624,12 +703,21 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                           </span>
 
                           <div className="flex items-center gap-1 ml-auto">
-                            <span className="text-[10px] text-violet-700 font-medium">Instalación:</span>
+                            <span className="text-[10px] text-violet-700 font-medium">
+                              Instalación:
+                            </span>
                             <input
                               type="date"
-                              value={cab.freno_fecha_inicio || new Date().toISOString().split('T')[0]}
+                              value={
+                                cab.freno_fecha_inicio ||
+                                new Date().toISOString().split("T")[0]
+                              }
                               onChange={(e) =>
-                                handleCabezalChange(idx, 'freno_fecha_inicio', e.target.value)
+                                handleCabezalChange(
+                                  idx,
+                                  "freno_fecha_inicio",
+                                  e.target.value,
+                                )
                               }
                               className="p-1 bg-white border border-violet-300 rounded-md text-violet-950 text-[11px] font-mono"
                             />
@@ -650,13 +738,19 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                       </span>
 
                       <div className="flex items-center gap-1.5 flex-1 min-w-[120px]">
-                        <span className="text-[10px] font-bold text-slate-500">Número #:</span>
+                        <span className="text-[10px] font-bold text-slate-500">
+                          Número #:
+                        </span>
                         <input
                           type="number"
                           min="1"
                           value={cas.id}
                           onChange={(e) =>
-                            handleCaseteraChange(idx, 'id', Number(e.target.value))
+                            handleCaseteraChange(
+                              idx,
+                              "id",
+                              Number(e.target.value),
+                            )
                           }
                           placeholder="Número"
                           className="w-20 p-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-mono text-xs font-bold text-center focus:ring-2 focus:ring-purple-500 focus:outline-none"
@@ -688,9 +782,9 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
             <div className="text-xs text-slate-500">
               {!empaque && (
                 <span>
-                  Resumen:{' '}
-                  <strong>{bancos.length}</strong> bancos ·{' '}
-                  <strong>{cabezales.length}</strong> cabezales ({cabezales.filter((c) => c.freno_id).length} con freno) ·{' '}
+                  Resumen: <strong>{bancos.length}</strong> bancos ·{" "}
+                  <strong>{cabezales.length}</strong> cabezales (
+                  {cabezales.filter((c) => c.freno_id).length} con freno) ·{" "}
                   <strong>{caseteras.length}</strong> caseteras
                 </span>
               )}
@@ -710,7 +804,11 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                 className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
-                {isSubmitting ? 'Guardando...' : empaque ? 'Guardar Cambios' : 'Crear Empaque y Equipos'}
+                {isSubmitting
+                  ? "Guardando..."
+                  : empaque
+                    ? "Guardar Cambios"
+                    : "Crear Empaque y Equipos"}
               </button>
             </div>
           </div>

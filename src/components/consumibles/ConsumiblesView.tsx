@@ -4,7 +4,7 @@
  * Adheres strictly to SDD and Clean Code standards with Admin-only edit protection.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Package,
   Plus,
@@ -19,32 +19,35 @@ import {
   Sliders,
   Check,
   Lock,
-} from 'lucide-react';
-import { coreApi } from '../../services/apiClient';
-import { Consumible } from '../../types/domain';
-import { useAuth } from '../../context/AuthContext';
+} from "lucide-react";
+import { coreApi } from "../../services/apiClient";
+import { Consumible } from "../../types/domain";
+import { useAuth } from "../../context/AuthContext";
 
 export const ConsumiblesView: React.FC = () => {
   const { user, isAdmin } = useAuth();
   const [consumibles, setConsumibles] = useState<Consumible[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Consumible | null>(null);
-  const [restockItem, setRestockItem] = useState<{ id: string; name: string } | null>(null);
+  const [restockItem, setRestockItem] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [restockAmount, setRestockAmount] = useState<number>(50);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    id: '',
-    nombre: '',
+    id: "",
+    nombre: "",
     stock: 100,
     es_critico: false,
     stock_minimo: 20,
   });
 
   const [editFormData, setEditFormData] = useState({
-    nombre: '',
+    nombre: "",
     stock: 0,
     es_critico: false,
     stock_minimo: 0,
@@ -74,7 +77,9 @@ export const ConsumiblesView: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAdmin) {
-      alert('Acceso denegado: Solo los administradores pueden crear nuevos consumibles (RF13).');
+      alert(
+        "Acceso denegado: Solo los administradores pueden crear nuevos consumibles.",
+      );
       return;
     }
     try {
@@ -88,23 +93,26 @@ export const ConsumiblesView: React.FC = () => {
       await coreApi.createConsumible(newConsumible);
       setIsModalOpen(false);
       await loadConsumibles();
-      showNotification('Consumible creado exitosamente (RF13).');
+      showNotification("Consumible creado exitosamente.");
       setFormData({
-        id: '',
-        nombre: '',
+        id: "",
+        nombre: "",
         stock: 100,
         es_critico: false,
         stock_minimo: 20,
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al guardar consumible';
+      const msg =
+        err instanceof Error ? err.message : "Error al guardar consumible";
       alert(msg);
     }
   };
 
   const handleOpenEdit = (item: Consumible) => {
     if (!isAdmin) {
-      alert('Acceso denegado: Solo los administradores pueden modificar los umbrales mínimos y datos maestros (RF13).');
+      alert(
+        "Acceso denegado: Solo los administradores pueden modificar los umbrales mínimos y datos maestros.",
+      );
       return;
     }
     setEditingItem(item);
@@ -119,7 +127,9 @@ export const ConsumiblesView: React.FC = () => {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAdmin) {
-      alert('Acceso denegado: Solo los administradores pueden modificar consumibles (RF13).');
+      alert(
+        "Acceso denegado: Solo los administradores pueden modificar consumibles.",
+      );
       return;
     }
     if (!editingItem) return;
@@ -133,12 +143,15 @@ export const ConsumiblesView: React.FC = () => {
       });
 
       setConsumibles((prev) =>
-        prev.map((c) => (c.id === editingItem.id ? updated : c))
+        prev.map((c) => (c.id === editingItem.id ? updated : c)),
       );
       setEditingItem(null);
-      showNotification(`Mínimo requerido de "${updated.nombre}" actualizado a ${updated.stock_minimo} uds (RF13).`);
+      showNotification(
+        `Mínimo requerido de "${updated.nombre}" actualizado a ${updated.stock_minimo} uds.`,
+      );
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al actualizar consumible';
+      const msg =
+        err instanceof Error ? err.message : "Error al actualizar consumible";
       alert(msg);
     }
   };
@@ -150,7 +163,9 @@ export const ConsumiblesView: React.FC = () => {
       await coreApi.restockConsumible(restockItem.id, Number(restockAmount));
       setRestockItem(null);
       await loadConsumibles();
-      showNotification(`Ingreso de ${restockAmount} unidades registrado exitosamente.`);
+      showNotification(
+        `Ingreso de ${restockAmount} unidades registrado exitosamente.`,
+      );
     } catch {
       // error
     }
@@ -158,7 +173,9 @@ export const ConsumiblesView: React.FC = () => {
 
   const handleToggleCritical = async (id: string) => {
     if (!isAdmin) {
-      alert('Acceso denegado: Solo los administradores pueden alterar la clasificación crítica (RF13).');
+      alert(
+        "Acceso denegado: Solo los administradores pueden alterar la clasificación crítica.",
+      );
       return;
     }
     try {
@@ -167,7 +184,7 @@ export const ConsumiblesView: React.FC = () => {
       showNotification(
         updated.es_critico
           ? `Ítem marcado como crítico.`
-          : `Ítem desmarcado de crítico.`
+          : `Ítem desmarcado de crítico.`,
       );
     } catch {
       // error
@@ -177,7 +194,7 @@ export const ConsumiblesView: React.FC = () => {
   const filteredConsumibles = consumibles.filter(
     (c) =>
       c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.id.toLowerCase().includes(searchTerm.toLowerCase())
+      c.id.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -206,7 +223,8 @@ export const ConsumiblesView: React.FC = () => {
             Consumibles y Repuestos Sinclair
           </h2>
           <p className="text-xs text-slate-500">
-            Control de stock de etiquetas, cintas de transferencia, cabezales térmicos y umbrales mínimos
+            Control de stock de etiquetas, cintas de transferencia, cabezales
+            térmicos y umbrales mínimos
           </p>
         </div>
 
@@ -233,7 +251,6 @@ export const ConsumiblesView: React.FC = () => {
           ) : (
             <div className="text-[11px] text-slate-500 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 font-medium flex items-center gap-1.5 shrink-0">
               <Lock className="w-3.5 h-3.5 text-slate-400" />
-              Solo Administrador puede crear o modificar consumibles (RF13)
             </div>
           )}
         </div>
@@ -255,8 +272,12 @@ export const ConsumiblesView: React.FC = () => {
                       <Package className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900 text-sm leading-tight">{item.nombre}</h3>
-                      <span className="text-[10px] text-slate-400 font-mono">ID: {item.id}</span>
+                      <h3 className="font-bold text-slate-900 text-sm leading-tight">
+                        {item.nombre}
+                      </h3>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        ID: {item.id}
+                      </span>
                     </div>
                   </div>
 
@@ -264,11 +285,11 @@ export const ConsumiblesView: React.FC = () => {
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         isLowStock
-                          ? 'bg-rose-100 text-rose-800'
-                          : 'bg-emerald-100 text-emerald-800'
+                          ? "bg-rose-100 text-rose-800"
+                          : "bg-emerald-100 text-emerald-800"
                       }`}
                     >
-                      {isLowStock ? 'Stock Bajo' : 'Disponible'}
+                      {isLowStock ? "Stock Bajo" : "Disponible"}
                     </span>
                     {item.es_critico && (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 flex items-center gap-1">
@@ -285,8 +306,10 @@ export const ConsumiblesView: React.FC = () => {
                       Stock en Depósito
                     </span>
                     <span className="text-xl font-black text-slate-900">
-                      {item.stock}{' '}
-                      <span className="text-xs font-normal text-slate-500">uds</span>
+                      {item.stock}{" "}
+                      <span className="text-xs font-normal text-slate-500">
+                        uds
+                      </span>
                     </span>
                   </div>
 
@@ -296,8 +319,10 @@ export const ConsumiblesView: React.FC = () => {
                     </span>
                     <div className="flex items-baseline justify-between">
                       <span className="text-xl font-black text-amber-950">
-                        {item.stock_minimo}{' '}
-                        <span className="text-xs font-normal text-amber-800">uds</span>
+                        {item.stock_minimo}{" "}
+                        <span className="text-xs font-normal text-amber-800">
+                          uds
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -311,13 +336,13 @@ export const ConsumiblesView: React.FC = () => {
                     <button
                       onClick={() => handleToggleCritical(item.id)}
                       className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition"
-                      title="Alternar estado crítico (RF13)"
+                      title="Alternar estado crítico"
                     >
-                      {item.es_critico ? 'Desmarcar Crítico' : 'Marcar Crítico'}
+                      {item.es_critico ? "Desmarcar Crítico" : "Marcar Crítico"}
                     </button>
                   ) : (
                     <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                      {item.es_critico ? 'Prioridad Crítica' : 'Uso Estándar'}
+                      {item.es_critico ? "Prioridad Crítica" : "Uso Estándar"}
                     </span>
                   )}
                 </div>
@@ -327,14 +352,16 @@ export const ConsumiblesView: React.FC = () => {
                     <button
                       onClick={() => handleOpenEdit(item)}
                       className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold rounded-lg text-xs flex items-center gap-1.5 transition"
-                      title="Modificar stock mínimo requerido (RF13)"
+                      title="Modificar stock mínimo requerido"
                     >
                       <Edit2 className="w-3.5 h-3.5 text-amber-700" />
                       Modificar Mínimo
                     </button>
                   )}
                   <button
-                    onClick={() => setRestockItem({ id: item.id, name: item.nombre })}
+                    onClick={() =>
+                      setRestockItem({ id: item.id, name: item.nombre })
+                    }
                     className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs transition shadow-xs"
                   >
                     + Reabastecer
@@ -360,9 +387,6 @@ export const ConsumiblesView: React.FC = () => {
                     <h3 className="font-bold text-slate-900 text-sm leading-tight">
                       Editar Mínimo Requerido y Stock
                     </h3>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-200 text-amber-900 border border-amber-300">
-                      RF13
-                    </span>
                   </div>
                   <span className="text-[10px] text-amber-800 font-mono font-bold">
                     Código: {editingItem.id}
@@ -379,7 +403,9 @@ export const ConsumiblesView: React.FC = () => {
 
             <form onSubmit={handleUpdate} className="p-5 space-y-4 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Nombre Descriptivo</label>
+                <label className="font-bold text-slate-700 block mb-1">
+                  Nombre Descriptivo
+                </label>
                 <input
                   type="text"
                   required
@@ -403,7 +429,9 @@ export const ConsumiblesView: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-[11px] text-amber-900/80 leading-relaxed">
-                  Cuando las unidades en depósito sean menores o iguales a este número, el sistema disparará alertas visuales de <strong>Stock Bajo</strong> y notificaciones técnicas.
+                  Cuando las unidades en depósito sean menores o iguales a este
+                  número, el sistema disparará alertas visuales de{" "}
+                  <strong>Stock Bajo</strong> y notificaciones técnicas.
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <button
@@ -481,7 +509,10 @@ export const ConsumiblesView: React.FC = () => {
                   required
                   value={editFormData.stock}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, stock: Number(e.target.value) })
+                    setEditFormData({
+                      ...editFormData,
+                      stock: Number(e.target.value),
+                    })
                   }
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none font-bold text-slate-800"
                 />
@@ -494,11 +525,17 @@ export const ConsumiblesView: React.FC = () => {
                   id="chk-edit-es-critico"
                   checked={editFormData.es_critico}
                   onChange={(e) =>
-                    setEditFormData({ ...editFormData, es_critico: e.target.checked })
+                    setEditFormData({
+                      ...editFormData,
+                      es_critico: e.target.checked,
+                    })
                   }
                   className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 w-4 h-4"
                 />
-                <label htmlFor="chk-edit-es-critico" className="font-bold text-slate-700 cursor-pointer">
+                <label
+                  htmlFor="chk-edit-es-critico"
+                  className="font-bold text-slate-700 cursor-pointer"
+                >
                   Marcar como Ítem Crítico para la Operación
                 </label>
               </div>
@@ -517,7 +554,7 @@ export const ConsumiblesView: React.FC = () => {
                   className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs flex items-center gap-1.5"
                 >
                   <Check className="w-4 h-4" />
-                  Guardar Cambios (RF13)
+                  Guardar Cambios
                 </button>
               </div>
             </form>
@@ -535,9 +572,6 @@ export const ConsumiblesView: React.FC = () => {
                   <Package className="w-4 h-4 text-amber-600" />
                   Registrar Consumible o Repuesto
                 </h3>
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-200 text-amber-900 border border-amber-300">
-                  RF13
-                </span>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -549,51 +583,71 @@ export const ConsumiblesView: React.FC = () => {
 
             <form onSubmit={handleCreate} className="p-5 space-y-4 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Identificador / Código</label>
+                <label className="font-bold text-slate-700 block mb-1">
+                  Identificador / Código
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="Ej: ETIQ-SINCLAIR-01"
                   value={formData.id}
-                  onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, id: e.target.value })
+                  }
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Nombre Descriptivo</label>
+                <label className="font-bold text-slate-700 block mb-1">
+                  Nombre Descriptivo
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="Ej: Rollo Etiquetas Sinclair Estándar 40mm"
                   value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nombre: e.target.value })
+                  }
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Stock Inicial</label>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    Stock Inicial
+                  </label>
                   <input
                     type="number"
                     min="0"
                     required
                     value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stock: Number(e.target.value),
+                      })
+                    }
                     className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Mínimo Requerido</label>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    Mínimo Requerido
+                  </label>
                   <input
                     type="number"
                     min="1"
                     required
                     value={formData.stock_minimo}
                     onChange={(e) =>
-                      setFormData({ ...formData, stock_minimo: Number(e.target.value) })
+                      setFormData({
+                        ...formData,
+                        stock_minimo: Number(e.target.value),
+                      })
                     }
                     className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
                   />
@@ -605,10 +659,15 @@ export const ConsumiblesView: React.FC = () => {
                   type="checkbox"
                   id="chk-es-critico"
                   checked={formData.es_critico}
-                  onChange={(e) => setFormData({ ...formData, es_critico: e.target.checked })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, es_critico: e.target.checked })
+                  }
                   className="rounded border-slate-300 text-amber-600 focus:ring-amber-500"
                 />
-                <label htmlFor="chk-es-critico" className="font-bold text-slate-700 cursor-pointer">
+                <label
+                  htmlFor="chk-es-critico"
+                  className="font-bold text-slate-700 cursor-pointer"
+                >
                   Ítem Crítico para la Operación
                 </label>
               </div>
@@ -625,7 +684,7 @@ export const ConsumiblesView: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
                 >
-                  Guardar Consumible (RF13)
+                  Guardar Consumible
                 </button>
               </div>
             </form>
@@ -638,8 +697,13 @@ export const ConsumiblesView: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95">
             <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-bold text-slate-900 text-sm">Reabastecer {restockItem.name}</h3>
-              <button onClick={() => setRestockItem(null)} className="text-slate-400 font-bold">
+              <h3 className="font-bold text-slate-900 text-sm">
+                Reabastecer {restockItem.name}
+              </h3>
+              <button
+                onClick={() => setRestockItem(null)}
+                className="text-slate-400 font-bold"
+              >
                 ✕
               </button>
             </div>

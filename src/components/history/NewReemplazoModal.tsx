@@ -5,7 +5,7 @@
  * Adheres strictly to SDD and Clean Code standards
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   X,
   Save,
@@ -18,9 +18,16 @@ import {
   Layers,
   Building,
   CheckCircle2,
-} from 'lucide-react';
-import { coreApi } from '../../services/apiClient';
-import { Cabezal, Casetera, CreateReeplaceDTO, Empaque, Status, Tecnico } from '../../types/domain';
+} from "lucide-react";
+import { coreApi } from "../../services/apiClient";
+import {
+  Cabezal,
+  Casetera,
+  CreateReeplaceDTO,
+  Empaque,
+  Status,
+  Tecnico,
+} from "../../types/domain";
 
 interface NewReemplazoModalProps {
   isOpen: boolean;
@@ -38,14 +45,16 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
   const [cabezales, setCabezales] = useState<Cabezal[]>([]);
   const [caseteras, setCaseteras] = useState<Casetera[]>([]);
 
-  const [tipo, setTipo] = useState<'Cabezal' | 'Casetera'>('Cabezal');
-  const [empaqueId, setEmpaqueId] = useState<string>('');
-  const [tecnicoId, setTecnicoId] = useState<string>('');
-  const [fecha, setFecha] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [retiradoId, setRetiradoId] = useState<string>('');
-  const [instaladoId, setInstaladoId] = useState<string>('');
-  const [motivo, setMotivo] = useState<string>('');
-  const [bancoUbicacion, setBancoUbicacion] = useState<string>('');
+  const [tipo, setTipo] = useState<"Cabezal" | "Casetera">("Cabezal");
+  const [empaqueId, setEmpaqueId] = useState<string>("");
+  const [tecnicoId, setTecnicoId] = useState<string>("");
+  const [fecha, setFecha] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  );
+  const [retiradoId, setRetiradoId] = useState<string>("");
+  const [instaladoId, setInstaladoId] = useState<string>("");
+  const [motivo, setMotivo] = useState<string>("");
+  const [bancoUbicacion, setBancoUbicacion] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -88,46 +97,54 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
 
   // Filter machines currently in the selected Empaque
   const machinesInSelectedEmpaque =
-    tipo === 'Cabezal'
+    tipo === "Cabezal"
       ? cabezales.filter(
           (c) =>
             c.ubicacion === empaqueId ||
             (selectedEmpaque && c.ubicacion === selectedEmpaque.nombre) ||
-            c.ubicacion.toLowerCase().includes(selectedEmpaque?.nombre.toLowerCase().slice(0, 5) || '___')
+            c.ubicacion
+              .toLowerCase()
+              .includes(
+                selectedEmpaque?.nombre.toLowerCase().slice(0, 5) || "___",
+              ),
         )
       : caseteras.filter(
           (c) =>
             c.ubicacion === empaqueId ||
             (selectedEmpaque && c.ubicacion === selectedEmpaque.nombre) ||
-            c.ubicacion.toLowerCase().includes(selectedEmpaque?.nombre.toLowerCase().slice(0, 5) || '___')
+            c.ubicacion
+              .toLowerCase()
+              .includes(
+                selectedEmpaque?.nombre.toLowerCase().slice(0, 5) || "___",
+              ),
         );
 
   // Filter new machines to install: status "Listo" (READY) and located in "Taller" (EMP-04)
   const machinesReadyInWorkshop =
-    tipo === 'Cabezal'
+    tipo === "Cabezal"
       ? cabezales.filter(
           (c) =>
             c.estado === Status.READY &&
-            (c.ubicacion === 'EMP-04' ||
-              c.ubicacion.toLowerCase().includes('taller') ||
-              c.ubicacion.toLowerCase().includes('central'))
+            (c.ubicacion === "EMP-04" ||
+              c.ubicacion.toLowerCase().includes("taller") ||
+              c.ubicacion.toLowerCase().includes("central")),
         )
       : caseteras.filter(
           (c) =>
             c.estado === Status.READY &&
-            (c.ubicacion === 'EMP-04' ||
-              c.ubicacion.toLowerCase().includes('taller') ||
-              c.ubicacion.toLowerCase().includes('central'))
+            (c.ubicacion === "EMP-04" ||
+              c.ubicacion.toLowerCase().includes("taller") ||
+              c.ubicacion.toLowerCase().includes("central")),
         );
 
   const handleEmpaqueChange = (newEmpaqueId: string) => {
     setEmpaqueId(newEmpaqueId);
-    setRetiradoId('');
+    setRetiradoId("");
     const newEmp = empaques.find((e) => e.id === newEmpaqueId);
     if (newEmp && newEmp.bancos && newEmp.bancos.length > 0) {
       setBancoUbicacion(newEmp.bancos[0].id);
     } else {
-      setBancoUbicacion('');
+      setBancoUbicacion("");
     }
   };
 
@@ -136,23 +153,31 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
     setErrorMessage(null);
 
     if (!empaqueId) {
-      setErrorMessage('Debe seleccionar la planta de empaque (DÓNDE).');
+      setErrorMessage("Debe seleccionar la planta de empaque (DÓNDE).");
       return;
     }
     if (!retiradoId) {
-      setErrorMessage('Debe especificar el ID del componente que se retira de la planta.');
+      setErrorMessage(
+        "Debe especificar el ID del componente que se retira de la planta.",
+      );
       return;
     }
     if (!instaladoId) {
-      setErrorMessage('Debe especificar el ID del componente nuevo que se instala.');
+      setErrorMessage(
+        "Debe especificar el ID del componente nuevo que se instala.",
+      );
       return;
     }
     if (retiradoId === instaladoId) {
-      setErrorMessage('El equipo retirado y el equipo instalado no pueden ser el mismo.');
+      setErrorMessage(
+        "El equipo retirado y el equipo instalado no pueden ser el mismo.",
+      );
       return;
     }
     if (!motivo.trim()) {
-      setErrorMessage('Debe detallar el motivo técnico de la sustitución (CÓMO).');
+      setErrorMessage(
+        "Debe detallar el motivo técnico de la sustitución (CÓMO).",
+      );
       return;
     }
 
@@ -172,7 +197,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
       onSuccess();
       onClose();
     } catch (err: any) {
-      setErrorMessage(err.message || 'Error al registrar el reemplazo.');
+      setErrorMessage(err.message || "Error al registrar el reemplazo.");
     } finally {
       setIsSubmitting(false);
     }
@@ -203,7 +228,10 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
         </div>
 
         {/* Modal Form Content */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-5 text-xs">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto flex-1 space-y-5 text-xs"
+        >
           {errorMessage && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-center gap-2 font-medium">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -220,29 +248,29 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  setTipo('Cabezal');
-                  setRetiradoId('');
-                  setInstaladoId('');
+                  setTipo("Cabezal");
+                  setRetiradoId("");
+                  setInstaladoId("");
                 }}
                 className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold border transition ${
-                  tipo === 'Cabezal'
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  tipo === "Cabezal"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <Cpu className="w-4 h-4" /> Cabezal (Printhead)
+                <Cpu className="w-4 h-4" /> Cabezal
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  setTipo('Casetera');
-                  setRetiradoId('');
-                  setInstaladoId('');
+                  setTipo("Casetera");
+                  setRetiradoId("");
+                  setInstaladoId("");
                 }}
                 className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold border transition ${
-                  tipo === 'Casetera'
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                  tipo === "Casetera"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
                 <Layers className="w-4 h-4" /> Casetera (Cassette)
@@ -258,7 +286,9 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Fecha de la Operación</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Fecha de la Operación
+                </label>
                 <input
                   type="date"
                   value={fecha}
@@ -268,7 +298,9 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                 />
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Técnico Responsable</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Técnico Responsable
+                </label>
                 <select
                   value={tecnicoId}
                   onChange={(e) => setTecnicoId(e.target.value)}
@@ -289,7 +321,9 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
           <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
             <div className="font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
               <MapPin className="w-4 h-4 text-emerald-600" />
-              <span>2. ¿DÓNDE SE REALIZA? (Ubicación & Bancos del Empaque)</span>
+              <span>
+                2. ¿DÓNDE SE REALIZA? (Ubicación & Bancos del Empaque)
+              </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -313,7 +347,8 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                 <label className="block font-semibold text-slate-700 mb-1">
                   Banco Asociado al Empaque *
                 </label>
-                {selectedEmpaque?.bancos && selectedEmpaque.bancos.length > 0 ? (
+                {selectedEmpaque?.bancos &&
+                selectedEmpaque.bancos.length > 0 ? (
                   <select
                     value={bancoUbicacion}
                     onChange={(e) => setBancoUbicacion(e.target.value)}
@@ -360,7 +395,9 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     className="w-full p-2 bg-white border border-rose-300 rounded-lg text-slate-900 font-mono font-bold"
                     required
                   >
-                    <option value="">-- Seleccione {tipo} de la Planta --</option>
+                    <option value="">
+                      -- Seleccione {tipo} de la Planta --
+                    </option>
                     {machinesInSelectedEmpaque.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.id} ({m.estado})
@@ -371,15 +408,19 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                   {/* Fallback text input if machine is not in list */}
                   <input
                     type="text"
-                    placeholder={`O escriba ID manual (ej. ${tipo === 'Cabezal' ? 'CAB-103' : '201'})`}
+                    placeholder={`O escriba ID manual (ej. ${tipo === "Cabezal" ? "CAB-103" : "201"})`}
                     value={retiradoId}
-                    onChange={(e) => setRetiradoId(e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      setRetiradoId(e.target.value.toUpperCase())
+                    }
                     className="w-full p-1.5 bg-white border border-rose-200 rounded text-slate-700 font-mono text-[11px]"
                   />
                 </div>
                 <p className="text-[11px] text-rose-700">
-                  {machinesInSelectedEmpaque.length} {tipo.toLowerCase()}s detectados en {selectedEmpaque?.nombre || 'la planta'}.
-                  Pasará a estado <strong>En Reparación (Pending)</strong> hacia Taller.
+                  {machinesInSelectedEmpaque.length} {tipo.toLowerCase()}s
+                  detectados en {selectedEmpaque?.nombre || "la planta"}. Pasará
+                  a estado <strong>En Reparación (Pending)</strong> hacia
+                  Taller.
                 </p>
               </div>
 
@@ -395,7 +436,9 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     className="w-full p-2 bg-white border border-emerald-300 rounded-lg text-slate-900 font-mono font-bold"
                     required
                   >
-                    <option value="">-- Seleccione {tipo} Listo en Taller --</option>
+                    <option value="">
+                      -- Seleccione {tipo} Listo en Taller --
+                    </option>
                     {machinesReadyInWorkshop.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.id} (Listo - Taller Central)
@@ -406,15 +449,19 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                   {/* Fallback text input if machine is not in list */}
                   <input
                     type="text"
-                    placeholder={`O escriba ID manual (ej. ${tipo === 'Cabezal' ? 'CAB-102' : '202'})`}
+                    placeholder={`O escriba ID manual (ej. ${tipo === "Cabezal" ? "CAB-102" : "202"})`}
                     value={instaladoId}
-                    onChange={(e) => setInstaladoId(e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      setInstaladoId(e.target.value.toUpperCase())
+                    }
                     className="w-full p-1.5 bg-white border border-emerald-200 rounded text-slate-700 font-mono text-[11px]"
                   />
                 </div>
                 <p className="text-[11px] text-emerald-700">
-                  {machinesReadyInWorkshop.length} {tipo.toLowerCase()}s listos en Taller Central.
-                  Pasará a estado <strong>En Uso (Using)</strong> en {selectedEmpaque?.nombre || 'la planta'}.
+                  {machinesReadyInWorkshop.length} {tipo.toLowerCase()}s listos
+                  en Taller Central. Pasará a estado{" "}
+                  <strong>En Uso (Using)</strong> en{" "}
+                  {selectedEmpaque?.nombre || "la planta"}.
                 </p>
               </div>
             </div>
@@ -449,7 +496,9 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-2 transition disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {isSubmitting ? 'Guardando Reemplazo...' : 'Confirmar & Registrar Reemplazo'}
+              {isSubmitting
+                ? "Guardando Reemplazo..."
+                : "Confirmar & Registrar Reemplazo"}
             </button>
           </div>
         </form>
