@@ -25,14 +25,14 @@ class ConsumableService(DatabaseBackedService):
 
     def create(self, data: ConsumibleCreateRequest) -> Consumible:
         try:
-            return self.repository.create_consumable(data)
+            return self.repository.create_consumable(data).to_domain()
         except Exception as e:
             print(f"Error occurred while creating consumable: {e}")
             return None
 
     def update(self, consumable_id: str, data: ConsumibleUpdateRequest) -> Consumible:
         try:
-            return self.repository.update_consumable(consumable_id, data)
+            return self.repository.update_consumable(consumable_id, data).to_domain()
         except Exception as e:
             print(f"Error occurred while updating consumable {consumable_id}: {e}")
             return None

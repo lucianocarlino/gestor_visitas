@@ -151,9 +151,6 @@ export const FrenosView: React.FC = () => {
                     <h3 className="font-bold text-slate-900 text-sm">
                       {freno.id}
                     </h3>
-                    <span className="text-[10px] text-slate-400 uppercase font-mono">
-                      Conjunto Freno Sinclair
-                    </span>
                   </div>
                 </div>
 

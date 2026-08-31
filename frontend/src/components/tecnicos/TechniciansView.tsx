@@ -165,11 +165,8 @@ export const TechniciansView: React.FC = () => {
         <div>
           <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
             <Users className="w-5 h-5 text-indigo-600" />
-            Cuerpo Técnico Certificado
+            Técnicos de campo
           </h2>
-          <p className="text-xs text-slate-500">
-            Técnicos habilitados para mantenimiento preventivo, correctivo y reemplazo de cabezales
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -272,7 +269,7 @@ export const TechniciansView: React.FC = () => {
                   className="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 font-bold rounded-xl text-xs border border-slate-200 hover:border-indigo-200 transition flex items-center gap-1.5"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
-                  Editar Perfil &amp; Clave
+                  Editar perfil y clave
                 </button>
               </div>
             )}

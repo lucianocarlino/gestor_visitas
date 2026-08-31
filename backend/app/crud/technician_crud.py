@@ -11,7 +11,7 @@ class TechnicianRepository:
     def get_all_technician(self) -> list[TecnicoModel]:
         return self.db.query(TecnicoModel).all()
 
-    def get_technician(self, tecnico_id: int) -> TecnicoModel:
+    def get_technician(self, tecnico_id: str) -> TecnicoModel:
         try:
             technician = self.db.query(TecnicoModel).filter(TecnicoModel.id == tecnico_id).first()
             if technician is not None:

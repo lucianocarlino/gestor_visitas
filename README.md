@@ -1,20 +1,44 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+Lector de PDFs (Python)
+=======================
 
-# Run and deploy your AI Studio app
+Este pequeño proyecto permite extraer texto de archivos PDF usando Python.
 
-This contains everything you need to run your app locally.
+Requisitos
+---------
+- Python 3.8+
+- Instalar dependencias:
 
-View your app in AI Studio: https://ai.studio/apps/2d9e4751-c79a-464d-820d-afda84810ac4
+En PowerShell (Windows):
 
-## Run Locally
+```powershell
+python -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r "C:\Users\User\OneDrive - frt.utn.edu.ar\CyC\Horas\requirements.txt"
+```
 
-**Prerequisites:**  Node.js
+Notas sobre OCR
+---------------
+Si el PDF está escaneado (imagenes), deberá instalar Tesseract para Windows:
+- Descargar el instalador de: https://github.com/tesseract-ocr/tesseract
+- Asegúrese de que el ejecutable `tesseract.exe` esté en el PATH.
 
+Uso
+----
+Ejemplos:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```powershell
+# Imprimir texto del PDF
+python .\main.py .\data\carlino-- psr-1AvEM-2026-05-08-04-00-08.pdf
+
+# Guardar salida en archivo (single o batch si path es carpeta)
+python .\main.py .\data --out .\salida\ --ocr
+
+# Forzar OCR (si extracción directa no funciona)
+python .\main.py .\data\archivo.pdf --ocr --out resultado.txt
+```
+
+Limitaciones
+------------
+- La extracción de texto depende de la calidad del PDF. PDFs escaneados requieren OCR.
+- Para páginas específicas o un control más fino puede ajustar el código.
+
+Si quiere, puedo adaptar el script para generar un único gran archivo de salida o para extraer metadatos adicionales.
+

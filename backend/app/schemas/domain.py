@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 from typing import Literal
 
@@ -102,7 +103,6 @@ class CreateEmpaqueDTO(BaseModel):
     cabezales: list[InitialCabezalInput] | None = None
     caseteras: list[InitialCaseteraInput] | None = None
 
-
 class Empaque(BaseModel):
     id: str
     nombre: str
@@ -125,45 +125,6 @@ class Tecnico(BaseModel):
     email: str
     password: str | None = None
 
-
-class Movimiento(BaseModel):
-    id: str
-    machine_id: str
-    machine_type: MachineType
-    fecha: str
-    tecnico_nombre: str
-    motivo: str
-    origen: str
-    destino: str
-
-
-class Cabezal(BaseModel):
-    id: str
-    tipo: Literal["Cabezal"]
-    estado: Status
-    ubicacion: str
-    freno_actual_id: str | None = None
-    historial_movimientos: list[Movimiento]
-
-
-class Casetera(BaseModel):
-    id: int
-    tipo: Literal["Casetera"]
-    estado: Status
-    ubicacion: str
-    historial_movimientos: list[Movimiento]
-
-
-class Freno(BaseModel):
-    id: str
-    tipo: Literal["Freno"]
-    fecha_inicio: str
-    estado: Status
-    cabezal_id: str | None = None
-    ubicacion: str
-    historial_movimientos: list[Movimiento]
-
-
 class Reemplazo(BaseModel):
     id: str
     fecha: str
@@ -178,31 +139,10 @@ class Reemplazo(BaseModel):
     tecnico_nombre: str | None = None
 
 
-class Cambio(BaseModel):
-    id: str
-    fecha: str
-    motivo: str
-    lugar: str
-    retirado_freno_id: str
-    instalado_freno_id: str
-    cabezal_id: str
-    tecnico_id: str | None = None
-    tecnico_nombre: str | None = None
-
-
 class ConsumibleItem(BaseModel):
     consumible_id: str
     nombre: str
     cantidad: int
-
-
-class Consumible(BaseModel):
-    id: str
-    nombre: str
-    stock: int
-    es_critico: bool
-    stock_minimo: int
-
 
 class Servicio(BaseModel):
     id: str
@@ -215,6 +155,69 @@ class Servicio(BaseModel):
     tecnico_id: str | None = None
     tecnico_nombre: str | None = None
 
+
+class Movimiento(BaseModel):
+    id: str
+    machine_id: str
+    machine_type: MachineType
+    fecha: str
+    tecnico_id: str | None = None
+    tecnico_nombre: str
+    motivo: str
+    origen: str
+    destino: str
+
+
+
+class Cabezal(BaseModel):
+    id: str
+    tipo: Literal["Cabezal"]
+    estado: Status
+    ubicacion: str
+    freno_actual_id: str | None = None
+    historial_reemplazos: list[Reemplazo] | None
+    historial_servicios: list[Servicio] | None
+    historial_movimientos: list[Movimiento] | None
+
+
+class Casetera(BaseModel):
+    id: int
+    tipo: Literal["Casetera"]
+    estado: Status
+    ubicacion: str
+    historial_reemplazos: list[Reemplazo] | None
+    historial_servicios: list[Servicio] | None
+    historial_movimientos: list[Movimiento] | None
+
+class Cambio(BaseModel):
+    id: str
+    fecha: str
+    motivo: str
+    lugar: str
+    retirado_freno_id: str | None = None
+    instalado_freno_id: str
+    cabezal_id: str
+    tecnico_id: str | None = None
+    tecnico_nombre: str | None = None
+
+
+class Freno(BaseModel):
+    id: str
+    tipo: Literal["Freno"]
+    fecha_inicio: str
+    estado: Status
+    cabezal_id: str | None = None
+    ubicacion: str
+    historial_cambios: list[Cambio] | None
+    historial_servicios: list[Servicio] | None
+    historial_movimientos: list[Movimiento] | None
+
+class Consumible(BaseModel):
+    id: str
+    nombre: str
+    stock: int
+    es_critico: bool
+    stock_minimo: int
 
 class ItemEstructura(BaseModel):
     codigo_res: str
@@ -290,10 +293,10 @@ class CreateReeplaceDTO(BaseModel):
 
 class CreateCambioDTO(BaseModel):
     cabezal_id: str
-    freno_retirado_id: str
+    freno_retirado_id: str | None = None
     freno_instalado_id: str
     motivo: str
-    fecha: str | None = None
+    fecha: str
     lugar: str
     empaque_id: str | None = None
     tecnico_id: str | None = None
@@ -328,4 +331,3 @@ class AuditEntry(BaseModel):
 class UserSession(BaseModel):
     user: Tecnico
     token: str
-

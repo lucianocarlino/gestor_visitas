@@ -141,11 +141,11 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
           <div>
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <Wrench className="w-5 h-5 text-blue-600" />
-              Gestión de Operaciones en Terreno & Taller
+              Gestión de Operaciones en campo y en taller
             </h2>
             <p className="text-xs text-slate-500">
-              Registro y trazabilidad completa de <strong>Dónde</strong>,{" "}
-              <strong>Cuándo</strong> y <strong>Cómo</strong> se ejecutan los
+              Registro de dónde,
+              cuándo y cómo se ejecutan los
               recambios, frenos, servicios y traslados
             </p>
           </div>
@@ -202,7 +202,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
             }`}
           >
             <Wrench className="w-4 h-4" />
-            <span>Servicios & Taller ({servicios.length})</span>
+            <span>Servicios({servicios.length})</span>
           </button>
 
           {isAdmin && (
@@ -216,7 +216,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
               }`}
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>Audit Trail (Auditoría)</span>
+              <span>Logs</span>
               <span
                 className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
                   activeTab === "audit-trail"
@@ -239,7 +239,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
             }`}
           >
             <History className="w-4 h-4" />
-            <span>Cronología Completa</span>
+            <span>Cronología completa</span>
           </button>
         </div>
       </div>
@@ -254,8 +254,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 Reemplazos de Cabezales y Caseteras en Planta
               </h3>
               <p className="text-xs text-blue-800">
-                Sustitución física de equipos en líneas de empaque con cambio
-                automático de estado (Retirado ➔ Pending, Instalado ➔ Using)
+                Sustitución física de equipos en líneas de empaque
               </p>
             </div>
             <button
@@ -280,9 +279,6 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                     <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                     <span>{r.empaque_nombre}</span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    {r.id}
-                  </span>
                 </div>
 
                 {/* Machine swap representation */}
@@ -292,7 +288,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                       Equipo Retirado:
                     </span>
                     <span className="font-mono font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                      {r.retirado_tipo} {r.retirado_id}
+                      {r.retirado_tipo} : {r.retirado_id}
                     </span>
                   </div>
                   <div className="flex items-center justify-center text-slate-400">
@@ -303,7 +299,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                       Equipo Instalado:
                     </span>
                     <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                      {r.instalado_tipo} {r.instalado_id}
+                      {r.instalado_tipo} : {r.instalado_id}
                     </span>
                   </div>
                 </div>
@@ -311,7 +307,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 {/* Motivo & Details */}
                 <div className="text-xs text-slate-600">
                   <span className="font-semibold text-slate-800">
-                    Causa / Motivo:
+                    [Banco] Motivo:
                   </span>{" "}
                   {r.motivo}
                 </div>
@@ -320,11 +316,11 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] text-slate-400">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-slate-400" />
-                    {new Date(r.fecha).toLocaleDateString()}
+                    Fecha: {new Date(r.fecha).toLocaleDateString()}
                   </span>
                   <span className="flex items-center gap-1 font-medium text-slate-600">
                     <User className="w-3 h-3 text-blue-600" />
-                    {r.tecnico_nombre || "Técnico asignado"}
+                    Técnico: {r.tecnico_nombre || "Técnico asignado"}
                   </span>
                 </div>
               </div>
@@ -349,8 +345,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 Cambios de Frenos en Cabezales
               </h3>
               <p className="text-xs text-indigo-800">
-                Sustitución de frenos por desgaste mecánico, desvinculación de
-                freno antiguo y montaje de nuevo freno
+                Sustitución de frenos
               </p>
             </div>
             <button
@@ -406,7 +401,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 {/* Motivo */}
                 <div className="text-xs text-slate-600">
                   <span className="font-semibold text-slate-800">
-                    Diagnóstico / Motivo:
+                    Motivo:
                   </span>{" "}
                   {c.motivo}
                 </div>
@@ -441,11 +436,10 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
             <div>
               <h3 className="font-bold text-amber-950 text-sm flex items-center gap-2">
                 <Wrench className="w-4 h-4 text-amber-700" />
-                Mantenimientos y Servicios Técnicos (Taller & Terreno)
+                Mantenimientos y Servicios Técnicos (en taller y en campo)
               </h3>
               <p className="text-xs text-amber-800">
-                Intervenciones preventivas y correctivas con consumo de
-                repuestos e insumos del inventario
+                Intervenciones preventivas y correctivas sobre cabezales, caseteras o frenos
               </p>
             </div>
             <button
@@ -472,17 +466,15 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                       {s.machine_type} {s.machine_id}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    {s.id}
-                  </span>
                 </div>
 
                 {/* Resumen & Trabajo hecho */}
                 <div className="space-y-1 text-xs">
-                  <div className="font-bold text-slate-900">{s.resumen}</div>
+                  <div className="font-bold text-slate-600">Motivo del servicio: </div> {s.resumen}
                   <p className="text-slate-600 line-clamp-3">
-                    {s.trabajo_hecho}
+                    Trabajo realizado:
                   </p>
+                    {s.trabajo_hecho}
                 </div>
 
                 {/* Consumibles Used */}
@@ -535,7 +527,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="font-bold text-slate-900 text-xs flex items-center gap-2">
               <History className="w-4 h-4 text-blue-600" />
-              Cronología Unificada de Todas las Operaciones Registradas
+              Todas las Operaciones Registradas
             </h3>
             <span className="text-xs text-slate-400">
               Total:{" "}

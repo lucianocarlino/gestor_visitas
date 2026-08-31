@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
 from app.models.common import generate_id
-from app.schemas.domain import Visita, ReporteSinclair, ItemEstructura
+from app.schemas.domain import CreateVisitDTO, ItemEstructura, ReporteSinclair, Visita
 
 
 class VisitaModel(TimestampMixin, Base):
@@ -27,6 +27,26 @@ class VisitaModel(TimestampMixin, Base):
     reporte: Mapped[ReporteSinclairModel] = relationship(
         back_populates="visita", cascade="all, delete-orphan", uselist=False
     )
+
+    @classmethod
+    def from_create_dto(
+        cls,
+        data: CreateVisitDTO,
+        *,
+        fecha: datetime | None = None,
+        estado_sincronizacion: str = "synced",
+    ) -> "VisitaModel":
+        kwargs: dict[str, object] = {
+            "fecha": fecha or datetime.now(),
+            "motivo": data.motivo,
+            "solicitado_por": data.solicitado_por,
+            "vehiculo": data.vehiculo,
+            "empaque_id": data.empaque_id,
+            "estado_sincronizacion": estado_sincronizacion,
+        }
+        if data.id is not None:
+            kwargs["id"] = data.id
+        return cls(**kwargs)
 
     def to_domain(self) -> Visita:
         return Visita(
@@ -52,6 +72,13 @@ class VisitaTecnicoModel(Base):
     tecnico_id: Mapped[str] = mapped_column(ForeignKey("tecnicos.id"), index=True)
 
     visita: Mapped[VisitaModel] = relationship(back_populates="tecnicos")
+
+    @classmethod
+    def from_ids(cls, *, visita_id: str, tecnico_id: str) -> "VisitaTecnicoModel":
+        return cls(
+            visita_id=visita_id,
+            tecnico_id=tecnico_id,
+        )
 
 
 class ReporteSinclairModel(TimestampMixin, Base):
@@ -80,6 +107,31 @@ class ReporteSinclairModel(TimestampMixin, Base):
         back_populates="reporte", cascade="all, delete-orphan",
         order_by="ItemEstructuraModel.orden",
     )
+
+    @classmethod
+    def from_create_dto(
+        cls, data: CreateVisitDTO, *, numero: int
+    ) -> "ReporteSinclairModel":
+        reporte = cls(
+            numero=numero,
+            codigo_motivo=data.codigo_motivo,
+            codigo_origen=data.codigo_origen,
+            codigo_tipo_servicio=data.codigo_tipo_servicio,
+            hora_inicio=datetime.fromisoformat(data.hora_inicio.replace("Z", "+00:00")),
+            hora_fin=datetime.fromisoformat(data.hora_fin.replace("Z", "+00:00")),
+            fuera_de_hora=data.fuera_de_hora,
+            comentarios=data.comentarios,
+            firma_cliente=data.firma_cliente,
+            nombre_cliente=data.nombre_cliente,
+            hora_llamada=datetime.fromisoformat(data.hora_llamada.replace("Z", "+00:00")),
+            produccion_etiquetada=data.produccion_etiquetada,
+            condicion_fruta=data.condicion_fruta,
+        )
+        reporte.estructura = [
+            ItemEstructuraModel.from_domain(item, orden=index)
+            for index, item in enumerate(data.estructura, start=1)
+        ]
+        return reporte
 
     def to_domain(self) -> ReporteSinclair:
         return ReporteSinclair(
@@ -119,6 +171,19 @@ class ItemEstructuraModel(Base):
     tiempo_servicio: Mapped[float] = mapped_column(Float)
 
     reporte: Mapped[ReporteSinclairModel] = relationship(back_populates="estructura")
+
+    @classmethod
+    def from_domain(cls, data: ItemEstructura, *, orden: int) -> "ItemEstructuraModel":
+        return cls(
+            orden=orden,
+            codigo_res=data.codigo_res,
+            numero_partes=data.numero_partes,
+            cantidad=data.cantidad,
+            otras_acciones=data.otras_acciones,
+            pct_etiquetado_esperado=data.pct_etiquetado_esperado,
+            pct_etiquetado_real=data.pct_etiquetado_real,
+            tiempo_servicio=data.tiempo_servicio,
+        )
 
     def to_domain(self) -> ItemEstructura:
         return ItemEstructura(

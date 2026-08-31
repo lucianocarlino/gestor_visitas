@@ -27,7 +27,13 @@ target_metadata = None
 
 from app.db.base import Base
 from app.db.config import get_database_settings
-import app.models  # Registers all ORM models in Base.metadata
+from app.models import audit
+from app.models import consumable
+from app.models import location
+from app.models import machine
+from app.models import operation
+from app.models import technician
+from app.models import visit
 
 config.set_main_option("sqlalchemy.url", get_database_settings().url)
 target_metadata = Base.metadata

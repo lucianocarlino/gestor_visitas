@@ -26,7 +26,8 @@ export const MachineModal: React.FC<MachineModalProps> = ({
 }) => {
   const [id, setId] = useState<string>('');
   const [estado, setEstado] = useState<Status>(Status.READY);
-  const [ubicacion, setUbicacion] = useState<string>(empaques[0]?.id || 'EMP-04');
+  const [ubicacion, setUbicacion] = useState<string>(empaques[0]?.nombre);
+  const [empaque_id, setEmpaqueId] = useState<string>(empaques[0]?.id);
   const [fechaInicio, setFechaInicio] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -44,10 +45,12 @@ export const MachineModal: React.FC<MachineModalProps> = ({
       return;
     }
 
+    setUbicacion(empaques.find((e) => e.id == empaque_id)?.nombre || 'Empaque');
+
     setIsSubmitting(true);
     try {
       if (type === 'Cabezal') {
-        await coreApi.createCabezal({ id: id.trim(), estado, ubicacion });
+        await coreApi.createCabezal({ id: id.trim(), estado, ubicacion, empaque_id});
       } else if (type === 'Casetera') {
         const numId = Number(id);
         if (isNaN(numId)) {
@@ -55,7 +58,7 @@ export const MachineModal: React.FC<MachineModalProps> = ({
           setIsSubmitting(false);
           return;
         }
-        await coreApi.createCasetera({ id: numId, estado, ubicacion });
+        await coreApi.createCasetera({ id: numId, estado, ubicacion, empaque_id });
       } else if (type === 'Freno') {
         await coreApi.createFreno({
           id: id.trim(),
@@ -132,15 +135,16 @@ export const MachineModal: React.FC<MachineModalProps> = ({
           <div>
             <label className="block font-semibold text-slate-700 mb-1">Ubicación Inicial *</label>
             <select
-              value={ubicacion}
-              onChange={(e) => setUbicacion(e.target.value)}
+              value={empaque_id}
+              onChange={(e) => setEmpaqueId(e.target.value)}
+
               className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
             >
               {empaques.map((e) => (
                 <option key={e.id} value={e.id}>
                   {e.nombre}
                 </option>
-              ))}
+              ))}f
             </select>
           </div>
 

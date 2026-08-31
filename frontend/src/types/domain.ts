@@ -135,6 +135,7 @@ export interface Casetera {
   tipo: 'Casetera';
   estado: Status;
   ubicacion: string;
+  empaque_id: string;
   historial_movimientos: Movimiento[];
 }
 

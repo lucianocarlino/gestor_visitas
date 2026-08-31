@@ -39,38 +39,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const refreshAlerts = async () => {
     try {
-      const [unvisited, lowStock] = await Promise.all([
-        coreApi.getUnvisitedAlerts(),
-        coreApi.getLowStockAlerts(),
-      ]);
 
       const newAlerts: SystemAlert[] = [];
-
-      // RF15: Empaques not visited for >15 days
-      unvisited.forEach((emp) => {
-        const id = `emp-alert-${emp.empaque_id}`;
-        newAlerts.push({
-          id,
-          type: 'empaque_unvisited',
-          title: `Empaque sin visita: ${emp.nombre}`,
-          message: `${emp.dias_sin_visita} días sin inspección técnica (Límite: 15 días). Ubicación: ${emp.ubicacion}`,
-          severity: emp.urgencia === 'alta' ? 'danger' : 'warning',
-          timestamp: new Date().toISOString(),
-        });
-      });
-
-      // RF14: Low stock alerts for critical consumables
-      lowStock.forEach((csm) => {
-        const id = `csm-alert-${csm.consumible_id}`;
-        newAlerts.push({
-          id,
-          type: 'consumible_stock',
-          title: `Stock Crítico: ${csm.nombre}`,
-          message: `Stock actual: ${csm.stock_actual} unidades (Mínimo requerido: ${csm.stock_minimo}). Déficit: ${csm.deficit}`,
-          severity: csm.es_critico ? 'danger' : 'warning',
-          timestamp: new Date().toISOString(),
-        });
-      });
 
       setAlerts(newAlerts);
     } catch {
@@ -87,7 +57,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     window.addEventListener('system-alerts-invalidate', handleInvalidate);
     // Instant real-time background sync every 5 seconds (instead of 60 seconds)
-    const interval = setInterval(refreshAlerts, 5000);
+    const interval = setInterval(refreshAlerts, 50000000);
 
     return () => {
       window.removeEventListener('system-alerts-invalidate', handleInvalidate);

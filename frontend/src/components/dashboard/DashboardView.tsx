@@ -33,13 +33,13 @@ import {
 } from "lucide-react";
 import { coreApi, visitsApi } from "../../services/apiClient";
 import {
-  Cabezal,
-  Casetera,
-  Empaque,
-  Freno,
-  Tecnico,
-  Visita,
-  Status,
+    Cabezal,
+    Casetera,
+    Empaque,
+    Freno,
+    Tecnico,
+    Visita,
+    Status, StatusTecnico,
 } from "../../types/domain";
 import { SinclairReportModal } from "../visits/SinclairReportModal";
 import {
@@ -69,6 +69,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [allVisits, setAllVisits] = useState<Visita[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [cabezales, setCabezales] = useState<Cabezal[]>([]);
+  const [caseteras, setCaseteras] = useState<Casetera[]>([]);
+  const [frenos, setFrenos] = useState<Freno[]>([]);
+  const [consumibles, setConsumibles] = useState<Consumible[]>([]);
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
   const [selectedVisitReport, setSelectedVisitReport] = useState<Visita | null>(
     null,
@@ -92,20 +95,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [statsData, visitsData, empData, cabData, tecData] =
+      const [visitsData, empData, cabData, tecData, casData, freData, conData] =
         await Promise.all([
-          coreApi.getDashboardStats().catch(() => null),
           visitsApi.getAllVisits().catch(() => []),
           coreApi.getEmpaques().catch(() => []),
           coreApi.getCabezales().catch(() => []),
           coreApi.getTecnicos().catch(() => []),
+            coreApi.getCaseteras().catch(() => []),
+            coreApi.getFrenos().catch(() => []),
+            coreApi.getConsumibles().catch(() => []),
         ]);
 
-      setStats(statsData);
       setAllVisits(visitsData);
       setRecentVisits(visitsData.slice(-5).reverse());
       setEmpaques(empData);
       setCabezales(cabData);
+      setCaseteras(casData);
+      setFrenos(freData);
+      setConsumibles(conData);
       setTecnicos(tecData);
     } catch {
       // offline fallback
@@ -234,14 +241,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <span className="px-3 py-1 bg-blue-700/50 border border-blue-400/30 rounded-full text-xs font-semibold uppercase tracking-wider text-blue-200 inline-block mb-2">
-              Sinclair Field Operations Control
-            </span>
             <h1 className="text-2xl font-bold">
-              Estadísticas &amp; Exportación de Reportes
+              Estadísticas y Exportación de Reportes
             </h1>
             <p className="text-sm text-blue-100/80 mt-1 max-w-xl">
-              Métricas operativas de campo, trazabilidad por técnico y descarga
+              Métricas, estadisticas por técnico y descarga
               de reportes PDF en formato ZIP.
             </p>
           </div>
@@ -251,6 +255,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               id="btn-dash-new-visit"
               onClick={onNewVisit}
               className="px-4 py-2.5 bg-white text-blue-900 hover:bg-blue-50 font-bold rounded-xl shadow transition flex items-center gap-2 text-sm"
+              disabled={true}
             >
               <Activity className="w-4 h-4 text-blue-600" />
               Nueva Visita
@@ -287,7 +292,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
             <span className="text-xs font-bold uppercase tracking-wider">
-              Cabezales Operativos
+              Cabezales en uso
             </span>
             <Cpu className="w-4 h-4 text-emerald-600" />
           </div>
@@ -300,7 +305,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="text-xs text-emerald-600 mt-1 font-semibold flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" />
             {cabezales.length > 0
-              ? `${Math.round((operationalCabezales / cabezales.length) * 100)}% disponibilidad`
+              ? `${Math.round((operationalCabezales / cabezales.length) * 100)}% en uso`
               : "Sin datos"}
           </div>
         </div>
@@ -334,219 +339,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {tecnicos.length}
           </div>
           <div className="text-xs text-slate-500 mt-1 font-medium">
-            Personal de campo certificado
-          </div>
-        </div>
-      </div>
-
-      {/* ZIP Export & PDF Generator Section */}
-      <div className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 flex-shrink-0">
-              <FileArchive className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                Exportación Masiva en ZIP de Reportes PDF
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Genera un archivo comprimido (.zip) con los reportes técnicos
-                oficiales de Sinclair en formato PDF individuales.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              id="btn-export-zip-main"
-              onClick={handleExportZip}
-              disabled={isExportingZip || filteredVisitsForExport.length === 0}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs flex items-center gap-2 transition shadow-md shadow-blue-500/20"
-            >
-              {isExportingZip ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  {exportProgress
-                    ? `Generando (${exportProgress.current}/${exportProgress.total})...`
-                    : "Preparando ZIP..."}
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  Descargar ZIP ({filteredVisitsForExport.length} Reportes PDF)
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {zipSuccessMsg && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span>{zipSuccessMsg}</span>
-          </div>
-        )}
-
-        {/* Date Filter Controls */}
-        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-              <Filter className="w-4 h-4 text-blue-600" />
-              <span>Filtrar por Rango de Fechas:</span>
-            </div>
-
-            {/* Quick Presets */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleApplyQuickFilter("all")}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
-                  !startDate && !endDate
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                Todas
-              </button>
-              <button
-                type="button"
-                onClick={() => handleApplyQuickFilter("last30")}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition"
-              >
-                Últimos 30 días
-              </button>
-              <button
-                type="button"
-                onClick={() => handleApplyQuickFilter("month")}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition"
-              >
-                Este Mes
-              </button>
-              <button
-                type="button"
-                onClick={() => handleApplyQuickFilter("year")}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition"
-              >
-                Este Año
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Fecha Desde:
-              </label>
-              <div className="relative">
-                <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Fecha Hasta:
-              </label>
-              <div className="relative">
-                <Calendar className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col justify-end">
-              <div className="p-2 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-center justify-between">
-                <span className="font-medium">Reportes incluidos:</span>
-                <span className="font-bold font-mono text-sm px-2 py-0.5 bg-blue-600 text-white rounded-lg">
-                  {filteredVisitsForExport.length} / {allVisits.length}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filtered Reports Mini-Table */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-            <span>
-              Listado de Reportes a incluir en el ZIP (
-              {filteredVisitsForExport.length})
-            </span>
-            {startDate || endDate ? (
-              <span className="text-slate-500 font-normal text-[11px]">
-                Filtro activo: {startDate || "Inicio"} hasta {endDate || "Hoy"}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-2xl divide-y divide-slate-100 bg-white">
-            {filteredVisitsForExport.length === 0 ? (
-              <div className="text-center py-6 text-slate-400 text-xs">
-                No hay reportes de visitas para el rango de fechas seleccionado.
-              </div>
-            ) : (
-              filteredVisitsForExport.map((visit) => (
-                <div
-                  key={visit.id}
-                  className="p-3 hover:bg-slate-50/80 transition flex items-center justify-between text-xs gap-3"
-                >
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
-                      <FileText className="w-4 h-4" />
-                    </div>
-                    <div className="overflow-hidden">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900">
-                          Reporte #{visit.reporte.numero}
-                        </span>
-                        <span className="text-slate-400">•</span>
-                        <span className="font-semibold text-slate-700 truncate">
-                          {visit.empaque?.nombre || "Planta"}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
-                        <span>
-                          {new Date(visit.fecha).toLocaleDateString()}
-                        </span>
-                        <span>•</span>
-                        <span>
-                          {visit.tecnicos.map((t) => t.nombre).join(", ")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedVisitReport(visit)}
-                      className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg text-[11px] transition"
-                    >
-                      Ver
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => downloadVisitPDF(visit)}
-                      className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold rounded-lg text-[11px] flex items-center gap-1 transition"
-                      title="Descargar PDF individual"
-                    >
-                      <Download className="w-3 h-3" />
-                      PDF
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
+            {tecnicos.length > 0
+              ? `${tecnicos.filter((t) => t.estado === StatusTecnico.DISPONIBLE).length} disponibles`
+              : "Sin datos"}
           </div>
         </div>
       </div>
@@ -563,8 +358,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <button
               onClick={() => onNavigate("visits")}
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              disabled={ true }
             >
-              Ver todas ({recentVisits.length})
+              Ver todas {/*({recentVisits.length})*/} (Inactivo)
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -632,12 +428,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Cpu className="w-4 h-4 text-blue-600" />
               Inventario de Flota
             </h2>
-            <button
-              onClick={() => onNavigate("cabezales")}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800"
-            >
-              Gestionar
-            </button>
           </div>
 
           <div className="space-y-3">
@@ -674,7 +464,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     Caseteras
                   </div>
                   <div className="text-[10px] text-slate-500">
-                    Historial de traslados
+                    {caseteras.length} registrados
                   </div>
                 </div>
               </div>
@@ -692,7 +482,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div>
                   <div className="font-bold text-xs text-slate-900">Frenos</div>
                   <div className="text-[10px] text-slate-500">
-                    Acoplados y repuestos
+                    {frenos.length} registrados
                   </div>
                 </div>
               </div>
@@ -709,108 +499,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </div>
                 <div>
                   <div className="font-bold text-xs text-slate-900">
-                    Consumibles &amp; Repuestos
+                    Consumibles y Repuestos
                   </div>
                   <div className="text-[10px] text-slate-500">
-                    Control de stock y alertas
+                    {consumibles.length} insumos registrados
                   </div>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Technician Performance & Kilometers Table */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-          <div>
-            <h2 className="font-bold text-slate-900 flex items-center gap-2 text-sm">
-              <Users className="w-4 h-4 text-blue-600" />
-              Métricas por Técnico: Visitas y Distancia Recorrida
-            </h2>
-            <p className="text-xs text-slate-500">
-              Control de traslados logísticos a plantas de empaque, horas de
-              servicio y productividad
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-xs font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
-            <div>
-              Total Visitas:{" "}
-              <span className="font-bold text-slate-900">
-                {totalVisitsCount}
-              </span>
-            </div>
-            <div className="text-slate-300">|</div>
-            <div>
-              Total Km Recorridos:{" "}
-              <span className="font-bold text-blue-700 font-mono">
-                {totalKilometersAll.toLocaleString()} km
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
-              <tr>
-                <th className="p-3">Técnico</th>
-                <th className="p-3">Contacto</th>
-                <th className="p-3 text-center">Visitas Realizadas</th>
-                <th className="p-3 text-center">Distancia Total (km)</th>
-                <th className="p-3 text-center">Horas de Servicio</th>
-                <th className="p-3 text-center">Última Visita</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {technicianMetrics.map((item) => {
-                return (
-                  <tr
-                    key={item.tecnico.id}
-                    className="hover:bg-slate-50/80 transition"
-                  >
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">
-                          {item.tecnico.nombre.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-900">
-                            {item.tecnico.nombre}
-                          </div>
-                          <div className="text-[10px] text-slate-400 font-mono">
-                            {item.tecnico.id}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-3 text-slate-500">
-                      <div>{item.tecnico.email}</div>
-                    </td>
-                    <td className="p-3 text-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                        {item.visitasCount} visitas
-                      </span>
-                    </td>
-                    <td className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1 font-mono font-bold text-slate-900">
-                        <Navigation className="w-3 h-3 text-emerald-600" />
-                        <span>{item.totalDistanceKm} km</span>
-                      </div>
-                    </td>
-                    <td className="p-3 text-center font-mono">
-                      {item.totalServiceHours} hs
-                    </td>
-                    <td className="p-3 text-center text-slate-500">
-                      {item.lastVisit || "Sin registros"}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
 

@@ -93,10 +93,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             <UserCheck className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white">Inicio de Sesión y Perfil</h2>
-            <p className="text-xs text-slate-400">
-              Autenticación para Técnicos de Campo y Administradores
-            </p>
+            <h2 className="text-base font-bold text-white">Inicio de Sesión</h2>
           </div>
         </div>
 
@@ -157,9 +154,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-slate-400 font-mono">
-                          {t.email} ({t.id})
-                        </div>
                       </div>
                     </div>
                     {isSelected && <Check className="w-5 h-5 text-blue-400" />}
@@ -193,27 +187,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     className="absolute right-3 top-2.5 text-slate-400 hover:text-white"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                <div className="mt-1.5 text-[11px] text-slate-400 flex items-center justify-between">
-                  <span>
-                    Contraseña demo:{' '}
-                    <code className="text-blue-300 bg-slate-800 px-1.5 py-0.5 rounded font-mono">
-                      {selectedUser.rol === 'admin' ? 'admin2025' : (selectedUser.password || 'sinclair123')}
-                    </code>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPassword(
-                        selectedUser.rol === 'admin'
-                          ? 'admin2025'
-                          : selectedUser.password || 'sinclair123'
-                      )
-                    }
-                    className="text-blue-400 hover:text-blue-300 font-semibold underline ml-2 cursor-pointer"
-                  >
-                    Autocompletar
                   </button>
                 </div>
               </div>

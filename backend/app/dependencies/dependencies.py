@@ -23,15 +23,22 @@ from app.services.technician_service import TechnicianService
 
 def get_empaque_service(session: Annotated[Session, Depends(get_db_session)]) -> EmpaqueService:
     repository = EmpaqueRepository(session)
-    return EmpaqueService(repository=repository)
+    machine_repository = MachineRepository(session)
+    return EmpaqueService(repository=repository, machines_repository=machine_repository)
 
 def get_machine_service(session: Annotated[Session, Depends(get_db_session)]) -> MachineService:
     repository = MachineRepository(session)
-    return MachineService(repository=repository)
+    location_repository = EmpaqueRepository(session)
+    operation_repository = OperationRepository(session)
+    return MachineService(repository=repository, location_repository=location_repository, operation_repository=operation_repository)
 
 def get_operation_service(session: Annotated[Session, Depends(get_db_session)]) -> OperationService:
     repository = OperationRepository(session)
-    return OperationService(repository=repository)
+    technician_repository = TechnicianRepository(session)
+    empaques_repository = EmpaqueRepository(session)
+    machines_repository = MachineRepository(session)
+    consumable_repository = ConsumableRepository(session)
+    return OperationService(repository=repository, technician_repository=technician_repository, empaques_repository=empaques_repository, machines_repository=machines_repository, consumable_repository=consumable_repository)
 
 def get_consumable_service(session: Annotated[Session, Depends(get_db_session)]) -> ConsumableService:
     repository = ConsumableRepository(session)

@@ -27,7 +27,7 @@ import { useAuth } from "../../context/AuthContext";
 export const EmpaquesView: React.FC = () => {
   const { user, isAdmin } = useAuth();
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
-  const [unvisitedAlerts, setUnvisitedAlerts] = useState<any[]>([]);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -40,12 +40,10 @@ export const EmpaquesView: React.FC = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [emps, alerts] = await Promise.all([
+      const [emps] = await Promise.all([
         coreApi.getEmpaques(),
-        coreApi.getUnvisitedAlerts(),
       ]);
       setEmpaques(emps);
-      setUnvisitedAlerts(alerts);
     } catch {
       // offline fallback
     } finally {
@@ -86,14 +84,11 @@ export const EmpaquesView: React.FC = () => {
       return;
     try {
       await coreApi.deleteEmpaque(id);
-      loadData();
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "Error al eliminar empaque");
+    } finally {
+        loadData();
     }
-  };
-
-  const isUnvisitedAlert = (id: string) => {
-    return unvisitedAlerts.find((a) => a.empaque_id === id);
   };
 
   const filtered = empaques.filter((e) => {
@@ -106,36 +101,6 @@ export const EmpaquesView: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Alert banner if plants exceed 15 days without inspection */}
-      {unvisitedAlerts.length > 0 && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="text-xs">
-            <h4 className="font-bold text-amber-900">
-              Alerta de Mantenimiento Preventivo: {unvisitedAlerts.length}{" "}
-              Empaques sin Visita ({">"}15 días)
-            </h4>
-            <p className="text-amber-800 mt-0.5">
-              Los siguientes empaques tienen servicio activo contratado pero
-              superaron el intervalo límite de inspección técnica:
-            </p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {unvisitedAlerts.map((a) => (
-                <span
-                  key={a.empaque_id}
-                  className="px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded font-semibold text-[11px]"
-                >
-                  {a.nombre} (
-                  {a.dias_sin_visita === 999
-                    ? "Nunca visitado"
-                    : `${a.dias_sin_visita} días`}
-                  )
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
@@ -170,7 +135,6 @@ export const EmpaquesView: React.FC = () => {
       {/* Grid of Empaques */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.map((emp) => {
-          const alert = isUnvisitedAlert(emp.id);
           const totalLineas =
             emp.bancos?.reduce((acc, b) => acc + (b.lineas || 0), 0) || 0;
 
@@ -178,9 +142,7 @@ export const EmpaquesView: React.FC = () => {
             <div
               key={emp.id}
               id={`card-empaque-${emp.id}`}
-              className={`bg-white p-5 rounded-2xl border transition shadow-xs flex flex-col justify-between ${
-                alert ? "border-amber-300 bg-amber-50/20" : "border-slate-200"
-              }`}
+              className={`bg-white p-5 rounded-2xl border transition shadow-xs flex flex-col justify-between `}
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-3">
@@ -193,9 +155,7 @@ export const EmpaquesView: React.FC = () => {
                         {emp.nombre}
                         {alert && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                            {alert.dias_sin_visita === 999
-                              ? "Sin visitas"
-                              : `+${alert.dias_sin_visita}d sin visita`}
+                            {`Sin visitas`}
                           </span>
                         )}
                       </h3>
@@ -250,10 +210,10 @@ export const EmpaquesView: React.FC = () => {
                 {emp.bancos && emp.bancos.length > 0 && (
                   <div className="text-[11px] text-slate-500 mb-2">
                     <span className="font-semibold text-slate-700">
-                      Detalle Bancos:{" "}
+                      Bancos:{" "}
                     </span>
                     {emp.bancos
-                      .map((b) => `${b.id} (${b.lineas} líns)`)
+                      .map((b) => `${b.id} (${b.lineas} líneas)`)
                       .join(" · ")}
                   </div>
                 )}

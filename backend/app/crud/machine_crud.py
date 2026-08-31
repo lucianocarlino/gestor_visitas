@@ -37,31 +37,31 @@ class MachineRepository:
             print("Error al leer todos los frenos:", e)
             return []
 
-    def read_all_cabezales_from_empaque(self, empaque_id: str) -> list[CabezalModel]:
+    def read_all_cabezales_from_empaque(self, ubicacion: str) -> list[CabezalModel]:
         try:
-            all_cabezales = self.db.query(CabezalModel).filter(CabezalModel.empaque_id == empaque_id).all()
+            all_cabezales = self.db.query(CabezalModel).filter(CabezalModel.ubicacion == ubicacion).all()
             return all_cabezales
         except Exception as e:
             self.db.rollback()
-            print(f"Error al leer todos los cabezales del empaque {empaque_id}:", e)
+            print(f"Error al leer todos los cabezales del empaque {ubicacion}:", e)
             return []
 
-    def read_all_caseteras_from_empaque(self, empaque_id: str) -> list[CaseteraModel]:
+    def read_all_caseteras_from_empaque(self, ubicacion: str) -> list[CaseteraModel]:
         try:
-            all_caseteras = self.db.query(CaseteraModel).filter(CaseteraModel.empaque_id == empaque_id).all()
+            all_caseteras = self.db.query(CaseteraModel).filter(CaseteraModel.ubicacion == ubicacion).all()
             return all_caseteras
         except Exception as e:
             self.db.rollback()
-            print(f"Error al leer todas las caseteras del empaque {empaque_id}:", e)
+            print(f"Error al leer todas las caseteras del empaque {ubicacion}:", e)
             return []
 
-    def read_all_frenos_from_empaque(self, empaque_id: str) -> list[FrenoModel]:
+    def read_all_frenos_from_empaque(self, ubicacion: str) -> list[FrenoModel]:
         try:
-            all_frenos = self.db.query(FrenoModel).filter(FrenoModel.empaque_id == empaque_id).all()
+            all_frenos = self.db.query(FrenoModel).filter(FrenoModel.ubicacion == ubicacion).all()
             return all_frenos
         except Exception as e:
             self.db.rollback()
-            print(f"Error al leer todos los frenos del empaque {empaque_id}:", e)
+            print(f"Error al leer todos los frenos del empaque {ubicacion}:", e)
             return []
 
     def get_all_movements(self) -> list[MovimientoModel]:
@@ -73,11 +73,10 @@ class MachineRepository:
             print("Error al leer todos los movimientos:", e)
             return []
 
-    def create_movement(self, data: MovimientoCreateRequest) -> MovimientoModel:
+    def create_movement(self, data: MovimientoCreateRequest) -> MovimientoModel | None:
         try:
-            new_movement = MovimientoModel(**data.model_dump())
+            new_movement = MovimientoModel.from_create_request(data)
             self.db.add(new_movement)
-            self.db.commit()
             self.db.refresh(new_movement)
             return new_movement
         except Exception as e:
@@ -87,9 +86,9 @@ class MachineRepository:
 
     def create_cabezal(self, data:CabezalCreateRequest) -> CabezalModel:
         try:
-            new_cabezal = CabezalModel(**data.model_dump())
+            new_cabezal = CabezalModel.from_create_request(data)
             self.db.add(new_cabezal)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(new_cabezal)
             return new_cabezal
         except Exception as e:
@@ -99,13 +98,12 @@ class MachineRepository:
 
     def update_cabezal(self, machine_id: str, data: CabezalUpdateRequest) -> CabezalModel:
         try:
-            cabezal = self.db.query(CabezalModel).filter(CabezalModel.machine_id == machine_id).first()
+            cabezal = self.db.query(CabezalModel).filter(CabezalModel.id == machine_id).first()
             if not cabezal:
                 print(f"No se encontró el cabezal con machine_id {machine_id}")
                 return None
-            for key, value in data.model_dump().items():
-                setattr(cabezal, key, value)
-            self.db.commit()
+            cabezal = cabezal.from_update_dto(cabezal, data)
+            self.db.flush()
             self.db.refresh(cabezal)
             return cabezal
         except Exception as e:
@@ -115,7 +113,7 @@ class MachineRepository:
 
     def delete_cabezal(self, machine_id: str) -> bool:
         try:
-            cabezal = self.db.query(CabezalModel).filter(CabezalModel.machine_id == machine_id).first()
+            cabezal = self.db.query(CabezalModel).filter(CabezalModel.id == machine_id).first()
             if not cabezal:
                 print(f"No se encontró el cabezal con machine_id {machine_id}")
                 return False
@@ -129,9 +127,9 @@ class MachineRepository:
 
     def create_casetera(self, data: CaseteraCreateRequest) -> CaseteraModel:
         try:
-            new_casetera = CaseteraModel(**data.model_dump())
+            new_casetera = CaseteraModel.from_create_request(data)
             self.db.add(new_casetera)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(new_casetera)
             return new_casetera
         except Exception as e:
@@ -145,9 +143,8 @@ class MachineRepository:
             if not casetera:
                 print(f"No se encontró la casetera con número {number}")
                 return None
-            for key, value in data.model_dump().items():
-                setattr(casetera, key, value)
-            self.db.commit()
+            casetera = casetera.from_update_dto(casetera, data)
+            self.db.flush()
             self.db.refresh(casetera)
             return casetera
         except Exception as e:
@@ -171,9 +168,9 @@ class MachineRepository:
 
     def create_freno(self, data: FrenoCreateRequest) -> FrenoModel:
         try:
-            new_freno = FrenoModel(**data.model_dump())
+            new_freno = FrenoModel.from_create_request(data)
             self.db.add(new_freno)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(new_freno)
             return new_freno
         except Exception as e:
@@ -183,13 +180,13 @@ class MachineRepository:
 
     def update_freno(self, machine_id: str, data: FrenoUpdateRequest) -> FrenoModel:
         try:
-            freno = self.db.query(FrenoModel).filter(FrenoModel.machine_id == machine_id).first()
+            freno = self.db.query(FrenoModel).filter(FrenoModel.id == machine_id).first()
             if not freno:
                 print(f"No se encontró el freno con machine_id {machine_id}")
                 return None
-            for key, value in data.model_dump().items():
-                setattr(freno, key, value)
-            self.db.commit()
+
+            freno = freno.from_update_dto(freno, data)
+            self.db.flush()
             self.db.refresh(freno)
             return freno
         except Exception as e:
@@ -199,7 +196,7 @@ class MachineRepository:
 
     def delete_freno(self, machine_id: str) -> bool:
         try:
-            freno = self.db.query(FrenoModel).filter(FrenoModel.machine_id == machine_id).first()
+            freno = self.db.query(FrenoModel).filter(FrenoModel.id == machine_id).first()
             if not freno:
                 print(f"No se encontró el freno con machine_id {machine_id}")
                 return False
@@ -210,3 +207,51 @@ class MachineRepository:
             self.db.rollback()
             print(f"Error al eliminar el freno con machine_id {machine_id}:", e)
             return False
+
+    def create_various_cabezal(self, data: list[CabezalCreateRequest]) -> bool:
+        try:
+            new_cabezales = [CabezalModel.from_create_request(item) for item in data]
+            self.db.add_all(new_cabezales)
+            self.db.flush()
+            for cabezal in new_cabezales:
+                self.db.refresh(cabezal)
+            return True
+        except Exception as e:
+            self.db.rollback()
+            print("Error al crear varios cabezales:", e)
+            return False
+
+    def create_various_casetera(self, data: list[CaseteraCreateRequest]) -> bool:
+        try:
+            new_caseteras = [CaseteraModel.from_create_request(item) for item in data]
+            self.db.add_all(new_caseteras)
+            self.db.flush()
+            for casetera in new_caseteras:
+                self.db.refresh(casetera)
+            return True
+        except Exception as e:
+            self.db.rollback()
+            print("Error al crear varias caseteras:", e)
+            return False
+
+    def create_various_freno(self, data: list[FrenoCreateRequest]) -> bool:
+        try:
+            new_frenos = [FrenoModel.from_create_request(item) for item in data]
+            self.db.add_all(new_frenos)
+            self.db.flush()
+            for freno in new_frenos:
+                self.db.refresh(freno)
+            return True
+        except Exception as e:
+            self.db.rollback()
+            print("Error al crear varios frenos:", e)
+            return False
+
+    def get_movements_by_machine_id(self, machine_id: str) -> list[MovimientoModel]:
+        try:
+            movements = self.db.query(MovimientoModel).filter(MovimientoModel.machine_id == machine_id).all()
+            return movements
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error al leer los movimientos de la máquina con ID {machine_id}:", e)
+            return []

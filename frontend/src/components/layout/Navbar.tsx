@@ -16,7 +16,6 @@ import {
   Menu,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useNotifications } from '../../context/NotificationContext';
 import { OfflineSyncManager } from '../../services/offlineSync';
 
 interface NavbarProps {
@@ -31,7 +30,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectTab,
 }) => {
   const { user } = useAuth();
-  const { alerts, unreadCount } = useNotifications();
   const [isOnline, setIsOnline] = useState<boolean>(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
@@ -94,18 +92,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Menu className="w-6 h-6" />
           </button>
           <div className="flex items-center space-x-2">
-            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg text-white shadow-sm shadow-blue-500/50">
-              S
+            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg text-white shadow-sm shadow-blue-500/50">
+              C&C
             </div>
             <div>
               <div className="text-base font-bold tracking-tight text-white flex items-center gap-2">
-                Sinclair Visit Manager
-                <span className="text-xs px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700 font-mono">
-                  v2.4
-                </span>
+                Gestor de visitas
               </div>
               <p className="text-xs text-slate-400 hidden sm:block">
-                Gestión Técnica de Mantenimiento & Sinclair Reports
+                Carlino & Carlino
               </p>
             </div>
           </div>
@@ -155,51 +150,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="Ver alertas"
             >
               <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce">
-                  {unreadCount}
-                </span>
-              )}
             </button>
 
             {showNotificationMenu && (
               <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 p-4">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
-                    Alertas del Sistema ({unreadCount})
-                  </h3>
                   <button
                     onClick={() => setShowNotificationMenu(false)}
                     className="text-xs text-slate-400 hover:text-slate-200"
                   >
                     Cerrar
                   </button>
-                </div>
-                <div className="max-h-72 overflow-y-auto space-y-2 mt-3 divide-y divide-slate-800/50">
-                  {alerts.length === 0 ? (
-                    <p className="text-xs text-slate-400 py-3 text-center">
-                      No hay alertas activas en este momento.
-                    </p>
-                  ) : (
-                    alerts.map((alert) => (
-                      <div key={alert.id} className="pt-2 text-xs">
-                        <div className="flex items-center justify-between font-semibold">
-                          <span
-                            className={
-                              alert.severity === 'danger' ? 'text-rose-400' : 'text-amber-400'
-                            }
-                          >
-                            {alert.title}
-                          </span>
-                          <span className="text-[10px] text-slate-500 uppercase">
-                            {alert.type === 'empaque_unvisited' ? 'Empaque' : 'Stock'}
-                          </span>
-                        </div>
-                        <p className="text-slate-300 mt-0.5">{alert.message}</p>
-                      </div>
-                    ))
-                  )}
                 </div>
               </div>
             )}

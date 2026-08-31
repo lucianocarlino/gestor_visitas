@@ -359,13 +359,13 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
             <h2 className="text-base font-bold text-slate-900">
               {empaque
                 ? `Editar Empaque: ${empaque.nombre}`
-                : "Nuevo Empaque / Planta"}
+                : "Nuevo Empaque"}
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             {empaque
               ? `Actualice los datos y la configuración de bancos para ${empaque.id}`
-              : "Defina la ubicación, bancos de etiquetado y toda la maquinaria inicial (Cabezales con Freno y Caseteras)."}
+              : "Crear un nuevo empaque con sus máquinas asociadas."}
           </p>
         </div>
 
@@ -397,7 +397,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
 
           <div>
             <label className="block font-semibold text-slate-700 mb-1">
-              Dirección / Ubicación *
+              Ubicación *
             </label>
             <input
               type="text"
@@ -412,7 +412,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Distancia desde Base (km)
+                Distancia desde el taller (km)
               </label>
               <input
                 type="number"
@@ -424,7 +424,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
             </div>
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Estado de Abono
+                Estado del servicio
               </label>
               <select
                 value={servicio ? "true" : "false"}
@@ -440,7 +440,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Latitud GPS
+                Latitud
               </label>
               <input
                 type="number"
@@ -452,7 +452,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
             </div>
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Longitud GPS
+                Longitud
               </label>
               <input
                 type="number"
@@ -550,15 +550,14 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                   <div className="flex items-center gap-2">
                     <Cpu className="w-4 h-4 text-blue-600" />
                     <h4 className="font-bold text-slate-900 text-xs">
-                      Maquinaria Asignada a Planta
+                      Maquinas en planta
                     </h4>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
                       {totalMachinesCount} equipos
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    {cabezales.length} Cabezales (
-                    {cabezales.filter((c) => c.freno_id).length} con Freno) ·{" "}
+                    {cabezales.length} Cabezales (con  {cabezales.filter((c) => c.freno_id).length} Frenos) ·{" "}
                     {caseteras.length} Caseteras
                   </p>
                 </div>
@@ -570,7 +569,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                     onClick={handleAddCabezal}
                     className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-[11px] flex items-center gap-1 transition shadow-xs"
                   >
-                    <Plus className="w-3.5 h-3.5" /> + Cabezal (con Freno)
+                    <Plus className="w-3.5 h-3.5" /> Cabezal (con Freno)
                   </button>
                   <button
                     type="button"
@@ -578,7 +577,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
                     onClick={handleAddCasetera}
                     className="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-[11px] flex items-center gap-1 transition shadow-xs"
                   >
-                    <Plus className="w-3.5 h-3.5" /> + Casetera
+                    <Plus className="w-3.5 h-3.5" /> Casetera
                   </button>
                   <button
                     type="button"
@@ -783,8 +782,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
               {!empaque && (
                 <span>
                   Resumen: <strong>{bancos.length}</strong> bancos ·{" "}
-                  <strong>{cabezales.length}</strong> cabezales (
-                  {cabezales.filter((c) => c.freno_id).length} con freno) ·{" "}
+                  <strong>{cabezales.length}</strong> cabezales (con {cabezales.filter((c) => c.freno_id).length} frenos) ·{" "}
                   <strong>{caseteras.length}</strong> caseteras
                 </span>
               )}

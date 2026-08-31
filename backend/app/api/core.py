@@ -20,7 +20,7 @@ from app.schemas.api_contracts import (
     FrenoUpdateRequest,
     RestockConsumibleRequest,
     TecnicoCreateRequest,
-    TecnicoUpdateRequest, UnvisitedAlert, LowStockAlert
+    TecnicoUpdateRequest, UnvisitedAlert, LowStockAlert, EquipmentByLocationResponse
 )
 
 from app.schemas.domain import (
@@ -34,10 +34,10 @@ from app.schemas.domain import (
     CreateServiceDTO,
     Empaque,
     Freno,
-    Movimiento,
     Reemplazo,
     Servicio,
     Tecnico,
+    Movimiento,
 )
 
 from app.services import empaque_service
@@ -78,13 +78,13 @@ def update_empaque(id: str, data: EmpaqueUpdateRequest, service: EmpaqueServiceD
 @core_router.delete("/empaques/{id}", response_model=DeleteResponse)
 def delete_empaque(id: str, service: EmpaqueServiceDependency) -> DeleteResponse:
     if service.delete(id):
-        return DeleteResponse(message=f"Empaque with id {id} deleted successfully")
+        return { "success": True }
     else:
         raise HTTPException(status_code=404, detail="Can´t delete Empaque with id {id}.")
 
 
-@core_router.get("/machines/location/{empaque_id}", response_model=dict)
-def get_equipment_by_location(empaque_id: str, service: MachineServiceDependency) -> dict:
+@core_router.get("/machines/location/{empaque_id}", response_model=EquipmentByLocationResponse)
+def get_equipment_by_location(empaque_id: str, service: MachineServiceDependency) -> EquipmentByLocationResponse:
     return service.equipment_by_location(empaque_id)
 
 
@@ -116,7 +116,7 @@ def update_cabezal(id: str, data: CabezalUpdateRequest, service: MachineServiceD
 @core_router.delete("/machines/cabezales/{id}", response_model=DeleteResponse)
 def delete_cabezal(id: str, service: MachineServiceDependency) -> DeleteResponse:
     if service.delete_cabezal(id):
-        return DeleteResponse(message=f"Cabezal with id {id} deleted successfully")
+        return { "success" : True }
     else:
         raise HTTPException(status_code=404, detail="Can´t delete Cabezal with id {id}.")
 
@@ -138,7 +138,7 @@ def update_casetera(numero: int, data: CaseteraUpdateRequest, service: MachineSe
 @core_router.delete("/machines/caseteras/{numero}", response_model=DeleteResponse)
 def delete_casetera(numero: int, service: MachineServiceDependency) -> DeleteResponse:
     if service.delete_casetera(numero):
-        return DeleteResponse(message=f"Casetera with number {numero} deleted successfully")
+        return { "success" : True }
     else:
         raise HTTPException(status_code=404, detail="Can´t delete Casetera with number {numero}.")
 
@@ -158,7 +158,7 @@ def update_freno(id: str, data: FrenoUpdateRequest, service: MachineServiceDepen
 @core_router.delete("/machines/frenos/{id}", response_model=DeleteResponse)
 def delete_freno(id: str, service: MachineServiceDependency) -> DeleteResponse:
     if service.delete_freno(id):
-        return DeleteResponse(message=f"Freno with id {id} deleted successfully")
+        return { "success" : True }
     else:
         raise HTTPException(status_code=404, detail="Can´t delete Freno with id {id}.")
 
@@ -186,8 +186,8 @@ def get_servicios(service: OperationServiceDependency) -> list[Servicio]:
     return service.list_services()
 
 
-@core_router.post("/operations/servicios", response_model=dict)
-def create_servicio(dto: CreateServiceDTO, service: OperationServiceDependency) -> dict:
+@core_router.post("/operations/servicios", response_model=Servicio)
+def create_servicio(dto: CreateServiceDTO, service: OperationServiceDependency) -> Servicio:
     return service.create_service(dto)
 
 @core_router.get("/consumibles", response_model=list[Consumible])
@@ -213,7 +213,7 @@ def update_consumible(id: str, data: ConsumibleUpdateRequest, service: Consumabl
 @core_router.delete("/consumibles/{id}", response_model=DeleteResponse)
 def delete_consumible(id: str, service: ConsumableServiceDependency) -> DeleteResponse:
     if service.delete(id):
-        return DeleteResponse(message=f"Consumible with id {id} deleted successfully")
+        return { "success" : True }
     else:
         return HTTPException(status_code=404, detail="Consumible not found")
 
@@ -257,7 +257,7 @@ def update_tecnico(id: str, data: TecnicoUpdateRequest, service: TechnicianServi
 @core_router.delete("/tecnicos/{id}", response_model=DeleteResponse)
 def delete_tecnico(id: str, service: TechnicianServiceDependency) -> DeleteResponse:
     if service.delete(id):
-        return DeleteResponse(message=f"Tecnico with id {id} deleted successfully")
+        return { "success" : True }
     else:
         raise HTTPException(status_code=404, detail="Can´t delete Tecnico with id {id}.")
 

@@ -74,11 +74,10 @@ export const EquipmentByLocationView: React.FC = () => {
           <div>
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <Building className="w-5 h-5 text-blue-600" />
-              Equipos por Empaque / Planta
+              Equipos por Empaque
             </h2>
             <p className="text-xs text-slate-500">
-              Consulte el inventario de Cabezales, Caseteras y Frenos asignados
-              a cada establecimiento
+              Inventario de Cabezales, Caseteras y Frenos asignados a cada establecimiento
             </p>
           </div>
 
@@ -158,10 +157,7 @@ export const EquipmentByLocationView: React.FC = () => {
                 <Cpu className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">Cabezales</h3>
-                <span className="text-[10px] text-slate-400">
-                  ({equipmentData?.cabezales.length || 0})
-                </span>
+                <h3 className="font-bold text-slate-900 text-sm">Cabezales ({equipmentData?.cabezales.length || 0})</h3>
               </div>
             </div>
           </div>
@@ -211,10 +207,7 @@ export const EquipmentByLocationView: React.FC = () => {
                 <Layers className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">Caseteras</h3>
-                <span className="text-[10px] text-slate-400">
-                  Caseteras ({equipmentData?.caseteras.length || 0})
-                </span>
+                <h3 className="font-bold text-slate-900 text-sm">Caseteras ({equipmentData?.caseteras.length || 0})</h3>
               </div>
             </div>
           </div>
@@ -244,9 +237,6 @@ export const EquipmentByLocationView: React.FC = () => {
                       {cas.estado}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-500">
-                    {cas.historial_movimientos.length} traslados registrados
-                  </div>
                 </div>
               ))
             )}
@@ -261,10 +251,7 @@ export const EquipmentByLocationView: React.FC = () => {
                 <Disc className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">Frenos</h3>
-                <span className="text-[10px] text-slate-400">
-                  Freno ({equipmentData?.frenos.length || 0})
-                </span>
+                <h3 className="font-bold text-slate-900 text-sm">Frenos ({equipmentData?.frenos.length || 0})</h3>
               </div>
             </div>
           </div>

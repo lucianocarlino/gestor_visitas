@@ -215,7 +215,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
             <div>
               <h3 className="font-bold text-base">Registrar Nuevo Reemplazo</h3>
               <p className="text-xs text-blue-200">
-                Sustitución de Cabezales o Caseteras en Línea de Empaque
+                Sustitución de Cabezales o Caseteras en Empaques
               </p>
             </div>
           </div>
@@ -273,7 +273,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <Layers className="w-4 h-4" /> Casetera (Cassette)
+                <Layers className="w-4 h-4" /> Casetera
               </button>
             </div>
           </div>
@@ -282,12 +282,12 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
           <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
             <div className="font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
               <Calendar className="w-4 h-4 text-blue-600" />
-              <span>1. ¿CUÁNDO SE REALIZA? (Fecha & Técnico)</span>
+              <span>1. Fecha y técnico</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Fecha de la Operación
+                  Fecha
                 </label>
                 <input
                   type="date"
@@ -299,7 +299,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Técnico Responsable
+                  Técnico
                 </label>
                 <select
                   value={tecnicoId}
@@ -322,13 +322,13 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
             <div className="font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
               <MapPin className="w-4 h-4 text-emerald-600" />
               <span>
-                2. ¿DÓNDE SE REALIZA? (Ubicación & Bancos del Empaque)
+                2. Empaque y banco de destino
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Planta / Empaque de Destino *
+                  Empaque destino
                 </label>
                 <select
                   value={empaqueId}
@@ -345,7 +345,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Banco Asociado al Empaque *
+                  Banco que requiere el cambio
                 </label>
                 {selectedEmpaque?.bancos &&
                 selectedEmpaque.bancos.length > 0 ? (
@@ -379,14 +379,14 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
           <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
             <div className="font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
               <Wrench className="w-4 h-4 text-amber-600" />
-              <span>3. ¿CÓMO SE REALIZA? (Equipos & Motivo)</span>
+              <span>3. Equipo retirado e instalado</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Removed Component */}
               <div className="p-3 bg-rose-50/60 border border-rose-200 rounded-xl space-y-2">
                 <label className="block font-bold text-rose-900">
-                  🔴 Componente Retirado de Planta
+                  Equipo retirado
                 </label>
                 <div className="space-y-1.5">
                   <select
@@ -396,7 +396,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     required
                   >
                     <option value="">
-                      -- Seleccione {tipo} de la Planta --
+                      -- Seleccione {tipo} --
                     </option>
                     {machinesInSelectedEmpaque.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -416,18 +416,12 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     className="w-full p-1.5 bg-white border border-rose-200 rounded text-slate-700 font-mono text-[11px]"
                   />
                 </div>
-                <p className="text-[11px] text-rose-700">
-                  {machinesInSelectedEmpaque.length} {tipo.toLowerCase()}s
-                  detectados en {selectedEmpaque?.nombre || "la planta"}. Pasará
-                  a estado <strong>En Reparación (Pending)</strong> hacia
-                  Taller.
-                </p>
               </div>
 
               {/* Installed Component */}
               <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-2">
                 <label className="block font-bold text-emerald-900">
-                  🟢 Componente Nuevo a Instalar
+                  Equipo instalado o a instalar
                 </label>
                 <div className="space-y-1.5">
                   <select
@@ -437,7 +431,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     required
                   >
                     <option value="">
-                      -- Seleccione {tipo} Listo en Taller --
+                      -- Seleccione {tipo} del taller --
                     </option>
                     {machinesReadyInWorkshop.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -457,22 +451,16 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     className="w-full p-1.5 bg-white border border-emerald-200 rounded text-slate-700 font-mono text-[11px]"
                   />
                 </div>
-                <p className="text-[11px] text-emerald-700">
-                  {machinesReadyInWorkshop.length} {tipo.toLowerCase()}s listos
-                  en Taller Central. Pasará a estado{" "}
-                  <strong>En Uso (Using)</strong> en{" "}
-                  {selectedEmpaque?.nombre || "la planta"}.
-                </p>
               </div>
             </div>
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Motivo Técnico de la Sustitución
+                Motivo del reemplazo
               </label>
               <textarea
                 rows={3}
-                placeholder="Describa el síntoma o causa (ej. Falla intermitente en sensor de paso, corte defectuoso de etiquetas, fin de ciclo preventivo)..."
+                placeholder="Descripción del motivo del reemplazo"
                 value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900"
@@ -497,8 +485,8 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
             >
               <Save className="w-4 h-4" />
               {isSubmitting
-                ? "Guardando Reemplazo..."
-                : "Confirmar & Registrar Reemplazo"}
+                ? "Guardando reemplazo..."
+                : "Confirmar y registrar reemplazo"}
             </button>
           </div>
         </form>

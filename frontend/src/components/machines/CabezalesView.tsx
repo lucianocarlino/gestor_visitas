@@ -161,9 +161,6 @@ export const CabezalesView: React.FC = () => {
                     <h3 className="font-bold text-slate-900 text-sm">
                       {cab.id}
                     </h3>
-                    <span className="text-[10px] text-slate-400 uppercase font-mono">
-                      Cabezal Sinclair
-                    </span>
                   </div>
                 </div>
 
@@ -194,7 +191,7 @@ export const CabezalesView: React.FC = () => {
                     <Disc className="w-3 h-3" /> Freno asignado:
                   </span>
                   <span className="font-mono font-medium text-blue-700">
-                    {cab.freno_actual_id || "Sin freno acoplado"}
+                    {cab.freno_actual_id || "Sin freno"}
                   </span>
                 </div>
               </div>

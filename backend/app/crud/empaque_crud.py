@@ -1,22 +1,14 @@
 from sqlalchemy.orm import Session
-from app.models.location import EmpaqueModel
-from app.schemas.api_contracts import EmpaqueCreateRequest
+from datetime import date
+from app.models.location import EmpaqueModel, BancoModel
+from app.schemas.api_contracts import EmpaqueCreateRequest, EmpaqueUpdateRequest
 from app.schemas.domain import Empaque
 
 class EmpaqueRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def read_all(self) -> list[Empaque]:
-        try:
-            all_packages = self.db.query(EmpaqueModel).all()
-            return [empaque.to_domain() for empaque in all_packages]
-        except Exception as e:
-            self.db.rollback()
-            print("Error al leer todos los empaques:", e)
-            return []
-
-    def get_all(self) -> list[EmpaqueModel]:
+    def read_all(self) -> list[EmpaqueModel]:
         try:
             return self.db.query(EmpaqueModel).all()
         except Exception as e:
@@ -24,32 +16,62 @@ class EmpaqueRepository:
             print("Error al leer todos los empaques:", e)
             return []
 
-    def create(self, data: EmpaqueCreateRequest) -> Empaque:
+    def create_empaque(self, data: EmpaqueCreateRequest) -> EmpaqueModel | None:
         try:
-            new_empaque = EmpaqueModel(data)
+            new_empaque = EmpaqueModel.from_create_dto(data)
             self.db.add(new_empaque)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(new_empaque)
-            return new_empaque.to_domain()
+            return new_empaque
         except Exception as e:
             self.db.rollback()
             print("Error al crear un empaque:", e)
-            return Empaque.empty()
+            return None
 
-    def update(self, empaque_id: str, data: EmpaqueCreateRequest) -> Empaque:
+    def update(self, empaque_id: str, data: EmpaqueUpdateRequest) -> EmpaqueModel | None:
         try:
             empaque = self.db.query(EmpaqueModel).filter(EmpaqueModel.id == empaque_id).first()
             if not empaque:
-                return Empaque.empty()
-            for key, value in data.dict().items():
-                setattr(empaque, key, value)
-            self.db.commit()
+                return None
+            empaque = empaque.from_update_dto(empaque, data)
+            self.db.flush()
             self.db.refresh(empaque)
-            return empaque.to_domain()
+            return empaque
         except Exception as e:
             self.db.rollback()
             print("Error al modificar un empaque:", e)
-            return Empaque.empty()
+            return None
+
+    def _update_bancos(self, empaque: EmpaqueModel, bancos: list[BancoModel]) -> None:
+        existing_by_id = {
+            banco.id: banco
+            for banco in empaque.bancos
+        }
+
+        updated_bancos: list[BancoModel] = []
+
+        for banco_data in bancos:
+            banco = existing_by_id.get(
+                banco_data.id
+            )
+
+            installation_date = date.fromisoformat(
+                banco_data.fecha_instalacion
+            )
+
+            if banco is None:
+                banco = BancoModel(
+                    id=banco_data.id,
+                    fecha_instalacion=installation_date,
+                    lineas=banco_data.lineas,
+                )
+            else:
+                banco.fecha_instalacion = installation_date
+                banco.lineas = banco_data.lineas
+
+            updated_bancos.append(banco)
+
+        empaque.bancos = updated_bancos
 
     def delete(self, empaque_id: str) -> bool:
         try:
@@ -64,52 +86,24 @@ class EmpaqueRepository:
             print("Error al eliminar un empaque:", e)
             return False
 
-def read_all(db: Session) -> list[Empaque]:
-    try:
-        all_packages = db.query(EmpaqueModel).all()
-        return [empaque.to_domain() for empaque in all_packages]
-    except Exception as e:
-        db.rollback()
-        print("Error al leer todos los empaques:", e)
-        return []
+    def get_empaque_by_id(self, empaque_id: str) -> Empaque | None:
+        try:
+            empaque = self.db.query(EmpaqueModel).filter(EmpaqueModel.id == empaque_id).first()
+            if not empaque:
+                return None
+            return empaque.to_domain()
+        except Exception as e:
+            self.db.rollback()
+            print("Error al obtener un empaque por ID:", e)
+            return None
 
-def create_empaque(db: Session, data: EmpaqueCreateRequest) -> Empaque:
-    try:
-        new_empaque = EmpaqueModel(data)
-        db.add(new_empaque)
-        db.commit()
-        db.refresh(new_empaque)
-        return new_empaque.to_domain()
-    except Exception as e:
-        db.rollback()
-        print("Error al crear un empaque:", e)
-        return Empaque.empty()
-
-def modify_empaque(db: Session, empaque_id: str, data: EmpaqueCreateRequest) -> Empaque:
-    try:
-        empaque = db.query(EmpaqueModel).filter(EmpaqueModel.id == empaque_id).first()
-        if not empaque:
-            return Empaque.empty()
-        for key, value in data.dict().items():
-            setattr(empaque, key, value)
-        db.commit()
-        db.refresh(empaque)
-        return empaque.to_domain()
-    except Exception as e:
-        db.rollback()
-        print("Error al modificar un empaque:", e)
-        return Empaque.empty()
-
-def delete_empaque(db: Session, empaque_id: str) -> bool:
-    try:
-        empaque = db.query(EmpaqueModel).filter(EmpaqueModel.id == empaque_id).first()
-        if not empaque:
-            return False
-        db.delete(empaque)
-        db.commit()
-        return True
-    except Exception as e:
-        db.rollback()
-        print("Error al eliminar un empaque:", e)
-        return False
-
+    def get_taller(self) -> Empaque | None:
+        try:
+            taller = self.db.query(EmpaqueModel).filter(EmpaqueModel.nombre == "Taller").first()
+            if not taller:
+                return None
+            return taller.to_domain()
+        except Exception as e:
+            self.db.rollback()
+            print("Error al obtener el taller:", e)
+            return None

@@ -46,8 +46,8 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
   const [cabezalId, setCabezalId] = useState<string>("");
   const [frenoRetiradoId, setFrenoRetiradoId] = useState<string>("");
   const [frenoInstaladoId, setFrenoInstaladoId] = useState<string>("");
-  const [lugar, setLugar] = useState<"En emplazamiento" | "Taller">(
-    "En emplazamiento",
+  const [lugar, setLugar] = useState<"Empaque" | "Taller">(
+    "Taller",
   );
   const [empaqueId, setEmpaqueId] = useState<string>("");
   const [tecnicoId, setTecnicoId] = useState<string>("");
@@ -96,23 +96,21 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
 
   // Filtered cabezales for autocomplete
   const filteredCabezales = cabezales.filter(
-    (c) =>
-      c.id.toLowerCase().includes(cabezalSearch.toLowerCase()) ||
-      c.ubicacion.toLowerCase().includes(cabezalSearch.toLowerCase()),
-  );
+    (c) => c.ubicacion == empaques.filter((e) => e.id === empaqueId)[0]?.nombre) ||
+      c.id.toLowerCase().includes(cabezalSearch.toLowerCase());
 
   const handleSelectCabezal = (selectedCabId: string) => {
     setCabezalId(selectedCabId);
     const cab = cabezales.find((c) => c.id === selectedCabId);
     if (cab) {
-      setFrenoRetiradoId(cab.freno_actual_id || "FRN-301");
+      setFrenoRetiradoId(cab.freno_actual_id || "Sin freno");
       if (
         cab.ubicacion === "EMP-04" ||
         cab.ubicacion.toLowerCase().includes("taller")
       ) {
         setLugar("Taller");
       } else {
-        setLugar("En emplazamiento");
+        setLugar("Empaque");
         const matchedEmpaque = empaques.find(
           (e) => e.id === cab.ubicacion || e.nombre === cab.ubicacion,
         );
@@ -157,7 +155,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
         freno_retirado_id: frenoRetiradoId,
         freno_instalado_id: frenoInstaladoId,
         lugar,
-        empaque_id: lugar === "En emplazamiento" ? empaqueId : undefined,
+        empaque_id: empaqueId,
         motivo,
         fecha,
         tecnico_id: tecnicoId || undefined,
@@ -185,7 +183,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
             <div>
               <h3 className="font-bold text-base">Registrar Cambio de Freno</h3>
               <p className="text-xs text-indigo-200">
-                Sustitución de conjunto de frenado en Cabezal de Etiquetado
+                Cambio de conjunto de freno en Cabezal
               </p>
             </div>
           </div>
@@ -213,12 +211,12 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
           <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
             <div className="font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
               <Calendar className="w-4 h-4 text-indigo-600" />
-              <span>1. ¿CUÁNDO SE REALIZA? (Fecha & Técnico)</span>
+              <span>1. Fecha y técnico</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Fecha de la Operación
+                  Fecha
                 </label>
                 <input
                   type="date"
@@ -230,7 +228,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Técnico Responsable
+                  Técnico
                 </label>
                 <select
                   value={tecnicoId}
@@ -252,46 +250,16 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
           <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
             <div className="font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
               <MapPin className="w-4 h-4 text-emerald-600" />
-              <span>2. ¿DÓNDE SE REALIZA EL CAMBIO? (Lugar)</span>
+              <span>2. Lugar del cambio</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Tipo de Emplazamiento
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setLugar("En emplazamiento")}
-                    className={`py-2 px-3 rounded-xl font-bold border transition text-center ${
-                      lugar === "En emplazamiento"
-                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    En Planta
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLugar("Taller")}
-                    className={`py-2 px-3 rounded-xl font-bold border transition text-center ${
-                      lugar === "Taller"
-                        ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    En Taller Sinclair
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Planta de Referencia
+                  Seleccionar uno
                 </label>
                 <select
                   value={empaqueId}
                   onChange={(e) => setEmpaqueId(e.target.value)}
-                  disabled={lugar === "Taller"}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 disabled:opacity-50"
                 >
                   {empaques.map((emp) => (
@@ -308,13 +276,13 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
           <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
             <div className="font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2">
               <Wrench className="w-4 h-4 text-amber-600" />
-              <span>3. ¿CÓMO SE REALIZA? (Cabezal, Frenos & Motivo)</span>
+              <span>3. Cabezal involucrado</span>
             </div>
 
             {/* Cabezal Selection with Search Autocomplete */}
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Cabezal Intervenido *
+                Cabezales de {lugar}
               </label>
               <div className="space-y-2">
                 {/* Autocomplete search input */}
@@ -322,7 +290,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   <input
                     type="text"
-                    placeholder="Filtrar por ID o ubicación (ej. CAB-101, Empaque)..."
+                    placeholder="Filtrar por ID"
                     value={cabezalSearch}
                     onChange={(e) => setCabezalSearch(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs"
@@ -337,7 +305,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                   required
                 >
                   <option value="">
-                    -- Seleccione un Cabezal ({cabezales.length} existentes) --
+                    -- Seleccione un Cabezal de {empaques.filter((e) => e.id === empaqueId)[0]?.nombre} ({filteredCabezales.length}) --
                   </option>
                   {filteredCabezales.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -353,7 +321,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
               {/* Removed Brake */}
               <div className="p-3 bg-rose-50/60 border border-rose-200 rounded-xl space-y-2">
                 <label className="block font-bold text-rose-900">
-                  🔴 Freno Retirado del Cabezal
+                  Freno retirado
                 </label>
                 <input
                   type="text"
@@ -365,16 +333,12 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                   className="w-full p-2 bg-white border border-rose-300 rounded-lg text-slate-900 font-mono font-bold"
                   required
                 />
-                <p className="text-[11px] text-rose-700">
-                  Freno que estaba montado en {cabezalId || "el cabezal"}.
-                  Pasará a <strong>En Reparación (Pending)</strong>.
-                </p>
               </div>
 
               {/* Installed Brake */}
               <div className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-2">
                 <label className="block font-bold text-emerald-900">
-                  🟢 Nuevo Freno a Instalar (Estado: Listo)
+                  Freno a instalar
                 </label>
                 <div className="space-y-1.5">
                   <select
@@ -388,7 +352,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                     </option>
                     {readyFrenos.map((f) => (
                       <option key={f.id} value={f.id}>
-                        {f.id} ({f.estado} - Ubicación: {f.ubicacion})
+                        {f.id} ({f.estado} - Ubicación: {empaques.filter((e) => e.id === f.ubicacion)[0]?.nombre})
                       </option>
                     ))}
                   </select>
@@ -403,20 +367,16 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
                     className="w-full p-1.5 bg-white border border-emerald-200 rounded text-slate-700 font-mono text-[11px]"
                   />
                 </div>
-                <p className="text-[11px] text-emerald-700">
-                  Pasará a estado <strong>En Uso (Using)</strong> montado en el
-                  cabezal {cabezalId || "seleccionado"}.
-                </p>
               </div>
             </div>
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Motivo Técnico del Cambio
+                Motivo del Cambio
               </label>
               <textarea
                 rows={3}
-                placeholder="Describa el motivo (ej. Desgaste de zapata ferodo tras 500k etiquetas, pérdida de par de frenado, rozamiento irregular)..."
+                placeholder="Describa el motivo"
                 value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900"
@@ -442,7 +402,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
               <Save className="w-4 h-4" />
               {isSubmitting
                 ? "Guardando Cambio..."
-                : "Confirmar & Registrar Cambio de Freno"}
+                : "Confirmar y Registrar Cambio de Freno"}
             </button>
           </div>
         </form>

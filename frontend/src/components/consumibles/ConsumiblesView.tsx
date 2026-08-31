@@ -6,19 +6,19 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Package,
-  Plus,
-  AlertTriangle,
-  CheckCircle2,
-  RefreshCw,
-  Search,
-  ArrowDownRight,
-  TrendingDown,
-  ShieldAlert,
-  Edit2,
-  Sliders,
-  Check,
-  Lock,
+    Package,
+    Plus,
+    AlertTriangle,
+    CheckCircle2,
+    RefreshCw,
+    Search,
+    ArrowDownRight,
+    TrendingDown,
+    ShieldAlert,
+    Edit2,
+    Sliders,
+    Check,
+    Lock, Trash2,
 } from "lucide-react";
 import { coreApi } from "../../services/apiClient";
 import { Consumible } from "../../types/domain";
@@ -147,7 +147,7 @@ export const ConsumiblesView: React.FC = () => {
       );
       setEditingItem(null);
       showNotification(
-        `Mínimo requerido de "${updated.nombre}" actualizado a ${updated.stock_minimo} uds.`,
+        `Mínimo requerido de "${updated.nombre}" actualizado a ${updated.stock_minimo} u.`,
       );
     } catch (err: unknown) {
       const msg =
@@ -197,6 +197,24 @@ export const ConsumiblesView: React.FC = () => {
       c.id.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!isAdmin) {
+      alert(
+        "Acceso denegado: Solo los administradores pueden eliminar insumos.",
+      );
+      return;
+    }
+    if (!window.confirm(`¿Está seguro de eliminar el insumo "${name}"?`))
+      return;
+    try {
+      await coreApi.deleteConsumible(id);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Error al eliminar insumo");
+    } finally {
+            loadConsumibles();
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Success Notification Banner */}
@@ -220,11 +238,10 @@ export const ConsumiblesView: React.FC = () => {
         <div>
           <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
             <Package className="w-5 h-5 text-amber-600" />
-            Consumibles y Repuestos Sinclair
+            Consumibles y Repuestos
           </h2>
           <p className="text-xs text-slate-500">
-            Control de stock de etiquetas, cintas de transferencia, cabezales
-            térmicos y umbrales mínimos
+            Control de stock de insumos necesarios, generales y especifícos de Sinclair
           </p>
         </div>
 
@@ -308,7 +325,7 @@ export const ConsumiblesView: React.FC = () => {
                     <span className="text-xl font-black text-slate-900">
                       {item.stock}{" "}
                       <span className="text-xs font-normal text-slate-500">
-                        uds
+                        u
                       </span>
                     </span>
                   </div>
@@ -321,7 +338,7 @@ export const ConsumiblesView: React.FC = () => {
                       <span className="text-xl font-black text-amber-950">
                         {item.stock_minimo}{" "}
                         <span className="text-xs font-normal text-amber-800">
-                          uds
+                          u
                         </span>
                       </span>
                     </div>
@@ -330,22 +347,7 @@ export const ConsumiblesView: React.FC = () => {
               </div>
 
               {/* Actions Footer */}
-              <div className="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
-                <div className="flex items-center gap-2">
-                  {isAdmin ? (
-                    <button
-                      onClick={() => handleToggleCritical(item.id)}
-                      className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition"
-                      title="Alternar estado crítico"
-                    >
-                      {item.es_critico ? "Desmarcar Crítico" : "Marcar Crítico"}
-                    </button>
-                  ) : (
-                    <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                      {item.es_critico ? "Prioridad Crítica" : "Uso Estándar"}
-                    </span>
-                  )}
-                </div>
+              <div className="flex items-center justify-end pt-3 border-t border-slate-100 gap-2">
 
                 <div className="flex items-center gap-2">
                   {isAdmin && (
@@ -355,17 +357,16 @@ export const ConsumiblesView: React.FC = () => {
                       title="Modificar stock mínimo requerido"
                     >
                       <Edit2 className="w-3.5 h-3.5 text-amber-700" />
-                      Modificar Mínimo
                     </button>
                   )}
-                  <button
-                    onClick={() =>
-                      setRestockItem({ id: item.id, name: item.nombre })
-                    }
-                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs transition shadow-xs"
-                  >
-                    + Reabastecer
-                  </button>
+                    <button
+                      id={`btn-delete-empaque-${item.id}`}
+                      onClick={() => handleDelete(item.id, item.nombre)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                      title="Eliminar empaque"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                 </div>
               </div>
             </div>
@@ -422,42 +423,10 @@ export const ConsumiblesView: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <label className="font-extrabold text-amber-950 block text-xs flex items-center gap-1.5">
                     <Sliders className="w-4 h-4 text-amber-700" />
-                    Mínimo Requerido (Stock de Seguridad)
+                    Mínimo requerido
                   </label>
-                  <span className="text-[10px] font-bold text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded-md">
-                    Umbral de Alerta
-                  </span>
                 </div>
-                <p className="text-[11px] text-amber-900/80 leading-relaxed">
-                  Cuando las unidades en depósito sean menores o iguales a este
-                  número, el sistema disparará alertas visuales de{" "}
-                  <strong>Stock Bajo</strong> y notificaciones técnicas.
-                </p>
                 <div className="flex items-center gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEditFormData((prev) => ({
-                        ...prev,
-                        stock_minimo: Math.max(1, prev.stock_minimo - 5),
-                      }))
-                    }
-                    className="w-8 h-8 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold flex items-center justify-center transition"
-                  >
-                    -5
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEditFormData((prev) => ({
-                        ...prev,
-                        stock_minimo: Math.max(1, prev.stock_minimo - 1),
-                      }))
-                    }
-                    className="w-8 h-8 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold flex items-center justify-center transition"
-                  >
-                    -1
-                  </button>
                   <input
                     type="number"
                     min="1"
@@ -471,30 +440,6 @@ export const ConsumiblesView: React.FC = () => {
                     }
                     className="flex-1 p-2.5 bg-white border-2 border-amber-500 rounded-xl focus:ring-2 focus:ring-amber-600 focus:outline-none text-base font-black text-center text-amber-950"
                   />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEditFormData((prev) => ({
-                        ...prev,
-                        stock_minimo: prev.stock_minimo + 1,
-                      }))
-                    }
-                    className="w-8 h-8 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold flex items-center justify-center transition"
-                  >
-                    +1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEditFormData((prev) => ({
-                        ...prev,
-                        stock_minimo: prev.stock_minimo + 5,
-                      }))
-                    }
-                    className="w-8 h-8 rounded-lg bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold flex items-center justify-center transition"
-                  >
-                    +5
-                  </button>
                 </div>
               </div>
 
@@ -600,7 +545,7 @@ export const ConsumiblesView: React.FC = () => {
 
               <div>
                 <label className="font-bold text-slate-700 block mb-1">
-                  Nombre Descriptivo
+                  Nombre
                 </label>
                 <input
                   type="text"
@@ -617,7 +562,7 @@ export const ConsumiblesView: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">
-                    Stock Inicial
+                    Stock actual
                   </label>
                   <input
                     type="number"
@@ -636,7 +581,7 @@ export const ConsumiblesView: React.FC = () => {
 
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">
-                    Mínimo Requerido
+                    Mínimo requerido (nivel de alerta)
                   </label>
                   <input
                     type="number"
@@ -668,7 +613,7 @@ export const ConsumiblesView: React.FC = () => {
                   htmlFor="chk-es-critico"
                   className="font-bold text-slate-700 cursor-pointer"
                 >
-                  Ítem Crítico para la Operación
+                  Ítem crítico para la Operación
                 </label>
               </div>
 
@@ -684,56 +629,7 @@ export const ConsumiblesView: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
                 >
-                  Guardar Consumible
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Restock Modal */}
-      {restockItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95">
-            <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-bold text-slate-900 text-sm">
-                Reabastecer {restockItem.name}
-              </h3>
-              <button
-                onClick={() => setRestockItem(null)}
-                className="text-slate-400 font-bold"
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleRestock} className="p-5 space-y-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">
-                  Cantidad a ingresar a stock
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  value={restockAmount}
-                  onChange={(e) => setRestockAmount(Number(e.target.value))}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none text-base font-bold"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRestockItem(null)}
-                  className="px-4 py-2 bg-slate-100 rounded-xl font-semibold text-slate-700"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-amber-600 text-white font-bold rounded-xl shadow-xs"
-                >
-                  Confirmar Ingreso
+                  Guardar
                 </button>
               </div>
             </form>

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 from app.models.common import generate_id
+from app.schemas.api_contracts import AuditEntryCreateRequest
 from app.schemas.domain import AuditEntry
 
 
@@ -25,6 +26,35 @@ class AuditEntryModel(Base):
     previous_value: Mapped[str | None] = mapped_column(Text)
     new_value: Mapped[str | None] = mapped_column(Text)
     metadata_json: Mapped[dict[str, JsonValue] | None] = mapped_column(JSON)
+
+    @classmethod
+    def from_create_request(cls, data: AuditEntryCreateRequest) -> "AuditEntryModel":
+        kwargs: dict[str, object] = {
+            "user_id": data.userId or "",
+            "user_name": data.userName or "",
+            "category": data.category or "system",
+            "action": data.action or "CREATE",
+            "target_id": data.targetId or "",
+            "target_name": data.targetName or "",
+            "details": data.details or "",
+        }
+
+        if data.id is not None:
+            kwargs["id"] = data.id
+        if data.timestamp is not None:
+            kwargs["timestamp"] = datetime.fromisoformat(data.timestamp.replace("Z", "+00:00"))
+        else:
+            kwargs["timestamp"] = datetime.now()
+        if data.userRole is not None:
+            kwargs["user_role"] = data.userRole
+        if data.previousValue is not None:
+            kwargs["previous_value"] = str(data.previousValue)
+        if data.newValue is not None:
+            kwargs["new_value"] = str(data.newValue)
+        if data.metadata is not None:
+            kwargs["metadata_json"] = data.metadata
+
+        return cls(**kwargs)
 
     def to_domain(self) -> "AuditEntry":
         return AuditEntry(

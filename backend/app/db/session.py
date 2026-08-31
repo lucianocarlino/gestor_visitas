@@ -23,4 +23,9 @@ def get_session_factory() -> sessionmaker[Session]:
 def get_db_session() -> Generator[Session, None, None]:
     """Provide one transaction-capable session per FastAPI request."""
     with get_session_factory()() as session:
-        yield session
+        try:
+            yield session
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise

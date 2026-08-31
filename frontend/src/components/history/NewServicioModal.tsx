@@ -198,9 +198,9 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
               <Wrench className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-base">Registrar Servicio Técnico & Mantenimiento</h3>
+              <h3 className="font-bold text-base">Registrar Servicio Técnico</h3>
               <p className="text-xs text-amber-200">
-                Intervención de taller/planta con consumo y deducción de repuestos
+                Mantenimiento preventivo o correctivo
               </p>
             </div>
           </div>
@@ -224,7 +224,7 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
           {/* Machine Type Selection */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
             <label className="block font-bold text-slate-800 mb-2">
-              Tipo de Máquina o Componente Intervenido
+              Tipo de equipo
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
@@ -277,7 +277,7 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
             <div className="font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-2">
               <div className="flex items-center gap-2">
                 <Wrench className="w-4 h-4 text-amber-600" />
-                <span>ID de Máquina Intervenida (Pendientes de Mantenimiento) *</span>
+                <span>ID de equipo</span>
               </div>
               <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                 {currentPendingMachines.length} {machineType.toLowerCase()}s pendientes
@@ -314,16 +314,13 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
                   className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-mono text-xs"
                 />
               </div>
-              <p className="text-[11px] text-slate-500">
-                Al completar este servicio, la máquina pasará automáticamente a estado <strong>Listo (Ready)</strong> en Taller Central.
-              </p>
             </div>
           </div>
 
           {/* Date & Technician */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-4 rounded-2xl border border-slate-200">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Fecha de Ejecución</label>
+              <label className="block font-semibold text-slate-700 mb-1">Fecha</label>
               <input
                 type="date"
                 value={fecha}
@@ -333,7 +330,7 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Técnico a Cargo</label>
+              <label className="block font-semibold text-slate-700 mb-1">Técnico responsable</label>
               <select
                 value={tecnicoId}
                 onChange={(e) => setTecnicoId(e.target.value)}
@@ -353,11 +350,11 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
           <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Resumen del Servicio / Motivo *
+                Resumen del Servicio
               </label>
               <input
                 type="text"
-                placeholder="Ej. Mantenimiento preventivo general de 500k ciclos, cambio de retenes y calibración"
+                placeholder="Resumen del por qué llegó el equipo a mantenimiento"
                 value={resumen}
                 onChange={(e) => setResumen(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium"
@@ -366,11 +363,11 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
             </div>
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Trabajo Técnico Detallado Ejecutado *
+                Trabajo realilzado
               </label>
               <textarea
                 rows={3}
-                placeholder="Describa el procedimiento técnico (ej. Desarme total, limpieza ultrasónica de cabezal, sustitución de rodamiento 608ZZ, purga de circuito neumático, pruebas en banco a 120 bpm)..."
+                placeholder="Describa cómo se solucionó el problema original"
                 value={trabajoHecho}
                 onChange={(e) => setTrabajoHecho(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900"
@@ -384,7 +381,7 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
             <div className="font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-2">
               <div className="flex items-center gap-2">
                 <Package className="w-4 h-4 text-emerald-600" />
-                <span>Repuestos y Consumibles Utilizados (Deducción de Stock)</span>
+                <span>Repuestos y Consumibles Utilizados</span>
               </div>
             </div>
 
@@ -454,7 +451,7 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
               className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md shadow-amber-500/20 flex items-center gap-2 transition disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {isSubmitting ? 'Guardando Servicio...' : 'Confirmar & Registrar Servicio'}
+              {isSubmitting ? 'Guardando Servicio...' : 'Confirmar y Registrar Servicio'}
             </button>
           </div>
         </form>

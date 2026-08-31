@@ -276,10 +276,10 @@ export const AuditTrail: React.FC<AuditTrailProps> = () => {
         <div>
           <h3 className="font-bold text-purple-950 text-sm flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-purple-700" />
-            Pista de Auditoría & Registro Cronológico (Audit Trail)
+            Registro Cronológico
           </h3>
           <p className="text-xs text-purple-800">
-            Trazabilidad inmutable de todas las modificaciones y operaciones sobre <strong>Máquinas</strong>, <strong>Consumibles</strong> y <strong>Visitas Técnicas</strong>
+            Trazabilidad inmutable de todas las modificaciones y operaciones sobre máquinas, consumibles y visitas técnicas
           </p>
         </div>
 
@@ -357,8 +357,8 @@ export const AuditTrail: React.FC<AuditTrailProps> = () => {
             </span>
             {[
               { id: 'all', label: 'Todas las Categorías', count: logs.length },
-              { id: 'machine', label: 'Máquinas & Equipos', count: metrics.machineCount },
-              { id: 'consumable', label: 'Consumibles & Stock', count: metrics.consumableCount },
+              { id: 'machine', label: 'Máquinas y Equipos', count: metrics.machineCount },
+              { id: 'consumable', label: 'Consumibles y Stock', count: metrics.consumableCount },
               { id: 'visit', label: 'Visitas Técnicas', count: metrics.visitCount },
             ].map((cat) => (
               <button

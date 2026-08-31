@@ -21,7 +21,6 @@ import {
   Sparkles,
   ArrowRightLeft,
 } from "lucide-react";
-import { useNotifications } from "../../context/NotificationContext";
 
 export interface MenuItem {
   id: string;
@@ -30,6 +29,7 @@ export interface MenuItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string | number;
   badgeColor?: string;
+  disabled?: boolean;
 }
 
 interface SidebarProps {
@@ -45,28 +45,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onCloseMobile,
 }) => {
-  const { alerts } = useNotifications();
 
-  const unvisitedCount = alerts.filter(
-    (a) => a.type === "empaque_unvisited",
-  ).length;
-  const lowStockCount = alerts.filter(
-    (a) => a.type === "consumible_stock",
-  ).length;
+  const unvisitedCount = 0
+  const lowStockCount = 0
 
   const menuItems: MenuItem[] = [
     // Principal
     {
       id: "visitas",
-      label: "Cargar Visita y Reporte",
+      label: "Cargar Visita y  (Inactivo)",
       category: "principal",
       icon: ClipboardList,
+        disabled: true,
     },
     {
       id: "operaciones",
-      label: "Operaciones (Reemplazo/Cambio)",
+      label: "Operaciones",
       category: "principal",
       icon: Wrench,
+        disabled: false,
     },
     // Equipos
     {
@@ -74,53 +71,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Equipos por Empaque",
       category: "equipos",
       icon: MapPin,
+        disabled: false,
     },
     {
       id: "cabezales",
       label: "Cabezales",
       category: "equipos",
       icon: Cpu,
+        disabled: false,
     },
     {
       id: "frenos",
       label: "Frenos ",
       category: "equipos",
       icon: Disc,
+        disabled: false,
     },
     {
       id: "caseteras",
       label: "Caseteras ",
       category: "equipos",
       icon: Layers,
+        disabled: false,
     },
     // Gestión
     {
       id: "empaques",
-      label: "Empaques & Ubicaciones",
+      label: "Empaques y Ubicaciones",
       category: "gestion",
       icon: MapPin,
       badge: unvisitedCount > 0 ? `${unvisitedCount} sin visita` : undefined,
       badgeColor: "bg-amber-600",
+        disabled: false,
     },
     {
       id: "consumibles",
-      label: "Consumibles & Stock",
+      label: "Consumibles y Stock",
       category: "gestion",
       icon: Package,
       badge: lowStockCount > 0 ? `${lowStockCount} bajo` : undefined,
       badgeColor: "bg-rose-600",
+        disabled: false,
     },
     {
       id: "tecnicos",
-      label: "Técnicos & Actividad",
+      label: "Técnicos y Actividad",
       category: "gestion",
       icon: Users,
+        disabled: false,
     },
     {
       id: "estadisticas",
-      label: "Estadísticas & ZIP Export",
+      label: "Estadísticas y ZIP Export",
       category: "gestion",
       icon: BarChart3,
+        disabled: false,
     },
   ];
 
@@ -150,6 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                     : "text-slate-300 hover:text-white hover:bg-slate-800"
                 }`}
+                disabled={item.disabled}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <Icon
@@ -193,17 +199,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }`}
       >
         <div className="p-3 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
-          {renderCategory("principal", "Operaciones de Campo")}
+          {renderCategory("principal", "Operaciones")}
           {renderCategory("equipos", "Inventario de Equipos")}
-          {renderCategory("gestion", "Gestión & Estadísticas")}
+          {renderCategory("gestion", "Gestión y Estadísticas")}
         </div>
 
         {/* Sinclair Footer */}
         <div className="p-3 border-t border-slate-800 text-[11px] text-slate-500 bg-slate-950/40 flex-shrink-0">
           <div className="font-semibold text-slate-400">
-            Sinclair Systems International
+            Carlino & Carlino
           </div>
-          <div>Field Service & Maintenance Suite</div>
+          <div>Representantes técnicos de Sinclair</div>
         </div>
       </aside>
     </>
