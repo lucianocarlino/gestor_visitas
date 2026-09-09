@@ -6,3 +6,6 @@ visitas.csv
 visitas.xlsx
 README.md
 *.pyc
+.editorconfig
+.idea
+requirements.txt
