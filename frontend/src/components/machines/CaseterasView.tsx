@@ -15,8 +15,10 @@ import {
   Status,
 } from "../../types/domain";
 import { MachineModal } from "./MachineModal";
+import {useAuth} from "@/src/context/AuthContext.tsx";
 
 export const CaseterasView: React.FC = () => {
+    const { user, isAdmin, isAuthenticated } = useAuth();
   const [caseteras, setCaseteras] = useState<Casetera[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -125,14 +127,14 @@ export const CaseterasView: React.FC = () => {
             <option value={Status.PENDING}>Pendiente</option>
           </select>
         </div>
-
+          {isAuthenticated && (
         <button
           id="btn-add-casetera"
           onClick={() => setIsCreateOpen(true)}
           className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
         >
           <Plus className="w-4 h-4" /> Nueva Casetera
-        </button>
+        </button>)}
       </div>
 
       {/* Grid of Caseteras */}
@@ -188,13 +190,14 @@ export const CaseterasView: React.FC = () => {
               >
                 <History className="w-3.5 h-3.5" /> Historial de Reemplazos
               </button>
+                {isAuthenticated && (
               <button
                 onClick={() => handleDelete(cas.id)}
                 className="p-1 text-slate-400 hover:text-rose-600 rounded"
                 title="Eliminar"
               >
                 <Trash2 className="w-4 h-4" />
-              </button>
+              </button>)}
             </div>
           </div>
         ))}

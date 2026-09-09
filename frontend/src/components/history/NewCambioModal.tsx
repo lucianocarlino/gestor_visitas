@@ -30,12 +30,14 @@ interface NewCambioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  tecnico: Tecnico | null;
 }
 
 export const NewCambioModal: React.FC<NewCambioModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+    tecnico,
 }) => {
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
@@ -158,7 +160,7 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
         empaque_id: empaqueId,
         motivo,
         fecha,
-        tecnico_id: tecnicoId || undefined,
+        tecnico_id: tecnico.id || undefined,
       };
 
       await coreApi.createCambio(dto);
@@ -228,20 +230,8 @@ export const NewCambioModal: React.FC<NewCambioModalProps> = ({
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Técnico
+                  Técnico: {tecnico.nombre}
                 </label>
-                <select
-                  value={tecnicoId}
-                  onChange={(e) => setTecnicoId(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900"
-                  required
-                >
-                  {tecnicos.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.nombre} ({t.rol})
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>

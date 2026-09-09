@@ -18,8 +18,10 @@ import {
 import { coreApi } from "../../services/apiClient";
 import { Cambio, Empaque, Freno, Movimiento, Status } from "../../types/domain";
 import { MachineModal } from "./MachineModal";
+import {useAuth} from "@/src/context/AuthContext.tsx";
 
 export const FrenosView: React.FC = () => {
+    const { user, isAdmin, isAuthenticated } = useAuth();
   const [frenos, setFrenos] = useState<Freno[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -123,14 +125,14 @@ export const FrenosView: React.FC = () => {
             <option value={Status.PENDING}>Pendiente</option>
           </select>
         </div>
-
+          {isAuthenticated && (
         <button
           id="btn-add-freno"
           onClick={() => setIsCreateOpen(true)}
           className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
         >
           <Plus className="w-4 h-4" /> Nuevo Freno
-        </button>
+        </button>)}
       </div>
 
       {/* Grid of Frenos */}
@@ -194,13 +196,14 @@ export const FrenosView: React.FC = () => {
               >
                 <History className="w-3.5 h-3.5" /> Historial de Cambios
               </button>
+                {isAuthenticated && (
               <button
                 onClick={() => handleDelete(freno.id)}
                 className="p-1 text-slate-400 hover:text-rose-600 rounded"
                 title="Eliminar"
               >
                 <Trash2 className="w-4 h-4" />
-              </button>
+              </button>)}
             </div>
           </div>
         ))}

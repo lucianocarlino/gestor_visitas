@@ -25,7 +25,7 @@ import { EmpaqueModal } from "./EmpaqueModal";
 import { useAuth } from "../../context/AuthContext";
 
 export const EmpaquesView: React.FC = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isAuthenticated } = useAuth();
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -135,8 +135,7 @@ export const EmpaquesView: React.FC = () => {
       {/* Grid of Empaques */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.map((emp) => {
-          const totalLineas =
-            emp.bancos?.reduce((acc, b) => acc + (b.lineas || 0), 0) || 0;
+          const totalLineas = emp.bancos[0].lineas;
 
           return (
             <div
@@ -186,7 +185,7 @@ export const EmpaquesView: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block uppercase font-bold">
-                      Bancos Sinclair
+                      Bancos
                     </span>
                     <span className="font-medium flex items-center gap-1">
                       <Layers className="w-3 h-3 text-slate-400" />{" "}
@@ -221,7 +220,6 @@ export const EmpaquesView: React.FC = () => {
 
               <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                 <div className="text-[11px] text-slate-400 font-mono">
-                  ID: {emp.id}
                 </div>
 
                 {isAdmin ? (

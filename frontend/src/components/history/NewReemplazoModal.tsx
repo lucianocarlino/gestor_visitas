@@ -33,12 +33,14 @@ interface NewReemplazoModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  tecnico: Tecnico | null;
 }
 
 export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
+    isOpen,
+    onClose,
+    onSuccess,
+    tecnico
 }) => {
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
@@ -190,7 +192,7 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
         instalado_id: instaladoId,
         instalado_tipo: tipo,
         motivo: bancoUbicacion ? `[${bancoUbicacion}] ${motivo}` : motivo,
-        tecnico_id: tecnicoId || undefined,
+        tecnico_id: tecnico.id || undefined,
       };
 
       await coreApi.createReemplazo(dto);
@@ -299,20 +301,8 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Técnico
+                  Técnico : {tecnico.nombre}
                 </label>
-                <select
-                  value={tecnicoId}
-                  onChange={(e) => setTecnicoId(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900"
-                  required
-                >
-                  {tecnicos.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.nombre} ({t.rol})
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>

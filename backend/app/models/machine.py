@@ -86,8 +86,8 @@ class CaseteraModel(TimestampMixin, Base):
     @classmethod
     def from_create_request(cls, data: CaseteraCreateRequest) -> "CaseteraModel":
         kwargs: dict[str, object] = {}
-        if data.numero is not None:
-            kwargs["numero"] = data.numero
+        if data.id is not None:
+            kwargs["numero"] = data.id
         if data.estado is not None:
             kwargs["estado"] = data.estado
         if data.ubicacion is not None:

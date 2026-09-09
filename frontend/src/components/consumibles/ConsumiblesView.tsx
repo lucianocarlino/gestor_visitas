@@ -25,7 +25,7 @@ import { Consumible } from "../../types/domain";
 import { useAuth } from "../../context/AuthContext";
 
 export const ConsumiblesView: React.FC = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isAuthenticated } = useAuth();
   const [consumibles, setConsumibles] = useState<Consumible[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -76,9 +76,9 @@ export const ConsumiblesView: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAdmin) {
+    if (!isAuthenticated) {
       alert(
-        "Acceso denegado: Solo los administradores pueden crear nuevos consumibles.",
+        "Acceso denegado: Solo los usuarios pueden crear nuevos consumibles.",
       );
       return;
     }
@@ -109,9 +109,9 @@ export const ConsumiblesView: React.FC = () => {
   };
 
   const handleOpenEdit = (item: Consumible) => {
-    if (!isAdmin) {
+    if (!isAuthenticated) {
       alert(
-        "Acceso denegado: Solo los administradores pueden modificar los umbrales mínimos y datos maestros.",
+        "Acceso denegado: Solo los usuarios pueden modificar los umbrales mínimos y datos maestros.",
       );
       return;
     }
@@ -126,9 +126,9 @@ export const ConsumiblesView: React.FC = () => {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAdmin) {
+    if (!isAuthenticated) {
       alert(
-        "Acceso denegado: Solo los administradores pueden modificar consumibles.",
+        "Acceso denegado: Solo los usuarios pueden modificar consumibles.",
       );
       return;
     }
@@ -172,9 +172,9 @@ export const ConsumiblesView: React.FC = () => {
   };
 
   const handleToggleCritical = async (id: string) => {
-    if (!isAdmin) {
+    if (!isAuthenticated) {
       alert(
-        "Acceso denegado: Solo los administradores pueden alterar la clasificación crítica.",
+        "Acceso denegado: Solo los usuarios pueden alterar la clasificación crítica.",
       );
       return;
     }
@@ -198,9 +198,9 @@ export const ConsumiblesView: React.FC = () => {
   );
 
   const handleDelete = async (id: string, name: string) => {
-    if (!isAdmin) {
+    if (!isAuthenticated) {
       alert(
-        "Acceso denegado: Solo los administradores pueden eliminar insumos.",
+        "Acceso denegado: Solo los usuarios pueden eliminar insumos.",
       );
       return;
     }
@@ -257,7 +257,7 @@ export const ConsumiblesView: React.FC = () => {
             />
           </div>
 
-          {isAdmin ? (
+          {isAuthenticated ? (
             <button
               onClick={() => setIsModalOpen(true)}
               className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-xs transition shrink-0"
@@ -350,7 +350,7 @@ export const ConsumiblesView: React.FC = () => {
               <div className="flex items-center justify-end pt-3 border-t border-slate-100 gap-2">
 
                 <div className="flex items-center gap-2">
-                  {isAdmin && (
+                  {isAuthenticated && (
                     <button
                       onClick={() => handleOpenEdit(item)}
                       className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold rounded-lg text-xs flex items-center gap-1.5 transition"
@@ -359,6 +359,7 @@ export const ConsumiblesView: React.FC = () => {
                       <Edit2 className="w-3.5 h-3.5 text-amber-700" />
                     </button>
                   )}
+                    {isAuthenticated && (
                     <button
                       id={`btn-delete-empaque-${item.id}`}
                       onClick={() => handleDelete(item.id, item.nombre)}
@@ -367,6 +368,7 @@ export const ConsumiblesView: React.FC = () => {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                        )}
                 </div>
               </div>
             </div>

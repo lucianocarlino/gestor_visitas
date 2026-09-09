@@ -115,6 +115,7 @@ class CabezalUpdateRequest(CabezalCreateRequest):
 
 
 class CaseteraCreateRequest(BaseModel):
+    id: int | None = None
     numero: int | None = None
     tipo: Literal["Casetera"] | None = "Casetera"
     estado: Status | None = None

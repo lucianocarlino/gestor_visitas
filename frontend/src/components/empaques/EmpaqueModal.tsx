@@ -364,7 +364,7 @@ export const EmpaqueModal: React.FC<EmpaqueModalProps> = ({
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             {empaque
-              ? `Actualice los datos y la configuración de bancos para ${empaque.id}`
+              ? `Actualice los datos y la configuración de bancos para ${empaque.nombre}`
               : "Crear un nuevo empaque con sus máquinas asociadas."}
           </p>
         </div>

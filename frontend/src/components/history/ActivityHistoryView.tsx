@@ -51,7 +51,7 @@ interface ActivityHistoryViewProps {
 export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
   initialTab = "reemplazos",
 }) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState<OperationTab>(
     initialTab === "audit-trail" && !isAdmin ? "reemplazos" : initialTab,
   );
@@ -257,6 +257,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 Sustitución física de equipos en líneas de empaque
               </p>
             </div>
+              {isAuthenticated && (
             <button
               id="btn-new-reemplazo"
               onClick={() => setIsReemplazoOpen(true)}
@@ -264,7 +265,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
             >
               <Plus className="w-4 h-4" />
               <span>Registrar Nuevo Reemplazo</span>
-            </button>
+            </button>)}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -348,6 +349,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 Sustitución de frenos
               </p>
             </div>
+              {isAuthenticated && (
             <button
               id="btn-new-cambio"
               onClick={() => setIsCambioOpen(true)}
@@ -355,7 +357,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
             >
               <Plus className="w-4 h-4" />
               <span>Registrar Cambio de Freno</span>
-            </button>
+            </button>)}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -442,6 +444,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                 Intervenciones preventivas y correctivas sobre cabezales, caseteras o frenos
               </p>
             </div>
+              {isAuthenticated && (
             <button
               id="btn-new-servicio"
               onClick={() => setIsServicioOpen(true)}
@@ -449,7 +452,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
             >
               <Plus className="w-4 h-4" />
               <span>Registrar Servicio Técnico</span>
-            </button>
+            </button>)}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -670,16 +673,19 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
         isOpen={isReemplazoOpen}
         onClose={() => setIsReemplazoOpen(false)}
         onSuccess={loadActivityData}
+        tecnico={user}
       />
       <NewCambioModal
         isOpen={isCambioOpen}
         onClose={() => setIsCambioOpen(false)}
         onSuccess={loadActivityData}
+        tecnico={user}
       />
       <NewServicioModal
         isOpen={isServicioOpen}
         onClose={() => setIsServicioOpen(false)}
         onSuccess={loadActivityData}
+        tecnico={user}
       />
       <NewMovimientoModal
         isOpen={isMovimientoOpen}

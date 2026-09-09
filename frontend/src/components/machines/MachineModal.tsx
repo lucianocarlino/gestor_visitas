@@ -45,14 +45,14 @@ export const MachineModal: React.FC<MachineModalProps> = ({
       return;
     }
 
-    setUbicacion(empaques.find((e) => e.id == empaque_id)?.nombre || 'Empaque');
+    setUbicacion(empaques.find((e) => e.id == empaque_id)?.nombre);
 
     setIsSubmitting(true);
     try {
       if (type === 'Cabezal') {
         await coreApi.createCabezal({ id: id.trim(), estado, ubicacion, empaque_id});
       } else if (type === 'Casetera') {
-        const numId = Number(id);
+        const numId = Number(id.trim());
         if (isNaN(numId)) {
           setErrorMsg('El ID de Casetera debe ser un valor numérico.');
           setIsSubmitting(false);

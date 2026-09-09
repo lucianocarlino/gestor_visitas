@@ -37,12 +37,14 @@ interface NewServicioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  tecnico: Tecnico | null;
 }
 
 export const NewServicioModal: React.FC<NewServicioModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+    tecnico,
 }) => {
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
@@ -175,7 +177,7 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
         resumen,
         trabajo_hecho: trabajoHecho,
         consumibles: usedConsumibles,
-        tecnico_id: tecnicoId || undefined,
+        tecnico_id: tecnico.id || undefined,
       };
 
       await coreApi.createServicio(dto);
@@ -330,19 +332,7 @@ export const NewServicioModal: React.FC<NewServicioModalProps> = ({
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Técnico responsable</label>
-              <select
-                value={tecnicoId}
-                onChange={(e) => setTecnicoId(e.target.value)}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900"
-                required
-              >
-                {tecnicos.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.nombre} ({t.rol})
-                  </option>
-                ))}
-              </select>
+              <label className="block font-semibold text-slate-700 mb-1">Técnico: {tecnico.nombre}</label>
             </div>
           </div>
 

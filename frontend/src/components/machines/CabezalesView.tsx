@@ -27,8 +27,10 @@ import {
   Status,
 } from "../../types/domain";
 import { MachineModal } from "./MachineModal";
+import {useAuth} from "@/src/context/AuthContext.tsx";
 
 export const CabezalesView: React.FC = () => {
+    const { user, isAdmin, isAuthenticated } = useAuth();
   const [cabezales, setCabezales] = useState<Cabezal[]>([]);
   const [empaques, setEmpaques] = useState<Empaque[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -84,7 +86,7 @@ export const CabezalesView: React.FC = () => {
       setMovements(
         filteredMovs.length > 0
           ? filteredMovs
-          : cab.historial_movimientos || [],
+          : cab.historial_movimientos || []
       );
       setServices(srvs.filter((s) => s.machine_id === cab.id));
     } catch {
@@ -134,13 +136,14 @@ export const CabezalesView: React.FC = () => {
           </select>
         </div>
 
+          {isAuthenticated &&(
         <button
           id="btn-add-cabezal"
           onClick={() => setIsCreateOpen(true)}
           className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
         >
           <Plus className="w-4 h-4" /> Nuevo Cabezal
-        </button>
+        </button>)}
       </div>
 
       {/* Grid of Cabezales */}
@@ -205,13 +208,14 @@ export const CabezalesView: React.FC = () => {
                 <History className="w-3.5 h-3.5" /> Historial (
                 {cab.historial_movimientos.length})
               </button>
+                {isAuthenticated && (
               <button
                 onClick={() => handleDelete(cab.id)}
                 className="p-1 text-slate-400 hover:text-rose-600 rounded"
                 title="Eliminar"
               >
                 <Trash2 className="w-4 h-4" />
-              </button>
+              </button>)}
             </div>
           </div>
         ))}

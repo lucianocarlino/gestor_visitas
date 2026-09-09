@@ -4,4 +4,5 @@ main.py
 *.docx
 visitas.csv
 visitas.xlsx
-notas
+README.md
+*.pyc

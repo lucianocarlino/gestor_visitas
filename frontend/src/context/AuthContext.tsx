@@ -32,15 +32,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAllTecnicos(data);
       if (!user && data.length > 0) {
         // Default to first technician
-        const storedUser = localStorage.getItem('sinclair_active_user');
-        if (storedUser) {
-          const parsed = JSON.parse(storedUser);
-          const found = data.find((t) => t.id === parsed.id);
-          setUser(found || data[0]);
-        } else {
-          setUser(data[0]);
-        }
-        setToken(`token_${Date.now()}`);
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem('sinclair_active_user');
       }
     } catch {
       // Offline fallback
