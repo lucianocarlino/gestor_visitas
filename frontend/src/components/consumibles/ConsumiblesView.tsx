@@ -292,9 +292,6 @@ export const ConsumiblesView: React.FC = () => {
                       <h3 className="font-bold text-slate-900 text-sm leading-tight">
                         {item.nombre}
                       </h3>
-                      <span className="text-[10px] text-slate-400 font-mono">
-                        ID: {item.id}
-                      </span>
                     </div>
                   </div>
 

@@ -33,6 +33,9 @@ export const MachineModal: React.FC<MachineModalProps> = ({
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [withfreno, setWithFreno] = useState<boolean>(false);
+  const [frenoId, setFrenoId] = useState<string>('');
+
 
   if (!isOpen) return null;
 
@@ -50,7 +53,10 @@ export const MachineModal: React.FC<MachineModalProps> = ({
     setIsSubmitting(true);
     try {
       if (type === 'Cabezal') {
-        await coreApi.createCabezal({ id: id.trim(), estado, ubicacion, empaque_id});
+        await coreApi.createCabezal({ id: id.trim(), estado, ubicacion, empaque_id, freno_actual_id: withfreno ? frenoId.trim() : null });
+        if (withfreno){
+            await coreApi.createFreno({ id: frenoId.trim(), estado: Status.USING, ubicacion, fecha_inicio: fechaInicio, cabezal_id: id.trim() });
+        }
       } else if (type === 'Casetera') {
         const numId = Number(id.trim());
         if (isNaN(numId)) {
@@ -105,7 +111,7 @@ export const MachineModal: React.FC<MachineModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
             <label className="block font-semibold text-slate-700 mb-1">
-              Identificador / Código *
+              Identificador / Código del cabezal*
             </label>
             <input
               type="text"
@@ -148,7 +154,36 @@ export const MachineModal: React.FC<MachineModalProps> = ({
             </select>
           </div>
 
-          {type === 'Freno' && (
+            <div>
+                <label className="block font-semibold text-slate-700 mb-1">Freno incluido</label>
+                <input
+            type="checkbox"
+            id="checkbox-with-freno"
+            checked={withfreno}
+            onChange={(e) => setWithFreno(e.target.checked)}
+            className="w-4 h-4 text-blue-600 rounded"
+          />
+            </div>
+
+            {withfreno && (
+
+                          <div>
+            <label className="block font-semibold text-slate-700 mb-1">
+              Identificador / Código  del freno*
+            </label>
+            <input
+              type="text"
+              value={frenoId}
+              onChange={(e) => setFrenoId(e.target.value)}
+              placeholder='FRN-304'
+              className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+                )}
+
+          {(type === 'Freno' || withfreno) && (
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Fecha de Inicio</label>
               <input

@@ -131,7 +131,7 @@ export const EquipmentByLocationView: React.FC = () => {
               </span>
               <span className="font-semibold text-slate-800">
                 {selectedEmpaque.bancos.length} bancos (
-                {selectedEmpaque.bancos.reduce((a, b) => a + b.lineas, 0)}{" "}
+                {selectedEmpaque.bancos[0].lineas}{" "}
                 líneas)
               </span>
             </div>
