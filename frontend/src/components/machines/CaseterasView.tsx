@@ -255,7 +255,9 @@ export const CaseterasView: React.FC = () => {
                         <span className="text-[10px] text-slate-400 uppercase font-bold block">
                           Retirada:
                         </span>
-                        <span className="font-mono">#{r.retirado_id}</span>
+                        <span className="font-mono">
+                          {r.retirado_id ? `#${r.retirado_id}` : "Sin equipo retirado"}
+                        </span>
                       </div>
                       <div>
                         <span className="text-[10px] text-slate-400 uppercase font-bold block">

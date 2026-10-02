@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.models.operation import ReemplazoModel, CambioModel, ServicioModel
 from app.schemas.domain import Reemplazo, CreateReeplaceDTO, Cambio, Servicio, CreateCambioDTO, CreateServiceDTO
@@ -11,10 +12,10 @@ class OperationRepository:
         return self.db.query(ReemplazoModel).all()
 
     def get_cabezal_replacements(self, cabezal_id: str) -> list[ReemplazoModel]:
-        return self.db.query(ReemplazoModel).filter(ReemplazoModel.instalado_id == cabezal_id or ReemplazoModel.retirado_id == cabezal_id).all()
+        return self.db.query(ReemplazoModel).filter(or_(ReemplazoModel.instalado_id == cabezal_id, ReemplazoModel.retirado_id == cabezal_id)).all()
 
     def get_casetera_replacements(self, casetera_id: str) -> list[ReemplazoModel]:
-        return self.db.query(ReemplazoModel).filter(ReemplazoModel.instalado_id == casetera_id or ReemplazoModel.retirado_id == casetera_id).all()
+        return self.db.query(ReemplazoModel).filter(or_(ReemplazoModel.instalado_id == casetera_id, ReemplazoModel.retirado_id == casetera_id)).all()
 
     def create_replacement(self, data: CreateReeplaceDTO, empaque: str, tecnico: str) -> ReemplazoModel:
         try:

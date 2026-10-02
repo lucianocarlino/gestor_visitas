@@ -54,15 +54,17 @@ export class ReemplazoService implements IReeplaceService {
     const fechaNow = new Date().toISOString().split('T')[0];
     const workshopLocation = 'EMP-04'; // Sinclair Central Workshop
 
-    this.updateRemovedMachine(dto.retirado_id, dto.retirado_tipo, workshopLocation, dto.motivo, tecnicoNombre);
+    if (dto.retirado_id && dto.retirado_tipo) {
+      this.updateRemovedMachine(dto.retirado_id, dto.retirado_tipo, workshopLocation, dto.motivo, tecnicoNombre);
+    }
     this.updateInstalledMachine(dto.instalado_id, dto.instalado_tipo, dto.empaque_id, dto.motivo, tecnicoNombre);
 
     const reemplazo: Reemplazo = {
       id: `REP-${Date.now()}`,
       fecha: fechaNow,
       motivo: dto.motivo,
-      retirado_id: dto.retirado_id,
-      retirado_tipo: dto.retirado_tipo,
+      retirado_id: dto.retirado_id ?? null,
+      retirado_tipo: dto.retirado_tipo ?? null,
       instalado_id: dto.instalado_id,
       instalado_tipo: dto.instalado_tipo,
       empaque_id: empaque.id,
@@ -79,12 +81,18 @@ export class ReemplazoService implements IReeplaceService {
       userRole: 'tecnico',
       category: 'machine',
       action: 'REPLACE',
-      targetId: dto.retirado_id,
-      targetName: `${dto.retirado_tipo} ${dto.retirado_id} ➔ ${dto.instalado_id}`,
-      details: `Reemplazo en ${empaque.nombre}: Se desmonta ${dto.retirado_id} (➔ Taller/Pendiente) y se monta ${dto.instalado_id} (➔ En uso). Motivo: ${dto.motivo}`,
-      previousValue: `${dto.retirado_id} en ${empaque.nombre}`,
+      targetId: dto.retirado_id ?? dto.instalado_id,
+      targetName: dto.retirado_id
+        ? `${dto.retirado_tipo} ${dto.retirado_id} ➔ ${dto.instalado_id}`
+        : `${dto.instalado_tipo} ${dto.instalado_id} (sin equipo retirado)`,
+      details: dto.retirado_id
+        ? `Reemplazo en ${empaque.nombre}: Se desmonta ${dto.retirado_id} (➔ Taller/Pendiente) y se monta ${dto.instalado_id} (➔ En uso). Motivo: ${dto.motivo}`
+        : `Reemplazo en ${empaque.nombre}: Se monta ${dto.instalado_id} (➔ En uso), sin retirar otro equipo. Motivo: ${dto.motivo}`,
+      previousValue: dto.retirado_id
+        ? `${dto.retirado_id} en ${empaque.nombre}`
+        : 'Sin equipo retirado',
       newValue: `${dto.instalado_id} en ${empaque.nombre}`,
-      metadata: { empaque_id: empaque.id, instalado_id: dto.instalado_id, retirado_id: dto.retirado_id },
+      metadata: { empaque_id: empaque.id, instalado_id: dto.instalado_id, retirado_id: dto.retirado_id ?? null },
     });
 
     return saved;
@@ -99,11 +107,13 @@ export class ReemplazoService implements IReeplaceService {
   }
 
   private validateReeplaceDTO(dto: CreateReeplaceDTO): void {
-    if (!dto.retirado_id) throw new ValidationError('Retirado machine ID is required');
     if (!dto.instalado_id) throw new ValidationError('Instalado machine ID is required');
     if (!dto.empaque_id) throw new ValidationError('Empaque ID is required');
     if (!dto.motivo) throw new ValidationError('Motivo is required');
-    if (dto.retirado_id === dto.instalado_id) {
+    if (Boolean(dto.retirado_id) !== Boolean(dto.retirado_tipo)) {
+      throw new ValidationError('Retired machine ID and type must be provided together');
+    }
+    if (dto.retirado_id && dto.retirado_id === dto.instalado_id) {
       throw new ValidationError('Removed and installed machines cannot be the same ID');
     }
   }

@@ -27,14 +27,16 @@ class OperationService():
         empaque = self.empaques_repository.get_empaque_by_id(data.empaque_id)
         operation = self.repository.create_replacement(data, empaque.nombre, tecnico.nombre).to_domain()
         if operation is not None:
-            if data.retirado_tipo == "Cabezal":
+            if data.retirado_id is not None and data.retirado_tipo == "Cabezal":
                 self.machines_repository.update_cabezal(data.retirado_id, CabezalUpdateRequest(estado=Status("Pendiente"), ubicacion=self.taller.nombre, empaque_id=self.taller.id))
-                self.machines_repository.update_cabezal(data.instalado_id, CabezalUpdateRequest(estado=Status("En uso"), ubicacion=empaque.nombre, empaque_id=empaque.id))
-            elif data.retirado_tipo == "Casetera":
+            elif data.retirado_id is not None and data.retirado_tipo == "Casetera":
                 self.machines_repository.update_casetera(int(data.retirado_id), CaseteraUpdateRequest(estado=Status("Pendiente"), ubicacion=self.taller.nombre, empaque_id=self.taller.id))
+
+            if data.instalado_tipo == "Cabezal":
+                self.machines_repository.update_cabezal(data.instalado_id, CabezalUpdateRequest(estado=Status("En uso"), ubicacion=empaque.nombre, empaque_id=empaque.id))
+            elif data.instalado_tipo == "Casetera":
                 self.machines_repository.update_casetera(int(data.instalado_id), CaseteraUpdateRequest(estado=Status("En uso"), ubicacion=empaque.nombre, empaque_id=empaque.id))
         return operation
-
     def list_brake_changes(self) -> list[Cambio]:
         return [cambio.to_domain() for cambio in self.repository.get_brake_changes()]
 

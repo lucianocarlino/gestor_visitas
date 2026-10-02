@@ -2,7 +2,7 @@ import datetime
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, JsonValue
+from pydantic import BaseModel, JsonValue, model_validator
 
 
 class Status(str, Enum):
@@ -129,8 +129,8 @@ class Reemplazo(BaseModel):
     id: str
     fecha: str
     motivo: str
-    retirado_id: str
-    retirado_tipo: RetiradoInstaladoType
+    retirado_id: str | None = None
+    retirado_tipo: RetiradoInstaladoType | None = None
     instalado_id: str
     instalado_tipo: RetiradoInstaladoType
     empaque_id: str
@@ -282,13 +282,19 @@ class CreateVisitDTO(BaseModel):
 
 
 class CreateReeplaceDTO(BaseModel):
-    retirado_id: str
-    retirado_tipo: RetiradoInstaladoType
+    retirado_id: str | None = None
+    retirado_tipo: RetiradoInstaladoType | None = None
     instalado_id: str
     instalado_tipo: RetiradoInstaladoType
     empaque_id: str
     motivo: str
     tecnico_id: str | None = None
+
+    @model_validator(mode="after")
+    def validate_retired_equipment_pair(self) -> "CreateReeplaceDTO":
+        if (self.retirado_id is None) != (self.retirado_tipo is None):
+            raise ValueError("retirado_id y retirado_tipo deben informarse juntos")
+        return self
 
 
 class CreateCambioDTO(BaseModel):

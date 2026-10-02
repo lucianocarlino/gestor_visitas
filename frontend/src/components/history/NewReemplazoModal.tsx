@@ -158,19 +158,13 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
       setErrorMessage("Debe seleccionar la planta de empaque (DÓNDE).");
       return;
     }
-    if (!retiradoId) {
-      setErrorMessage(
-        "Debe especificar el ID del componente que se retira de la planta.",
-      );
-      return;
-    }
     if (!instaladoId) {
       setErrorMessage(
         "Debe especificar el ID del componente nuevo que se instala.",
       );
       return;
     }
-    if (retiradoId === instaladoId) {
+    if (retiradoId && retiradoId === instaladoId) {
       setErrorMessage(
         "El equipo retirado y el equipo instalado no pueden ser el mismo.",
       );
@@ -187,8 +181,8 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
     try {
       const dto: CreateReeplaceDTO = {
         empaque_id: empaqueId,
-        retirado_id: retiradoId,
-        retirado_tipo: tipo,
+        retirado_id: retiradoId || undefined,
+        retirado_tipo: retiradoId ? tipo : undefined,
         instalado_id: instaladoId,
         instalado_tipo: tipo,
         motivo: bancoUbicacion ? `[${bancoUbicacion}] ${motivo}` : motivo,
@@ -383,10 +377,9 @@ export const NewReemplazoModal: React.FC<NewReemplazoModalProps> = ({
                     value={retiradoId}
                     onChange={(e) => setRetiradoId(e.target.value)}
                     className="w-full p-2 bg-white border border-rose-300 rounded-lg text-slate-900 font-mono font-bold"
-                    required
                   >
                     <option value="">
-                      -- Seleccione {tipo} --
+                      -- Sin equipo retirado --
                     </option>
                     {machinesInSelectedEmpaque.map((m) => (
                       <option key={m.id} value={m.id}>

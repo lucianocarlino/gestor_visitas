@@ -155,8 +155,8 @@ export interface Reemplazo {
   id: string;
   fecha: string;
   motivo: string;
-  retirado_id: string;
-  retirado_tipo: 'Cabezal' | 'Casetera';
+  retirado_id: string | null;
+  retirado_tipo: 'Cabezal' | 'Casetera' | null;
   instalado_id: string;
   instalado_tipo: 'Cabezal' | 'Casetera';
   empaque_id: string;
@@ -266,8 +266,8 @@ export interface CreateVisitDTO {
 }
 
 export interface CreateReeplaceDTO {
-  retirado_id: string;
-  retirado_tipo: 'Cabezal' | 'Casetera';
+  retirado_id?: string;
+  retirado_tipo?: 'Cabezal' | 'Casetera';
   instalado_id: string;
   instalado_tipo: 'Cabezal' | 'Casetera';
   empaque_id: string;

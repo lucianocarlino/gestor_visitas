@@ -95,7 +95,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
   // Filtered lists based on search
   const filteredReemplazos = reemplazos.filter(
     (r) =>
-      r.retirado_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.retirado_id?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       r.instalado_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.empaque_nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.motivo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -289,7 +289,9 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                       Equipo Retirado:
                     </span>
                     <span className="font-mono font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                      {r.retirado_tipo} : {r.retirado_id}
+                      {r.retirado_id
+                        ? `${r.retirado_tipo ?? "Equipo"} : ${r.retirado_id}`
+                        : "Sin equipo retirado"}
                     </span>
                   </div>
                   <div className="flex items-center justify-center text-slate-400">
@@ -555,7 +557,7 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
                   </span>
                   <div>
                     <div className="font-bold text-slate-900">
-                      Reemplazo en {r.empaque_nombre}: {r.retirado_id} &rarr;{" "}
+                      Reemplazo en {r.empaque_nombre}: {r.retirado_id ?? "(sin retirado)"} &rarr;{" "}
                       {r.instalado_id}
                     </div>
                     <div className="text-slate-500 text-[11px]">{r.motivo}</div>
