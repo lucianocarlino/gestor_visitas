@@ -106,7 +106,7 @@ const MainAppContent: React.FC = () => {
 
       {isVisitFormOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-4 md:p-6 flex items-start justify-center">
-          <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 my-4 md:my-8 max-h-[92vh] flex flex-col">
+          <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 my-4 md:my-8 max-h-[92vh] flex flex-col">
             <div className="overflow-y-auto p-4 sm:p-6 flex-1">
               <VisitForm
                 onSuccess={() => {

@@ -24,6 +24,7 @@ import {
   AuditEntry,
 } from '../types/domain';
 import { invalidateSystemAlerts } from '../context/NotificationContext';
+import { readReferenceData, writeReferenceData } from './offline/referenceDataDb';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -39,6 +40,31 @@ async function handleResponse<T>(res: Response): Promise<T> {
     throw new Error(errorMsg);
   }
   return res.json();
+}
+
+async function getReferenceData<T extends Empaque[] | Tecnico[]>(
+  key: 'empaques' | 'tecnicos',
+  url: string,
+  sanitize: (data: T) => T = (data) => data,
+): Promise<T> {
+  try {
+    const response = await fetch(url);
+    const data = sanitize(await handleResponse<T>(response));
+    try {
+      await writeReferenceData(key, data);
+    } catch (error) {
+      console.warn('No se pudo actualizar la copia local de datos de referencia.', error);
+    }
+    return data;
+  } catch (networkError) {
+    try {
+      const cached = await readReferenceData<T>(key);
+      if (cached) return cached.data;
+    } catch (storageError) {
+      console.warn('No se pudo leer la copia local de datos de referencia.', storageError);
+    }
+    throw networkError;
+  }
 }
 
 export const visitsApi = {
@@ -92,8 +118,7 @@ export const visitsApi = {
 export const coreApi = {
   // Empaques
   getEmpaques: async (): Promise<Empaque[]> => {
-    const res = await fetch('/api/core/empaques');
-    return handleResponse(res);
+    return getReferenceData<Empaque[]>('empaques', '/api/core/empaques');
   },
   getUnvisitedAlerts: async (): Promise<any[]> => {
     const res = await fetch('/api/core/empaques/alerts/unvisited');
@@ -322,8 +347,9 @@ export const coreApi = {
 
   // Tecnicos
   getTecnicos: async (): Promise<Tecnico[]> => {
-    const res = await fetch('/api/core/tecnicos');
-    return handleResponse(res);
+    return getReferenceData<Tecnico[]>('tecnicos', '/api/core/tecnicos', (tecnicos) =>
+      tecnicos.map(({ password: _password, ...tecnico }) => tecnico),
+    );
   },
   getTecnicoStats: async (): Promise<any[]> => {
     const res = await fetch('/api/core/tecnicos/activity/stats');

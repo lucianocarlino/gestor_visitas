@@ -255,7 +255,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               id="btn-dash-new-visit"
               onClick={onNewVisit}
               className="px-4 py-2.5 bg-white text-blue-900 hover:bg-blue-50 font-bold rounded-xl shadow transition flex items-center gap-2 text-sm"
-              disabled={true}
             >
               <Activity className="w-4 h-4 text-blue-600" />
               Nueva Visita

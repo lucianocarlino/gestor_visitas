@@ -15,15 +15,25 @@ import {
   Car,
   Wrench,
   Download,
+  PhoneOutgoing,
 } from "lucide-react";
 import { Visita } from "../../types/domain";
-import { downloadVisitPDF } from "../../utils/pdfGenerator";
+import { downloadVisitPDF, generateVisitPDF } from "../../utils/pdfGenerator";
 
 interface SinclairReportModalProps {
   visita: Visita | null;
   isOpen: boolean;
   onClose: () => void;
 }
+
+const formatTime = (timeStr?: string): string => {
+  if (!timeStr) return "";
+  if (timeStr.includes("T")) {
+    const timePart = timeStr.split("T")[1];
+    return timePart.substring(0, 5);
+  }
+  return timeStr.substring(0, 5);
+};
 
 export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
   visita,
@@ -34,8 +44,76 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
 
   const { reporte, empaque, tecnicos } = visita;
 
+  const motivosList = React.useMemo(() => {
+    const set = new Set<string>();
+    if (reporte.codigo_motivo) {
+      if (Array.isArray(reporte.codigo_motivo)) {
+        reporte.codigo_motivo.forEach((m) => m && set.add(String(m)));
+      } else {
+        set.add(String(reporte.codigo_motivo));
+      }
+    }
+    if (reporte.estructura) {
+      reporte.estructura.forEach((item) => {
+        if (item.codigo_motivo) set.add(String(item.codigo_motivo));
+      });
+    }
+    return Array.from(set);
+  }, [reporte]);
+
+  const origenesList = React.useMemo(() => {
+    const set = new Set<string>();
+    if (reporte.codigo_origen) {
+      if (Array.isArray(reporte.codigo_origen)) {
+        reporte.codigo_origen.forEach((o) => o && set.add(String(o)));
+      } else {
+        set.add(String(reporte.codigo_origen));
+      }
+    }
+    if (reporte.estructura) {
+      reporte.estructura.forEach((item) => {
+        if (item.codigo_origen) set.add(String(item.codigo_origen));
+      });
+    }
+    return Array.from(set);
+  }, [reporte]);
+
   const handlePrint = () => {
-    window.print();
+    const tecNames = visita.tecnicos.map((t) => t.nombre);
+    const empName = visita.empaque?.nombre || "";
+    const empUbicacion = visita.empaque?.ubicacion || "";
+    const visitDTO = {
+      vehiculo: visita.vehiculo,
+      empaque_id: visita.empaque?.id || "",
+      tecnico_ids: visita.tecnicos.map((t) => t.id),
+      codigo_motivo: [visita.reporte.codigo_motivo],
+      codigo_origen: [visita.reporte.codigo_origen],
+      codigo_tipo_servicio: visita.reporte.codigo_tipo_servicio,
+      solicitado_por: visita.solicitado_por,
+      motivo: visita.motivo,
+      hora_inicio: visita.reporte.hora_inicio,
+      hora_fin: visita.reporte.hora_fin,
+      fuera_de_hora: visita.reporte.fuera_de_hora,
+      comentarios: visita.reporte.comentarios,
+      estructura: visita.reporte.estructura,
+      hora_llamada: visita.reporte.hora_llamada,
+      nombre_cliente: visita.reporte.nombre_cliente,
+      firma_cliente: visita.reporte.firma_cliente,
+      produccion_etiquetada: visita.reporte.produccion_etiquetada,
+      condicion_fruta: visita.reporte.condicion_fruta,
+      id: visita.id,
+      numero: visita.reporte.numero,
+    };
+    const doc = generateVisitPDF(
+      visitDTO,
+      visita.reporte.numero,
+      tecNames,
+      empName,
+      empUbicacion
+    );
+    doc.autoPrint();
+    const blobUrl = doc.output("bloburl");
+    window.open(blobUrl, "_blank");
   };
 
   const handleDownloadPDF = () => {
@@ -52,7 +130,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 flex-shrink-0 no-print">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg font-mono text-xs font-bold">
-              SINCLAIR SERVICE REPORT #{reporte.numero}
+              Reporte sinclair
             </span>
             {visita.estado_sincronizacion === "synced" ? (
               <span className="flex items-center gap-1 text-emerald-700 text-xs font-semibold">
@@ -83,11 +161,8 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
           <div className="flex flex-col sm:flex-row justify-between items-start border-b border-slate-200 pb-4">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                SINCLAIR SYSTEMS INTERNATIONAL
+                Informe de servicio y mantenimiento de campo
               </h1>
-              <p className="text-xs text-slate-500">
-                Informe Técnico Oficial de Servicio y Mantenimiento de Campo
-              </p>
             </div>
             <div className="text-right mt-2 sm:mt-0 text-xs text-slate-600">
               <div>
@@ -104,25 +179,28 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
             <div>
               <div className="text-slate-500 font-semibold mb-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-blue-600" /> EMPAQUE /
-                CLIENTE
+                <MapPin className="w-3.5 h-3.5 text-blue-600" /> Empaque
               </div>
-              <div className="font-bold text-slate-900">{empaque.nombre}</div>
-              <div className="text-slate-600">{empaque.ubicacion}</div>
-              <div className="text-slate-600 mt-1">
-                <strong>Solicitado por:</strong> {visita.solicitado_por}
+              <div className="font-bold text-slate-900">
+                {empaque.nombre}{" "}
+                <span className="text-slate-600"> ({empaque.ubicacion})</span>
               </div>
+              <div className="text-slate-500 font-semibold mb-1 mt-2 flex items-center gap-1">
+                <PhoneOutgoing className="w-3.5 h-3.5 text-blue-600" /> Solicitado por
+              </div>
+              <div className="font-bold text-slate-900">{visita.solicitado_por}</div>
             </div>
             <div>
               <div className="text-slate-500 font-semibold mb-1 flex items-center gap-1">
-                <User className="w-3.5 h-3.5 text-blue-600" /> TÉCNICOS
-                ASIGNADOS
+                <User className="w-3.5 h-3.5 text-blue-600" /> Técnicos
               </div>
               <div className="font-bold text-slate-900">
                 {tecnicos.map((t) => t.nombre).join(", ")}
               </div>
-              <div className="flex items-center gap-2 mt-1 text-slate-600">
-                <Car className="w-3.5 h-3.5 text-slate-500" /> Vehículo:{" "}
+              <div className="text-slate-500 font-semibold mb-1 mt-2 flex items-center gap-1">
+                <Car className="w-3.5 h-3.5 text-blue-600" /> Vehículo
+              </div>
+              <div className="font-bold text-slate-900">
                 {visita.vehiculo}
               </div>
             </div>
@@ -135,7 +213,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
                 Motivo
               </span>
               <span className="font-semibold text-blue-950">
-                {reporte.codigo_motivo}
+                {motivosList.length > 0 ? motivosList.join(", ") : "-"}
               </span>
             </div>
             <div>
@@ -143,7 +221,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
                 Origen/Orden
               </span>
               <span className="font-semibold text-blue-950">
-                {reporte.codigo_origen}
+                {origenesList.length > 0 ? origenesList.join(", ") : "-"}
               </span>
             </div>
             <div>
@@ -159,7 +237,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
                 Horarios
               </span>
               <span className="font-semibold text-blue-950">
-                {reporte.hora_inicio} a {reporte.hora_fin}{" "}
+                {formatTime(reporte.hora_inicio)} a {formatTime(reporte.hora_fin)}{" "}
                 {reporte.fuera_de_hora && "(Fuera de hora)"}
               </span>
             </div>
@@ -185,8 +263,11 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
                   <tr>
-                    <th className="p-2.5">Cód. Res</th>
-                    <th className="p-2.5">Nº Partes</th>
+                    <th className="p-2.5">Numero de serie</th>
+                    <th className="p-2.5">Codigo del motivo</th>
+                    <th className="p-2.5">Codigo de origen</th>
+                    <th className="p-2.5">Codigo de la res</th>
+                    <th className="p-2.5">Numero de partes sustituidas</th>
                     <th className="p-2.5">Cant</th>
                     <th className="p-2.5">% Esperado</th>
                     <th className="p-2.5">% Real</th>
@@ -198,7 +279,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
                   {reporte.estructura.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={10}
                         className="p-4 text-center text-slate-400 italic"
                       >
                         Sin ítems de estructura detallados.
@@ -207,7 +288,16 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
                   ) : (
                     reporte.estructura.map((item, idx) => (
                       <tr key={idx} className="hover:bg-slate-50">
-                        <td className="p-2.5 font-mono font-medium">
+                        <td className="p-2.5  font-medium">
+                          {item.numero_de_serie}
+                        </td>
+                        <td className="p-2.5  font-medium">
+                          {item.codigo_motivo}
+                        </td>
+                        <td className="p-2.5  font-medium">
+                          {item.codigo_origen}
+                        </td>
+                        <td className="p-2.5  font-medium">
                           {item.codigo_res}
                         </td>
                         <td className="p-2.5 font-medium">
@@ -217,7 +307,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
                         <td className="p-2.5">
                           {item.pct_etiquetado_esperado}%
                         </td>
-                        <td className="p-2.5 font-semibold text-emerald-700">
+                        <td className="p-2.5">
                           {item.pct_etiquetado_real}%
                         </td>
                         <td className="p-2.5">{item.tiempo_servicio} h</td>
@@ -297,7 +387,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
           <button
             type="button"
             onClick={handlePrint}
-            className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition"
+            className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             Imprimir Reporte
@@ -306,7 +396,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
             id="btn-download-pdf-report"
             type="button"
             onClick={handleDownloadPDF}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
           >
             <Download className="w-4 h-4" />
             Descargar PDF
@@ -315,7 +405,7 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
             id="btn-bottom-close-report"
             type="button"
             onClick={onClose}
-            className="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs transition shadow-xs"
+            className="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs transition shadow-xs cursor-pointer"
           >
             Cerrar
           </button>

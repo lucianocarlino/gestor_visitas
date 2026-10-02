@@ -204,6 +204,9 @@ export interface Servicio {
 }
 
 export interface ItemEstructura {
+    numero_de_serie: string;
+    codigo_motivo: CodigoMotivo;
+    codigo_origen: CodigoOrden;
   codigo_res: string;
   numero_partes: string;
   cantidad: string;
@@ -214,7 +217,7 @@ export interface ItemEstructura {
 }
 
 export interface ReporteSinclair {
-  numero: number;
+  numero: string;
   codigo_motivo: CodigoMotivo;
   codigo_origen: CodigoOrden;
   codigo_tipo_servicio: CodigoTipoServicio;
@@ -247,8 +250,8 @@ export interface CreateVisitDTO {
   vehiculo: Vehiculo;
   empaque_id: string;
   tecnico_ids: string[];
-  codigo_motivo: CodigoMotivo;
-  codigo_origen: CodigoOrden;
+  codigo_motivo: CodigoMotivo[];
+  codigo_origen: CodigoOrden[];
   codigo_tipo_servicio: CodigoTipoServicio;
   solicitado_por: string;
   motivo: string;
@@ -263,6 +266,7 @@ export interface CreateVisitDTO {
   produccion_etiquetada?: string;
   condicion_fruta?: string;
   id?: string; // Optional client-generated offline ID
+  numero?: string; // FSR report number (e.g. LC2609GRPS)
 }
 
 export interface CreateReeplaceDTO {

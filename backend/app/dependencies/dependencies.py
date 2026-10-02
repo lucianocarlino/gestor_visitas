@@ -18,6 +18,7 @@ from app.services.machine_service import MachineService
 from app.services.operation_service import OperationService
 from app.services.system_service import SystemService
 from app.services.technician_service import TechnicianService
+from app.services.visit_service import VisitService
 
 
 
@@ -58,6 +59,10 @@ def get_audit_service(session: Annotated[Session, Depends(get_db_session)]) -> A
     repository = AuditRepository(session)
     return AuditService(repository=repository)
 
+def get_visit_service(session: Annotated[Session, Depends(get_db_session)]) -> VisitService:
+    visitas_repository = VisitsRepository(session)
+    return VisitService(visitas_repository=visitas_repository)
+
 EmpaqueServiceDependency = Annotated[EmpaqueService, Depends(get_empaque_service)]
 MachineServiceDependency = Annotated[MachineService, Depends(get_machine_service)]
 OperationServiceDependency = Annotated[OperationService, Depends(get_operation_service)]
@@ -65,3 +70,4 @@ ConsumableServiceDependency = Annotated[ConsumableService, Depends(get_consumabl
 TechnicianServiceDependency = Annotated[TechnicianService, Depends(get_technician_service)]
 SystemServiceDependency = Annotated[SystemService, Depends(get_system_service)]
 AuditServiceDependency = Annotated[AuditService, Depends(get_audit_service)]
+VisitServiceDependency = Annotated[VisitService, Depends(get_visit_service)]

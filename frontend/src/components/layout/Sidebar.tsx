@@ -56,7 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Cargar Visita (Inactivo)",
       category: "principal",
       icon: ClipboardList,
-        disabled: true,
+        disabled: false,
     },
     {
       id: "operaciones",

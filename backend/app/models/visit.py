@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, time
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
 from app.models.common import generate_id
+from app.models.location import EmpaqueModel
+from app.models.technician import TecnicoModel
 from app.schemas.domain import CreateVisitDTO, ItemEstructura, ReporteSinclair, Visita
 
 
@@ -21,11 +23,12 @@ class VisitaModel(TimestampMixin, Base):
     empaque_id: Mapped[str] = mapped_column(ForeignKey("empaques.id"), index=True)
     estado_sincronizacion: Mapped[str] = mapped_column(String(20), default="synced", index=True)
 
+    empaque: Mapped[EmpaqueModel | None] = relationship(lazy="joined")
     tecnicos: Mapped[list[VisitaTecnicoModel]] = relationship(
-        back_populates="visita", cascade="all, delete-orphan"
+        back_populates="visita", cascade="all, delete-orphan", lazy="joined"
     )
     reporte: Mapped[ReporteSinclairModel] = relationship(
-        back_populates="visita", cascade="all, delete-orphan", uselist=False
+        back_populates="visita", cascade="all, delete-orphan", uselist=False, lazy="joined"
     )
 
     @classmethod
@@ -51,13 +54,13 @@ class VisitaModel(TimestampMixin, Base):
     def to_domain(self) -> Visita:
         return Visita(
             id=self.id,
-            fecha=self.fecha,
+            fecha=self.fecha.isoformat(),
             motivo=self.motivo,
             solicitado_por=self.solicitado_por,
             vehiculo=self.vehiculo,
-            tecnicos=[vt.tecnico.to_domain() for vt in self.tecnicos],
+            tecnicos=[vt.tecnico.to_domain() for vt in self.tecnicos if vt.tecnico],
             reporte=self.reporte.to_domain() if self.reporte else None,
-            empaque_id=self.empaque_id,
+            empaque=self.empaque.to_domain() if self.empaque else None,
             estado_sincronizacion=self.estado_sincronizacion
         )
 
@@ -72,6 +75,7 @@ class VisitaTecnicoModel(Base):
     tecnico_id: Mapped[str] = mapped_column(ForeignKey("tecnicos.id"), index=True)
 
     visita: Mapped[VisitaModel] = relationship(back_populates="tecnicos")
+    tecnico: Mapped[TecnicoModel | None] = relationship(lazy="joined")
 
     @classmethod
     def from_ids(cls, *, visita_id: str, tecnico_id: str) -> "VisitaTecnicoModel":
@@ -88,10 +92,10 @@ class ReporteSinclairModel(TimestampMixin, Base):
     visita_id: Mapped[str] = mapped_column(
         ForeignKey("visitas.id", ondelete="CASCADE"), unique=True, index=True
     )
-    numero: Mapped[int] = mapped_column(Integer, unique=True, index=True)
-    codigo_motivo: Mapped[str] = mapped_column(String(10))
-    codigo_origen: Mapped[str] = mapped_column(String(10))
-    codigo_tipo_servicio: Mapped[str] = mapped_column(String(10))
+    numero: Mapped[str] = mapped_column(String(30), unique=True, index=True)
+    codigo_motivo: Mapped[str] = mapped_column(String(50))
+    codigo_origen: Mapped[str] = mapped_column(String(50))
+    codigo_tipo_servicio: Mapped[str] = mapped_column(String(50))
     hora_inicio: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     hora_fin: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     fuera_de_hora: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -105,25 +109,25 @@ class ReporteSinclairModel(TimestampMixin, Base):
     visita: Mapped[VisitaModel] = relationship(back_populates="reporte")
     estructura: Mapped[list[ItemEstructuraModel]] = relationship(
         back_populates="reporte", cascade="all, delete-orphan",
-        order_by="ItemEstructuraModel.orden",
+        order_by="ItemEstructuraModel.orden", lazy="joined"
     )
 
     @classmethod
     def from_create_dto(
-        cls, data: CreateVisitDTO, *, numero: int
+        cls, data: CreateVisitDTO, *, numero: str
     ) -> "ReporteSinclairModel":
         reporte = cls(
             numero=numero,
-            codigo_motivo=data.codigo_motivo,
-            codigo_origen=data.codigo_origen,
+            codigo_motivo=data.codigo_motivo[0] if isinstance(data.codigo_motivo, list) else data.codigo_motivo,
+            codigo_origen=data.codigo_origen[0] if isinstance(data.codigo_origen, list) else data.codigo_origen,
             codigo_tipo_servicio=data.codigo_tipo_servicio,
-            hora_inicio=datetime.fromisoformat(data.hora_inicio.replace("Z", "+00:00")),
-            hora_fin=datetime.fromisoformat(data.hora_fin.replace("Z", "+00:00")),
+            hora_inicio=datetime.combine(datetime.now().date(), time.fromisoformat(data.hora_inicio)),
+            hora_fin=datetime.combine(datetime.now().date(), time.fromisoformat(data.hora_fin)),
             fuera_de_hora=data.fuera_de_hora,
             comentarios=data.comentarios,
             firma_cliente=data.firma_cliente,
             nombre_cliente=data.nombre_cliente,
-            hora_llamada=datetime.fromisoformat(data.hora_llamada.replace("Z", "+00:00")),
+            hora_llamada=datetime.combine(datetime.now().date(), time.fromisoformat(data.hora_llamada)),
             produccion_etiquetada=data.produccion_etiquetada,
             condicion_fruta=data.condicion_fruta,
         )
@@ -162,6 +166,9 @@ class ItemEstructuraModel(Base):
         ForeignKey("reportes_sinclair.id", ondelete="CASCADE"), index=True
     )
     orden: Mapped[int] = mapped_column(Integer)
+    numero_de_serie: Mapped[str] = mapped_column(String(50), default="")
+    codigo_motivo: Mapped[str] = mapped_column(String(50), default="")
+    codigo_origen: Mapped[str] = mapped_column(String(50), default="")
     codigo_res: Mapped[str] = mapped_column(String(50))
     numero_partes: Mapped[str] = mapped_column(String(100))
     cantidad: Mapped[str] = mapped_column(String(100))
@@ -176,6 +183,9 @@ class ItemEstructuraModel(Base):
     def from_domain(cls, data: ItemEstructura, *, orden: int) -> "ItemEstructuraModel":
         return cls(
             orden=orden,
+            numero_de_serie=data.numero_de_serie,
+            codigo_motivo=data.codigo_motivo,
+            codigo_origen=data.codigo_origen,
             codigo_res=data.codigo_res,
             numero_partes=data.numero_partes,
             cantidad=data.cantidad,
@@ -187,9 +197,9 @@ class ItemEstructuraModel(Base):
 
     def to_domain(self) -> ItemEstructura:
         return ItemEstructura(
-            id=self.id,
-            reporte_id=self.reporte_id,
-            orden=self.orden,
+            numero_de_serie=self.numero_de_serie,
+            codigo_motivo=self.codigo_motivo,
+            codigo_origen=self.codigo_origen,
             codigo_res=self.codigo_res,
             numero_partes=self.numero_partes,
             cantidad=self.cantidad,

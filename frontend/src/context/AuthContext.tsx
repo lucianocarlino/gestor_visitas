@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Tecnico, StatusTecnico } from '../types/domain';
+import { Tecnico } from '../types/domain';
 import { coreApi } from '../services/apiClient';
 
 interface AuthContextType {
@@ -37,19 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.removeItem('sinclair_active_user');
       }
     } catch {
-      // Offline fallback
-      const fallbackTec: Tecnico = {
-        id: 'TEC-01',
-        nombre: 'Carlos Mendoza',
-        ultima_conexion: new Date().toISOString(),
-        estado: StatusTecnico.DISPONIBLE,
-        cumpleanos: '1988-04-12',
-        rol: 'tecnico',
-        email: 'carlos.mendoza@sinclair-service.com',
-        password: 'sinclair123',
-      };
-      setAllTecnicos([fallbackTec]);
-      if (!user) setUser(fallbackTec);
+      // Cached technicians remain available through coreApi, but offline
+      // access must never create an authenticated session.
+      setAllTecnicos([]);
     }
   };
 
@@ -78,19 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('sinclair_active_user', JSON.stringify(resp.user));
       return { success: true };
     } catch (err: unknown) {
-      // Offline / fallback check against cached allTecnicos
-      const found = allTecnicos.find(
-        (t) =>
-          t.id.toLowerCase() === idOrEmail.toLowerCase() ||
-          t.email.toLowerCase() === idOrEmail.toLowerCase()
-      );
-      if (found) {
-        if (found.password && found.password !== password) {
-          return { success: false, error: 'Contraseña incorrecta.' };
-        }
-        login(found);
-        return { success: true };
-      }
       return {
         success: false,
         error: err instanceof Error ? err.message : 'Credenciales inválidas.',
