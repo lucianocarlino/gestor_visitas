@@ -359,7 +359,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
               disabled={ true }
             >
-              Ver todas {/*({recentVisits.length})*/} (Inactivo)
+              Ver todas {/*({recentVisits.length})*/}
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>

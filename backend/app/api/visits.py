@@ -47,7 +47,8 @@ async def filter_by_date_range(
 ) -> list[Visita]:
     return service.filter_by_date_range(start, end)
 
-@visits_router.post("/export-zip", response_class=Response)
+@visits_router.post("/export-z"
+                    "ip", response_class=Response)
 async def export_zip(payload: ExportZipRequest, service: VisitServiceDependency) -> Response:
     return service.export_zip(payload)
 

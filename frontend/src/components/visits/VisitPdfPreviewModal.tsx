@@ -20,6 +20,9 @@ import {
 import { CreateVisitDTO } from '../../types/domain';
 import { generateVisitPDF } from '../../utils/pdfGenerator';
 import jsPDF from 'jspdf';
+import { subscribeToConnectivity } from '../../platform/connectivity';
+import { isNativeApp } from '../../platform/nativePlatform';
+import { exportFileNativeSafely } from '../../platform/nativeFileExport';
 
 interface VisitPdfPreviewModalProps {
   isOpen: boolean;
@@ -51,15 +54,7 @@ export const VisitPdfPreviewModal: React.FC<VisitPdfPreviewModalProps> = ({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
-    const handleOnlineStatus = () => {
-      setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
-    };
-    window.addEventListener('online', handleOnlineStatus);
-    window.addEventListener('offline', handleOnlineStatus);
-    return () => {
-      window.removeEventListener('online', handleOnlineStatus);
-      window.removeEventListener('offline', handleOnlineStatus);
-    };
+    return subscribeToConnectivity(setIsOnline);
   }, []);
 
   const cleanUpPdfUrl = useCallback(() => {
@@ -105,18 +100,39 @@ export const VisitPdfPreviewModal: React.FC<VisitPdfPreviewModalProps> = ({
 
   if (!isOpen || !visitData) return null;
 
-  const handleDownload = () => {
-    if (!pdfDoc) return;
+  const buildFileName = (): string => {
     const empaqueClean = (empaqueName || 'Empaque')
       .replace(/[^a-zA-Z0-9_-]/g, '_')
       .slice(0, 20);
     const dateStr = new Date().toISOString().split('T')[0];
     const numPart = visitData.numero ? `${visitData.numero}_` : '';
-    const fileName = `Reporte_Sinclair_${numPart}${empaqueClean}_${dateStr}.pdf`;
+    return `Reporte_Sinclair_${numPart}${empaqueClean}_${dateStr}.pdf`;
+  };
+
+  /** Android: the WebView cannot display/print PDFs, so the file is handed to an external app. */
+  const handleOpenNative = () => {
+    if (!pdfDoc) return;
+    exportFileNativeSafely(pdfDoc.output('blob'), buildFileName(), {
+      persist: false,
+      dialogTitle: 'Abrir o imprimir reporte con...',
+    });
+  };
+
+  const handleDownload = () => {
+    if (!pdfDoc) return;
+    const fileName = buildFileName();
+    if (isNativeApp()) {
+      exportFileNativeSafely(pdfDoc.output('blob'), fileName, { persist: true });
+      return;
+    }
     pdfDoc.save(fileName);
   };
 
   const handlePrint = () => {
+    if (isNativeApp()) {
+      handleOpenNative();
+      return;
+    }
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
         iframeRef.current.contentWindow.focus();
@@ -225,6 +241,24 @@ export const VisitPdfPreviewModal: React.FC<VisitPdfPreviewModalProps> = ({
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-500">
               <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
               <p className="text-xs font-semibold">Generando vista previa del reporte...</p>
+            </div>
+          ) : pdfUrl && isNativeApp() ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-600 text-center px-4">
+              <FileText className="w-10 h-10 text-blue-600" />
+              <p className="text-sm font-semibold">Reporte generado correctamente.</p>
+              <p className="text-xs text-slate-500 max-w-sm">
+                Para revisarlo, ábralo en el visor de PDF de la tablet y luego vuelva para confirmar.
+              </p>
+              <button
+                id="btn-open-native-pdf"
+                type="button"
+                onClick={handleOpenNative}
+                disabled={!pdfDoc || isSubmitting}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50"
+              >
+                <FileText className="w-4 h-4" />
+                Abrir PDF
+              </button>
             </div>
           ) : pdfUrl ? (
             <iframe

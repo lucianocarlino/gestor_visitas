@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { Visita } from "../../types/domain";
 import { downloadVisitPDF, generateVisitPDF } from "../../utils/pdfGenerator";
+import { isNativeApp } from "../../platform/nativePlatform";
+import { exportFileNativeSafely } from "../../platform/nativeFileExport";
 
 interface SinclairReportModalProps {
   visita: Visita | null;
@@ -111,6 +113,14 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
       empName,
       empUbicacion
     );
+    if (isNativeApp()) {
+      // Android WebView cannot print: hand the PDF to a viewer/print app.
+      exportFileNativeSafely(doc.output("blob"), `Reporte_Sinclair_${visita.reporte.numero}.pdf`, {
+        persist: false,
+        dialogTitle: "Abrir o imprimir reporte con...",
+      });
+      return;
+    }
     doc.autoPrint();
     const blobUrl = doc.output("bloburl");
     window.open(blobUrl, "_blank");

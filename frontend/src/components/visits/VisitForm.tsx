@@ -18,6 +18,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { coreApi, visitsApi } from '../../services/apiClient';
 import { OfflineSyncManager } from '../../services/offlineSync';
+import { getConnectivityStatus } from '../../platform/connectivity';
 import {
   CodigoMotivo,
   CodigoOrden,
@@ -264,7 +265,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
     if (!pendingVisitDTO) return;
 
     setIsSubmitting(true);
-    const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    const isOnline = await getConnectivityStatus();
 
     try {
       if (!isOnline) {

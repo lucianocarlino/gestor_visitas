@@ -267,6 +267,7 @@ export interface CreateVisitDTO {
   condicion_fruta?: string;
   id?: string; // Optional client-generated offline ID
   numero?: string; // FSR report number (e.g. LC2609GRPS)
+  fecha?: string;
 }
 
 export interface CreateReeplaceDTO {

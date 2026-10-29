@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     // Principal
     {
       id: "visitas",
-      label: "Cargar Visita (Inactivo)",
+      label: "Cargar Visita",
       category: "principal",
       icon: ClipboardList,
         disabled: false,
@@ -188,13 +188,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isOpen && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs transition-opacity"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs transition-opacity"
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed md:relative inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between flex-shrink-0 h-full transform transition-transform duration-200 ease-in-out md:translate-x-0 ${
+        className={`fixed lg:relative inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between flex-shrink-0 h-full transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

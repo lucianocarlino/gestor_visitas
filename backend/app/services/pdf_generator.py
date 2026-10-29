@@ -211,6 +211,53 @@ def get_origen_code(val: Any) -> str:
     return s
 
 
+def format_to_24h(val: Any) -> str:
+    """Formats any time string, ISO datetime, or datetime object into strictly 24-hour HH:mm format."""
+    if not val:
+        return ""
+    if isinstance(val, datetime):
+        return val.strftime("%H:%M")
+    s = str(val).strip()
+    if not s:
+        return ""
+    ampm = re.search(r"(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)", s, re.IGNORECASE)
+    if ampm:
+        h = int(ampm.group(1))
+        m = ampm.group(2)
+        is_pm = ampm.group(3).lower() == "pm"
+        if is_pm and h < 12:
+            h += 12
+        elif not is_pm and h == 12:
+            h = 0
+        return f"{h:02d}:{m}"
+    if "T" in s:
+        s = s.split("T")[1]
+    elif " " in s:
+        s = s.split()[1]
+    m = re.search(r"(\d{1,2}):(\d{2})", s)
+    if m:
+        return f"{int(m.group(1)):02d}:{m.group(2)}"
+    return s
+
+
+def format_report_date(date_val: Any) -> str:
+    """Formats a date value into DD/MM/YYYY."""
+    if not date_val:
+        return datetime.now().strftime("%d/%m/%Y")
+    if isinstance(date_val, datetime):
+        return date_val.strftime("%d/%m/%Y")
+    s = str(date_val).strip()
+    if not s:
+        return datetime.now().strftime("%d/%m/%Y")
+    clean = s.split("T")[0].split()[0]
+    parts = re.split(r"[-/]", clean)
+    if len(parts) == 3:
+        if len(parts[0]) == 4:
+            return f"{int(parts[2]):02d}/{int(parts[1]):02d}/{parts[0]}"
+        return clean
+    return s
+
+
 def y_coord(y_mm: float, height_mm: float = 0) -> float:
     """Converts top-relative millimeters to ReportLab bottom-relative points."""
     return (297.0 - y_mm - height_mm) * mm
@@ -324,9 +371,8 @@ def generate_visit_pdf(
 
     nombre_cliente = getattr(visit, "nombre_cliente", "") or (getattr(visit, "reporte", None) and getattr(visit.reporte, "nombre_cliente", "")) or ""
     solicitado_por = getattr(visit, "solicitado_por", "") or ""
-    fecha_str = getattr(visit, "fecha", "") or datetime.now().strftime("%d/%m/%Y")
-    if "T" in str(fecha_str):
-        fecha_str = str(fecha_str).split("T")[0]
+    fecha_val = getattr(visit, "fecha", "") or datetime.now()
+    fecha_display = format_report_date(fecha_val)
 
     hora_llamada = getattr(visit, "hora_llamada", "") or (getattr(visit, "reporte", None) and getattr(visit.reporte, "hora_llamada", "")) or ""
     hora_inicio = getattr(visit, "hora_inicio", "") or (getattr(visit, "reporte", None) and getattr(visit.reporte, "hora_inicio", "")) or ""
@@ -336,13 +382,13 @@ def generate_visit_pdf(
     # Row 1
     draw_labeled_field(c, page_x, current_y, w_cliente, row_h, "NOMBRE DEL CLIENTE:", empaque_name or nombre_cliente)
     draw_labeled_field(c, page_x + w_cliente, current_y, w_ubicacion, row_h, "UBICACIÓN:", solicitado_por)
-    draw_labeled_field(c, page_x + w_cliente + w_ubicacion, current_y, w_fecha, row_h, "FECHA:", str(fecha_str))
+    draw_labeled_field(c, page_x + w_cliente + w_ubicacion, current_y, w_fecha, row_h, "FECHA:", fecha_display)
     current_y += row_h
 
-    # Row 2
-    draw_labeled_field(c, page_x, current_y, w_llamada, row_h, "FECHA/HORA LLAMADA RECIBIDA:", str(hora_llamada))
-    draw_labeled_field(c, page_x + w_llamada, current_y, w_comienzo, row_h, "HORA DE COMIENZO:", str(hora_inicio))
-    draw_labeled_field(c, page_x + w_llamada + w_comienzo, current_y, w_fin, row_h, "HORA DE FINALIZACIÓN:", str(hora_fin))
+    # Row 2 - Format time strictly to 24hs (HH:mm)
+    draw_labeled_field(c, page_x, current_y, w_llamada, row_h, "FECHA/HORA LLAMADA RECIBIDA:", format_to_24h(hora_llamada))
+    draw_labeled_field(c, page_x + w_llamada, current_y, w_comienzo, row_h, "HORA DE COMIENZO:", format_to_24h(hora_inicio))
+    draw_labeled_field(c, page_x + w_llamada + w_comienzo, current_y, w_fin, row_h, "HORA DE FINALIZACIÓN:", format_to_24h(hora_fin))
 
     fuera_de_x = page_x + w_llamada + w_comienzo + w_fin
     c.rect(fuera_de_x * mm, y_coord(current_y, row_h), w_fuera_de * mm, row_h * mm, fill=0, stroke=1)
@@ -824,7 +870,7 @@ def create_visits_zip(
             h_ini = v.reporte.hora_inicio if v.reporte else ""
             h_fin = v.reporte.hora_fin if v.reporte else ""
             sync_st = v.estado_sincronizacion or "synced"
-            manifest_lines.append(f'{rep_num},"{v.fecha}","{emp}","{tec_str}","{h_ini}-{h_fin}","{sync_st}"')
+            manifest_lines.append(f'{rep_num},"{v.fecha}","{emp}","{tec_str}","{format_to_24h(h_ini)}-{format_to_24h(h_fin)}","{sync_st}"')
 
         zip_file.writestr("Reportes_Sinclair_PDF/indice_reportes.csv", "\n".join(manifest_lines))
 

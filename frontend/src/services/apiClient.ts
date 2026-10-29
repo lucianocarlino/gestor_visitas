@@ -25,6 +25,7 @@ import {
 } from '../types/domain';
 import { invalidateSystemAlerts } from '../context/NotificationContext';
 import { readReferenceData, writeReferenceData } from './offline/referenceDataDb';
+import { apiFetch } from '../config/apiConfig';
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -48,7 +49,7 @@ async function getReferenceData<T extends Empaque[] | Tecnico[]>(
   sanitize: (data: T) => T = (data) => data,
 ): Promise<T> {
   try {
-    const response = await fetch(url);
+    const response = await apiFetch(url);
     const data = sanitize(await handleResponse<T>(response));
     try {
       await writeReferenceData(key, data);
@@ -69,11 +70,11 @@ async function getReferenceData<T extends Empaque[] | Tecnico[]>(
 
 export const visitsApi = {
   getEnums: async (): Promise<any> => {
-    const res = await fetch('/api/visits/enums');
+    const res = await apiFetch('/visits/enums');
     return handleResponse(res);
   },
   createVisit: async (dto: CreateVisitDTO): Promise<{ visita: Visita; reporte: any }> => {
-    const res = await fetch('/api/visits', {
+    const res = await apiFetch('/visits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dto),
@@ -83,7 +84,7 @@ export const visitsApi = {
     return result;
   },
   syncBatch: async (visits: CreateVisitDTO[]): Promise<{ synced: Visita[]; errors: string[] }> => {
-    const res = await fetch('/api/visits/sync-batch', {
+    const res = await apiFetch('/visits/sync-batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visits }),
@@ -93,19 +94,19 @@ export const visitsApi = {
     return result;
   },
   getAllVisits: async (): Promise<Visita[]> => {
-    const res = await fetch('/api/visits');
+    const res = await apiFetch('/visits');
     return handleResponse(res);
   },
   getVisitById: async (id: string): Promise<Visita> => {
-    const res = await fetch(`/api/visits/${id}`);
+    const res = await apiFetch(`/visits/${id}`);
     return handleResponse(res);
   },
   filterByDateRange: async (start: string, end: string): Promise<Visita[]> => {
-    const res = await fetch(`/api/visits/filter/date-range?start=${start}&end=${end}`);
+    const res = await apiFetch(`/visits/filter/date-range?start=${start}&end=${end}`);
     return handleResponse(res);
   },
   exportZip: async (startDate?: string, endDate?: string): Promise<Blob> => {
-    const res = await fetch('/api/visits/export-zip', {
+    const res = await apiFetch('/visits/export-zip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ startDate, endDate }),
@@ -118,14 +119,14 @@ export const visitsApi = {
 export const coreApi = {
   // Empaques
   getEmpaques: async (): Promise<Empaque[]> => {
-    return getReferenceData<Empaque[]>('empaques', '/api/core/empaques');
+    return getReferenceData<Empaque[]>('empaques', '/core/empaques');
   },
   getUnvisitedAlerts: async (): Promise<any[]> => {
-    const res = await fetch('/api/core/empaques/alerts/unvisited');
+    const res = await apiFetch('/core/empaques/alerts/unvisited');
     return handleResponse(res);
   },
   createEmpaque: async (data: CreateEmpaqueDTO | Partial<Empaque>): Promise<Empaque> => {
-    const res = await fetch('/api/core/empaques', {
+    const res = await apiFetch('/core/empaques', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -135,7 +136,7 @@ export const coreApi = {
     return result;
   },
   updateEmpaque: async (id: string, data: Partial<Empaque>): Promise<Empaque> => {
-    const res = await fetch(`/api/core/empaques/${id}`, {
+    const res = await apiFetch(`/core/empaques/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -145,7 +146,7 @@ export const coreApi = {
     return result;
   },
   deleteEmpaque: async (id: string): Promise<{ success: boolean }> => {
-    const res = await fetch(`/api/core/empaques/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`/core/empaques/${id}`, { method: 'DELETE' });
     const result = await handleResponse<{ success: boolean }>(res);
     invalidateSystemAlerts();
     return result;
@@ -153,15 +154,15 @@ export const coreApi = {
 
   // Machines
   getEquipmentByLocation: async (empaqueId: string): Promise<any> => {
-    const res = await fetch(`/api/core/machines/location/${empaqueId}`);
+    const res = await apiFetch(`/core/machines/location/${empaqueId}`);
     return handleResponse(res);
   },
   getAllMovements: async (): Promise<Movimiento[]> => {
-    const res = await fetch('/api/core/machines/movements');
+    const res = await apiFetch('/core/machines/movements');
     return handleResponse(res);
   },
   createMovimiento: async (data: any): Promise<Movimiento> => {
-    const res = await fetch('/api/core/machines/movements', {
+    const res = await apiFetch('/core/machines/movements', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -169,11 +170,11 @@ export const coreApi = {
     return handleResponse(res);
   },
   getCabezales: async (): Promise<Cabezal[]> => {
-    const res = await fetch('/api/core/machines/cabezales');
+    const res = await apiFetch('/core/machines/cabezales');
     return handleResponse(res);
   },
   createCabezal: async (data: Partial<Cabezal>): Promise<Cabezal> => {
-    const res = await fetch('/api/core/machines/cabezales', {
+    const res = await apiFetch('/core/machines/cabezales', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -181,7 +182,7 @@ export const coreApi = {
     return handleResponse(res);
   },
   updateCabezal: async (id: string, data: Partial<Cabezal>): Promise<Cabezal> => {
-    const res = await fetch(`/api/core/machines/cabezales/${id}`, {
+    const res = await apiFetch(`/core/machines/cabezales/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -189,17 +190,17 @@ export const coreApi = {
     return handleResponse(res);
   },
   deleteCabezal: async (id: string): Promise<{ success: boolean }> => {
-    const res = await fetch(`/api/core/machines/cabezales/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`/core/machines/cabezales/${id}`, { method: 'DELETE' });
     return handleResponse(res);
   },
 
   // Caseteras
   getCaseteras: async (): Promise<Casetera[]> => {
-    const res = await fetch('/api/core/machines/caseteras');
+    const res = await apiFetch('/core/machines/caseteras');
     return handleResponse(res);
   },
   createCasetera: async (data: Partial<Casetera>): Promise<Casetera> => {
-    const res = await fetch('/api/core/machines/caseteras', {
+    const res = await apiFetch('/core/machines/caseteras', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -207,7 +208,7 @@ export const coreApi = {
     return handleResponse(res);
   },
   updateCasetera: async (numero: number, data: Partial<Casetera>): Promise<Casetera> => {
-    const res = await fetch(`/api/core/machines/caseteras/${numero}`, {
+    const res = await apiFetch(`/core/machines/caseteras/${numero}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -215,17 +216,17 @@ export const coreApi = {
     return handleResponse(res);
   },
   deleteCasetera: async (numero: number): Promise<{ success: boolean }> => {
-    const res = await fetch(`/api/core/machines/caseteras/${numero}`, { method: 'DELETE' });
+    const res = await apiFetch(`/core/machines/caseteras/${numero}`, { method: 'DELETE' });
     return handleResponse(res);
   },
 
   // Frenos
   getFrenos: async (): Promise<Freno[]> => {
-    const res = await fetch('/api/core/machines/frenos');
+    const res = await apiFetch('/core/machines/frenos');
     return handleResponse(res);
   },
   createFreno: async (data: Partial<Freno>): Promise<Freno> => {
-    const res = await fetch('/api/core/machines/frenos', {
+    const res = await apiFetch('/core/machines/frenos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -233,7 +234,7 @@ export const coreApi = {
     return handleResponse(res);
   },
   updateFreno: async (id: string, data: Partial<Freno>): Promise<Freno> => {
-    const res = await fetch(`/api/core/machines/frenos/${id}`, {
+    const res = await apiFetch(`/core/machines/frenos/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -241,17 +242,17 @@ export const coreApi = {
     return handleResponse(res);
   },
   deleteFreno: async (id: string): Promise<{ success: boolean }> => {
-    const res = await fetch(`/api/core/machines/frenos/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`/core/machines/frenos/${id}`, { method: 'DELETE' });
     return handleResponse(res);
   },
 
   // Operations
   getReemplazos: async (): Promise<Reemplazo[]> => {
-    const res = await fetch('/api/core/operations/reemplazos');
+    const res = await apiFetch('/core/operations/reemplazos');
     return handleResponse(res);
   },
   createReemplazo: async (dto: CreateReeplaceDTO): Promise<Reemplazo> => {
-    const res = await fetch('/api/core/operations/reemplazos', {
+    const res = await apiFetch('/core/operations/reemplazos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dto),
@@ -261,11 +262,11 @@ export const coreApi = {
     return result;
   },
   getCambios: async (): Promise<Cambio[]> => {
-    const res = await fetch('/api/core/operations/cambios');
+    const res = await apiFetch('/core/operations/cambios');
     return handleResponse(res);
   },
   createCambio: async (dto: CreateCambioDTO): Promise<Cambio> => {
-    const res = await fetch('/api/core/operations/cambios', {
+    const res = await apiFetch('/core/operations/cambios', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dto),
@@ -275,11 +276,11 @@ export const coreApi = {
     return result;
   },
   getServicios: async (): Promise<Servicio[]> => {
-    const res = await fetch('/api/core/operations/servicios');
+    const res = await apiFetch('/core/operations/servicios');
     return handleResponse(res);
   },
   createServicio: async (dto: CreateServiceDTO): Promise<any> => {
-    const res = await fetch('/api/core/operations/servicios', {
+    const res = await apiFetch('/core/operations/servicios', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dto),
@@ -291,15 +292,15 @@ export const coreApi = {
 
   // Consumibles
   getConsumibles: async (): Promise<Consumible[]> => {
-    const res = await fetch('/api/core/consumibles');
+    const res = await apiFetch('/core/consumibles');
     return handleResponse(res);
   },
   getLowStockAlerts: async (): Promise<any[]> => {
-    const res = await fetch('/api/core/consumibles/alerts/low-stock');
+    const res = await apiFetch('/core/consumibles/alerts/low-stock');
     return handleResponse(res);
   },
   createConsumible: async (data: Partial<Consumible>): Promise<Consumible> => {
-    const res = await fetch('/api/core/consumibles', {
+    const res = await apiFetch('/core/consumibles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -309,7 +310,7 @@ export const coreApi = {
     return result;
   },
   updateConsumible: async (id: string, data: Partial<Consumible>): Promise<Consumible> => {
-    const res = await fetch(`/api/core/consumibles/${id}`, {
+    const res = await apiFetch(`/core/consumibles/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -319,7 +320,7 @@ export const coreApi = {
     return result;
   },
   deleteConsumible: async (id: string): Promise<{ success: boolean }> => {
-    const res = await fetch(`/api/core/consumibles/${id}`, {
+    const res = await apiFetch(`/core/consumibles/${id}`, {
       method: 'DELETE',
     });
     const result = await handleResponse<{ success: boolean }>(res);
@@ -327,7 +328,7 @@ export const coreApi = {
     return result;
   },
   toggleCriticalConsumible: async (id: string): Promise<Consumible> => {
-    const res = await fetch(`/api/core/consumibles/${id}/toggle-critical`, {
+    const res = await apiFetch(`/core/consumibles/${id}/toggle-critical`, {
       method: 'PATCH',
     });
     const result = await handleResponse<Consumible>(res);
@@ -335,7 +336,7 @@ export const coreApi = {
     return result;
   },
   restockConsumible: async (id: string, amount: number): Promise<Consumible> => {
-    const res = await fetch(`/api/core/consumibles/${id}/restock`, {
+    const res = await apiFetch(`/core/consumibles/${id}/restock`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount }),
@@ -347,16 +348,16 @@ export const coreApi = {
 
   // Tecnicos
   getTecnicos: async (): Promise<Tecnico[]> => {
-    return getReferenceData<Tecnico[]>('tecnicos', '/api/core/tecnicos', (tecnicos) =>
+    return getReferenceData<Tecnico[]>('tecnicos', '/core/tecnicos', (tecnicos) =>
       tecnicos.map(({ password: _password, ...tecnico }) => tecnico),
     );
   },
   getTecnicoStats: async (): Promise<any[]> => {
-    const res = await fetch('/api/core/tecnicos/activity/stats');
+    const res = await apiFetch('/core/tecnicos/activity/stats');
     return handleResponse(res);
   },
   createTecnico: async (data: Partial<Tecnico>): Promise<Tecnico> => {
-    const res = await fetch('/api/core/tecnicos', {
+    const res = await apiFetch('/core/tecnicos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -364,7 +365,7 @@ export const coreApi = {
     return handleResponse(res);
   },
   updateTecnico: async (id: string, data: Partial<Tecnico>): Promise<Tecnico> => {
-    const res = await fetch(`/api/core/tecnicos/${id}`, {
+    const res = await apiFetch(`/core/tecnicos/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -372,13 +373,13 @@ export const coreApi = {
     return handleResponse(res);
   },
   deleteTecnico: async (id: string): Promise<{ success: boolean }> => {
-    const res = await fetch(`/api/core/tecnicos/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`/core/tecnicos/${id}`, { method: 'DELETE' });
     return handleResponse(res);
   },
 
   // Auth Login
   authLogin: async (credentials: { email?: string; id?: string; password?: string }): Promise<{ user: Tecnico; token: string }> => {
-    const res = await fetch('/api/core/auth/login', {
+    const res = await apiFetch('/core/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
@@ -388,11 +389,11 @@ export const coreApi = {
 
   // Statistics & Provider
   getDashboardStats: async (): Promise<any> => {
-    const res = await fetch('/api/core/statistics/dashboard');
+    const res = await apiFetch('/core/statistics/dashboard');
     return handleResponse(res);
   },
   getProviderTelemetry: async (): Promise<any> => {
-    const res = await fetch('/api/core/provider/telemetry');
+    const res = await apiFetch('/core/provider/telemetry');
     return handleResponse(res);
   },
 
@@ -414,11 +415,11 @@ export const coreApi = {
     if (filters?.limit) params.append('limit', String(filters.limit));
 
     const query = params.toString();
-    const res = await fetch(`/api/core/audit-logs${query ? `?${query}` : ''}`);
+    const res = await apiFetch(`/core/audit-logs${query ? `?${query}` : ''}`);
     return handleResponse(res);
   },
   createAuditLog: async (entry: Partial<AuditEntry>): Promise<AuditEntry> => {
-    const res = await fetch('/api/core/audit-logs', {
+    const res = await apiFetch('/core/audit-logs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),

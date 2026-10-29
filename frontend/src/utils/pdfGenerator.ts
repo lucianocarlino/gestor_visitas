@@ -7,6 +7,8 @@
 
 import jsPDF from 'jspdf';
 import * as JSZip from 'jszip';
+import { isNativeApp } from '../platform/nativePlatform';
+import { exportFileNative, exportFileNativeSafely } from '../platform/nativeFileExport';
 import {
   CodigoMotivo,
   CodigoOrden,
@@ -92,6 +94,80 @@ export function generateSinclairReportNumber(
   const base36Seconds = secondsInMonth.toString(36).toUpperCase().padStart(4, '0');
 
   return `${prefix}${year}${month}${base36Seconds}`;
+}
+
+/**
+ * Formats any time string or ISO datetime into strictly 24-hour HH:mm format.
+ * Guarantees that only the time (e.g. "08:30", "14:00") appears in PDF time fields.
+ */
+export function formatTo24HourTime(timeInput?: unknown): string {
+  if (timeInput === undefined || timeInput === null) return '';
+  if (timeInput instanceof Date) {
+    if (isNaN(timeInput.getTime())) return '';
+    const hours = String(timeInput.getHours()).padStart(2, '0');
+    const minutes = String(timeInput.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  const str = String(timeInput).trim();
+  if (!str) return '';
+
+  // Check for 12-hour AM/PM format (e.g. "02:30 PM", "2:30pm", "12:15 AM")
+  const ampmMatch = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)/i);
+  if (ampmMatch) {
+    let hours = parseInt(ampmMatch[1], 10);
+    const minutes = ampmMatch[2].padStart(2, '0');
+    const isPM = ampmMatch[3].toLowerCase() === 'pm';
+    if (isPM && hours < 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
+  }
+
+  // Check for ISO datetime or datetime with separator (T or space)
+  if (str.includes('T') || str.includes(' ')) {
+    const timePart = str.includes('T') ? str.split('T')[1] : str.split(/\s+/)[1];
+    if (timePart) {
+      const match = timePart.match(/(\d{1,2}):(\d{2})/);
+      if (match) {
+        const hours = match[1].padStart(2, '0');
+        const minutes = match[2];
+        return `${hours}:${minutes}`;
+      }
+    }
+  }
+
+  // Match simple time format "HH:mm" or "HH:mm:ss"
+  const simpleMatch = str.match(/(\d{1,2}):(\d{2})/);
+  if (simpleMatch) {
+    const hours = simpleMatch[1].padStart(2, '0');
+    const minutes = simpleMatch[2];
+    return `${hours}:${minutes}`;
+  }
+
+  return str;
+}
+
+/**
+ * Formats a date value into DD/MM/YYYY for Sinclair reports
+ */
+export function formatReportDate(dateInput?: unknown): string {
+  if (!dateInput) return new Date().toLocaleDateString('es-AR');
+  if (dateInput instanceof Date && !isNaN(dateInput.getTime())) {
+    return dateInput.toLocaleDateString('es-AR');
+  }
+  const str = String(dateInput).trim();
+  if (!str) return new Date().toLocaleDateString('es-AR');
+
+  const clean = str.includes('T') ? str.split('T')[0] : str.split(/\s+/)[0];
+  const parts = clean.split(/[-/]/);
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      // YYYY-MM-DD -> DD/MM/YYYY
+      return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+    }
+    return clean;
+  }
+  return str;
 }
 
 /**
@@ -308,15 +384,20 @@ export function generateVisitPDF(
   const wSiNo = wFecha / 2; // 12 mm
 
   // Row 1 - Uses empaqueName if provided, and empaqueUbicacion for UBICACIÓN
+  const displayFecha = formatReportDate(visit.fecha);
   drawLabeledField(doc, pageX, y, wCliente, rowH, 'NOMBRE DEL CLIENTE:', empaqueName || visit.nombre_cliente || '');
   drawLabeledField(doc, pageX + wCliente, y, wUbicacion, rowH, 'UBICACIÓN:', empaqueUbicacion || visit.solicitado_por || '');
-  drawLabeledField(doc, pageX + wCliente + wUbicacion, y, wFecha, rowH, 'FECHA:', new Date().toLocaleDateString('es-AR'));
+  drawLabeledField(doc, pageX + wCliente + wUbicacion, y, wFecha, rowH, 'FECHA:', displayFecha);
   y += rowH;
 
-  // Row 2
-  drawLabeledField(doc, pageX, y, wLlamada, rowH, 'FECHA/HORA LLAMADA RECIBIDA:', visit.hora_llamada || '');
-  drawLabeledField(doc, pageX + wLlamada, y, wComienzo, rowH, 'HORA DE COMIENZO:', visit.hora_inicio || '');
-  drawLabeledField(doc, pageX + wLlamada + wComienzo, y, wFin, rowH, 'HORA DE FINALIZACIÓN:', visit.hora_fin || '');
+  // Row 2 - Strict 24-hour time format (HH:mm) for all three time fields
+  const horaLlamadaFormatted = formatTo24HourTime(visit.hora_llamada);
+  const horaInicioFormatted = formatTo24HourTime(visit.hora_inicio);
+  const horaFinFormatted = formatTo24HourTime(visit.hora_fin);
+
+  drawLabeledField(doc, pageX, y, wLlamada, rowH, 'FECHA/HORA LLAMADA RECIBIDA:', horaLlamadaFormatted);
+  drawLabeledField(doc, pageX + wLlamada, y, wComienzo, rowH, 'HORA DE COMIENZO:', horaInicioFormatted);
+  drawLabeledField(doc, pageX + wLlamada + wComienzo, y, wFin, rowH, 'HORA DE FINALIZACIÓN:', horaFinFormatted);
 
   const fueraDeX = pageX + wLlamada + wComienzo + wFin;
   doc.rect(fueraDeX, y, wFueraDe, rowH, 'S');
@@ -819,6 +900,7 @@ function mapVisitaToCreateVisitDTO(visita: Visita): CreateVisitDTO {
     condicion_fruta: visita.reporte.condicion_fruta,
     id: visita.id,
     numero: visita.reporte.numero,
+    fecha: visita.fecha,
   };
 }
 
@@ -834,6 +916,10 @@ export function downloadVisitPDF(visita: Visita, logoImagePath?: string): void {
     .replace(/[^a-zA-Z0-9_-]/g, '_')
     .slice(0, 20);
   const fileName = `Reporte_Sinclair_${visita.reporte.numero}.pdf`;
+  if (isNativeApp()) {
+    exportFileNativeSafely(doc.output('blob'), fileName, { persist: true });
+    return;
+  }
   doc.save(fileName);
 }
 
@@ -882,18 +968,24 @@ export async function downloadVisitsAsZip(
 
   visitas.forEach((v) => {
     const tecStr = v.tecnicos.map((t) => t.nombre).join(' & ');
-    summaryContent += `${v.reporte.numero},"${v.fecha}","${v.empaque?.nombre || 'Planta'}","${tecStr}","${v.reporte.hora_inicio}-${v.reporte.hora_fin}","${v.estado_sincronizacion}"\n`;
+    summaryContent += `${v.reporte.numero},"${v.fecha}","${v.empaque?.nombre || 'Planta'}","${tecStr}","${formatTo24HourTime(v.reporte.hora_inicio)}-${formatTo24HourTime(v.reporte.hora_fin)}","${v.estado_sincronizacion}"\n`;
   });
 
   zip.file('indice_reportes.csv', summaryContent);
 
   const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const zipFileName = `Reportes_Sinclair_PDF_${new Date().toISOString().split('T')[0]}.zip`;
+
+  if (isNativeApp()) {
+    await exportFileNative(zipBlob, zipFileName, { persist: true });
+    return;
+  }
 
   // Trigger download
   const url = URL.createObjectURL(zipBlob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Reportes_Sinclair_PDF_${new Date().toISOString().split('T')[0]}.zip`;
+  a.download = zipFileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

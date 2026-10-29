@@ -1,13 +1,13 @@
 import { coreApi } from '../apiClient';
+import { subscribeToConnectivity } from '../../platform/connectivity';
 
-/** Refreshes the local reference-data snapshots when the browser regains connectivity. */
+/** Refreshes the local reference-data snapshots when the device regains connectivity. */
 export function registerReferenceDataRefresh(): () => void {
-  if (typeof window === 'undefined') return () => undefined;
-
   const refresh = () => {
     void Promise.allSettled([coreApi.getEmpaques(), coreApi.getTecnicos()]);
   };
 
-  window.addEventListener('online', refresh);
-  return () => window.removeEventListener('online', refresh);
+  return subscribeToConnectivity((isOnline) => {
+    if (isOnline) refresh();
+  });
 }
