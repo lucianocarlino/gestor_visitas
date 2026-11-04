@@ -5,6 +5,7 @@
 
 import { CreateVisitDTO } from '../types/domain';
 import { visitsApi } from './apiClient';
+import { subscribeToConnectivity } from '../platform/connectivity';
 
 const STORAGE_KEY = 'sinclair_pending_offline_visits_v1';
 
@@ -20,11 +21,10 @@ export class OfflineSyncManager {
   private listeners: ((pendingCount: number) => void)[] = [];
 
   private constructor() {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => {
-        this.syncPendingVisits();
-      });
-    }
+    // Web: window 'online' event. Android: @capacitor/network status changes.
+    subscribeToConnectivity((isOnline) => {
+      if (isOnline) this.syncPendingVisits();
+    });
   }
 
   public static getInstance(): OfflineSyncManager {

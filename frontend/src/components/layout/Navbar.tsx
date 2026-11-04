@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { OfflineSyncManager } from '../../services/offlineSync';
+import { subscribeToConnectivity } from '../../platform/connectivity';
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -41,19 +42,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   const syncManager = OfflineSyncManager.getInstance();
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    const unsubscribeConnectivity = subscribeToConnectivity(setIsOnline);
 
     const unsubscribe = syncManager.subscribe((count) => {
       setPendingCount(count);
     });
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      unsubscribeConnectivity();
       unsubscribe();
     };
   }, []);
@@ -86,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="btn-toggle-sidebar"
             onClick={onToggleSidebar}
-            className="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none"
+            className="lg:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none"
             aria-label="Abrir menú"
           >
             <Menu className="w-6 h-6" />

@@ -255,7 +255,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               id="btn-dash-new-visit"
               onClick={onNewVisit}
               className="px-4 py-2.5 bg-white text-blue-900 hover:bg-blue-50 font-bold rounded-xl shadow transition flex items-center gap-2 text-sm"
-              disabled={true}
             >
               <Activity className="w-4 h-4 text-blue-600" />
               Nueva Visita
@@ -360,7 +359,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
               disabled={ true }
             >
-              Ver todas {/*({recentVisits.length})*/} (Inactivo)
+              Ver todas {/*({recentVisits.length})*/}
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>

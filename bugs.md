@@ -5,3 +5,5 @@
 ~5- Al abrir la aplicacion debe aparecer sin sesion, y sin sesion solo se pueden realizar operaciones de visualizacion y nada mas~
 6- Al crear un cabezal debo poder crear un freno al mismo tiempo y asignarselo a el cabezal.
 ~7- Al realizar un reemplazo, cambio de freno o servicio, el tecnico es el que esta logueado.~
+8- En la tabla de maquinas, debe haber un renglon por banco del empaque, con el numero de serie como id del banco, ademas de un codigo de motivo distinto por cada uno.
+9- En el formulario de visita, Código de motivo no debe aparecer como campo editable, debe ser la lista de Codigos de Motivo de la tabla de maquinas, sin repeticiones 

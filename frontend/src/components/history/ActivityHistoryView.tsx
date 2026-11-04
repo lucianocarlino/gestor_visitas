@@ -93,44 +93,46 @@ export const ActivityHistoryView: React.FC<ActivityHistoryViewProps> = ({
   };
 
   // Filtered lists based on search
+  const term = (searchTerm || '').toLowerCase();
+
   const filteredReemplazos = reemplazos.filter(
     (r) =>
-      (r.retirado_id?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-      r.instalado_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.empaque_nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.motivo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.retirado_id || '').toLowerCase().includes(term) ||
+      (r.instalado_id || '').toLowerCase().includes(term) ||
+      (r.empaque_nombre || '').toLowerCase().includes(term) ||
+      (r.motivo || '').toLowerCase().includes(term) ||
       (r.tecnico_nombre &&
-        r.tecnico_nombre.toLowerCase().includes(searchTerm.toLowerCase())),
+        r.tecnico_nombre.toLowerCase().includes(term)),
   );
 
   const filteredCambios = cambios.filter(
     (c) =>
-      c.cabezal_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.retirado_freno_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.instalado_freno_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.lugar.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.motivo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.cabezal_id || '').toLowerCase().includes(term) ||
+      (c.retirado_freno_id || '').toLowerCase().includes(term) ||
+      (c.instalado_freno_id || '').toLowerCase().includes(term) ||
+      (c.lugar || '').toLowerCase().includes(term) ||
+      (c.motivo || '').toLowerCase().includes(term) ||
       (c.tecnico_nombre &&
-        c.tecnico_nombre.toLowerCase().includes(searchTerm.toLowerCase())),
+        c.tecnico_nombre.toLowerCase().includes(term)),
   );
 
   const filteredServicios = servicios.filter(
     (s) =>
-      s.machine_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.resumen.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.trabajo_hecho.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.machine_id || '').toLowerCase().includes(term) ||
+      (s.resumen || '').toLowerCase().includes(term) ||
+      (s.trabajo_hecho || '').toLowerCase().includes(term) ||
       (s.tecnico_nombre &&
-        s.tecnico_nombre.toLowerCase().includes(searchTerm.toLowerCase())),
+        s.tecnico_nombre.toLowerCase().includes(term)),
   );
 
   const filteredMovimientos = movements.filter(
     (m) =>
-      m.machine_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.origen.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.destino.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.motivo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (m.machine_id || '').toLowerCase().includes(term) ||
+      (m.origen || '').toLowerCase().includes(term) ||
+      (m.destino || '').toLowerCase().includes(term) ||
+      (m.motivo || '').toLowerCase().includes(term) ||
       (m.tecnico_nombre &&
-        m.tecnico_nombre.toLowerCase().includes(searchTerm.toLowerCase())),
+        m.tecnico_nombre.toLowerCase().includes(term)),
   );
 
   return (

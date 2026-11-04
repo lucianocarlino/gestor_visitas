@@ -1,6 +1,12 @@
 import os
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
+
+# Variable de configuración para el directorio donde se almacenan los PDFs de visitas generados.
+# Puedes cambiar la ruta asignando directamente esta variable o definiendo la variable de entorno PDF_STORAGE_DIR.
+DEFAULT_PDF_STORAGE_DIR = Path(__file__).resolve().parent.parent.parent / "storage" / "reports"
+PDF_STORAGE_DIR = Path(os.getenv("PDF_STORAGE_DIR", str(DEFAULT_PDF_STORAGE_DIR)))
 
 
 @dataclass(frozen=True, slots=True)

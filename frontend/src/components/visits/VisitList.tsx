@@ -114,8 +114,6 @@ export const VisitList: React.FC<VisitListProps> = ({ onNewVisitClick }) => {
                 <th className="p-3.5">Fecha</th>
                 <th className="p-3.5">Empaque</th>
                 <th className="p-3.5">Técnicos</th>
-                <th className="p-3.5">Motivo Sinclair</th>
-                <th className="p-3.5">Vehículo</th>
                 <th className="p-3.5">Estado</th>
                 <th className="p-3.5 text-right">Acción</th>
               </tr>
@@ -146,13 +144,6 @@ export const VisitList: React.FC<VisitListProps> = ({ onNewVisitClick }) => {
                       {v.tecnicos.map((t) => t.nombre).join(', ')}
                     </td>
                     <td className="p-3.5">
-                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md font-medium text-[11px]">
-                        {v.reporte.codigo_motivo}
-                      </span>
-                      <div className="text-[10px] text-slate-500 mt-0.5">{v.reporte.codigo_origen}</div>
-                    </td>
-                    <td className="p-3.5 text-slate-600">{v.vehiculo}</td>
-                    <td className="p-3.5">
                       {v.estado_sincronizacion === 'synced' ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
                           <CheckCircle className="w-3.5 h-3.5" /> Sincronizado
@@ -170,7 +161,7 @@ export const VisitList: React.FC<VisitListProps> = ({ onNewVisitClick }) => {
                           onClick={() => handleOpenReport(v)}
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 font-semibold rounded-lg transition"
                         >
-                          <Eye className="w-3.5 h-3.5" /> Ver Reporte
+                          <Eye className="w-3.5 h-3.5" /> Ver resumen
                         </button>
                         <button
                           id={`btn-download-pdf-${v.id}`}

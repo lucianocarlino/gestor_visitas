@@ -220,6 +220,9 @@ class Consumible(BaseModel):
     stock_minimo: int
 
 class ItemEstructura(BaseModel):
+    numero_de_serie: str
+    codigo_motivo: CodigoMotivo
+    codigo_origen: CodigoOrden
     codigo_res: str
     numero_partes: str
     cantidad: str
@@ -230,7 +233,7 @@ class ItemEstructura(BaseModel):
 
 
 class ReporteSinclair(BaseModel):
-    numero: int
+    numero: str
     codigo_motivo: CodigoMotivo
     codigo_origen: CodigoOrden
     codigo_tipo_servicio: CodigoTipoServicio
@@ -263,8 +266,8 @@ class CreateVisitDTO(BaseModel):
     vehiculo: Vehiculo
     empaque_id: str
     tecnico_ids: list[str]
-    codigo_motivo: CodigoMotivo
-    codigo_origen: CodigoOrden
+    codigo_motivo: list[CodigoMotivo]
+    codigo_origen: list[CodigoOrden]
     codigo_tipo_servicio: CodigoTipoServicio
     solicitado_por: str
     motivo: str
@@ -279,6 +282,7 @@ class CreateVisitDTO(BaseModel):
     produccion_etiquetada: str | None = None
     condicion_fruta: str | None = None
     id: str | None = None
+    numero: str | None = None
 
 
 class CreateReeplaceDTO(BaseModel):

@@ -217,7 +217,6 @@ export const TechniciansView: React.FC = () => {
                   </div>
                   <div className="overflow-hidden">
                     <h3 className="font-bold text-slate-900 text-sm truncate">{tec.nombre}</h3>
-                    <span className="text-[10px] text-slate-400 font-mono">ID: {tec.id}</span>
                   </div>
                 </div>
 

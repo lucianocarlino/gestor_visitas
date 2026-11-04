@@ -32,6 +32,8 @@ import {
 import { coreApi } from '../../services/apiClient';
 import { AuditEntry, AuditCategory, AuditAction } from '../../types/domain';
 import { useAuth } from '../../context/AuthContext';
+import { isNativeApp } from '../../platform/nativePlatform';
+import { exportFileNativeSafely } from '../../platform/nativeFileExport';
 
 interface AuditTrailProps {
   onRefreshParent?: () => void;
@@ -170,10 +172,15 @@ export const AuditTrail: React.FC<AuditTrailProps> = () => {
 
       const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const csvFileName = `Auditoria_Sinclair_${new Date().toISOString().split('T')[0]}.csv`;
+      if (isNativeApp()) {
+        exportFileNativeSafely(blob, csvFileName, { persist: true });
+        return;
+      }
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `Auditoria_Sinclair_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', csvFileName);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
