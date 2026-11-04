@@ -62,7 +62,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    const result = await loginWithPassword(selectedUser.id, password);
+    const result = await loginWithPassword(selectedUser.email, password);
     setIsLoading(false);
 
     if (result.success) {
