@@ -38,8 +38,12 @@ class SyncBatchResponse(BaseModel):
 
 
 class CreateVisitResponse(BaseModel):
-    visita: Visita
-    reporte: ReporteSinclair
+    visita: Visita | None = None
+    reporte: ReporteSinclair | None = None
+
+    @classmethod
+    def empty(cls) -> "CreateVisitResponse":
+        return cls(visita=None, reporte=None)
 
 
 class ExportZipRequest(BaseModel):

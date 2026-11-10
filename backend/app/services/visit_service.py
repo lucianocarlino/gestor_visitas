@@ -13,7 +13,14 @@ class VisitService(DatabaseBackedService):
 
     def create(self, data: CreateVisitDTO) -> CreateVisitResponse:
         try:
-            visit_model = self.visitas_repository.create_visit(data)
+            existing_model = self.visitas_repository.get_visit_by_id(data.id) if data.id else None
+            if existing_model and existing_model.reporte:
+                return CreateVisitResponse(
+                    visita=existing_model.to_domain(),
+                    reporte=existing_model.reporte.to_domain(),
+                )
+
+            visit_model = existing_model or self.visitas_repository.create_visit(data)
             if not visit_model:
                 return CreateVisitResponse.empty()
 
@@ -55,7 +62,7 @@ class VisitService(DatabaseBackedService):
     def list_all(self) -> list[Visita]:
         try:
             visits = self.visitas_repository.get_all_visits()
-            return [v.to_domain() for v in visits if v]
+            return [v.to_domain() for v in visits if v and v.reporte]
         except Exception as e:
             print(f"Error listing visits: {e}")
             return []
@@ -63,7 +70,7 @@ class VisitService(DatabaseBackedService):
     def filter_by_date_range(self, start: str, end: str) -> list[Visita]:
         try:
             visits = self.visitas_repository.filter_by_date_range(start, end)
-            return [v.to_domain() for v in visits if v]
+            return [v.to_domain() for v in visits if v and v.reporte]
         except Exception as e:
             print(f"Error filtering visits by date range: {e}")
             return []

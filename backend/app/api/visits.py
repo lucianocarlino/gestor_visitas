@@ -24,13 +24,11 @@ async def get_enums() -> EnumsResponse:
 
 @visits_router.post("", response_model=CreateVisitResponse)
 async def create_visit(dto: CreateVisitDTO, service: VisitServiceDependency) -> CreateVisitResponse:
-    print("Create visit DTO:", dto)
     return service.create(dto)
 
 
 @visits_router.post("/sync-batch", response_model=SyncBatchResponse)
 async def sync_batch(payload: SyncBatchRequest, service: VisitServiceDependency) -> SyncBatchResponse:
-    print("Sync batch payload:", payload)
     return service.sync_batch(payload.visits)
 
 
@@ -47,8 +45,8 @@ async def filter_by_date_range(
 ) -> list[Visita]:
     return service.filter_by_date_range(start, end)
 
-@visits_router.post("/export-z"
-                    "ip", response_class=Response)
+
+@visits_router.post("/export-zip", response_class=Response)
 async def export_zip(payload: ExportZipRequest, service: VisitServiceDependency) -> Response:
     return service.export_zip(payload)
 

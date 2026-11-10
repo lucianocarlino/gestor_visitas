@@ -37,12 +37,15 @@ El sistema funciona mediante **3 servicios de Windows** con inicio automático (
    - Variables de entorno inyectadas por NSSM (`AppEnvironmentExtra`):
      - `DATABASE_URL=postgresql://postgres:1234@127.0.0.1:5432/gestor_visitas`
      - `PYTHONUNBUFFERED=1`
+     - `PYTHONUTF8=1`
+     - `PYTHONIOENCODING=utf-8`
    - *(Importante: Se inyecta `DATABASE_URL` desde NSSM para no modificar `backend/app/db/config.py` ni `.env`, manteniendo intacta la configuración del entorno de desarrollo).*
 
 3. **Frontend + Reverse Proxy (`GestorVisitasNginx` - gestionado por NSSM):**
    - Ejecutable: `C:\nginx\nginx.exe`
    - Directorio de trabajo: `C:\nginx`
    - Función: Sirve los archivos estáticos compilados en `C:\nginx\html` en el puerto `80` y redirige todas las peticiones `/api/` hacia `http://127.0.0.1:8000/`.
+   - **Conexión de la App Móvil (Android):** Tanto la web como la APK de Android se conectan a través de Nginx en el puerto `80` usando `VITE_API_BASE_URL=http://192.168.1.70/api` (definido en `frontend/.env.android`). De esta forma, `uvicorn` permanece protegido escuchando solo en `127.0.0.1:8000` y solo se expone el puerto `80` en la red local.
 
 ---
 
@@ -73,7 +76,7 @@ alembic upgrade head
 nssm restart GestorVisitasBackend
 ```
 
-### Paso 3: Si hubo cambios en el Frontend (React / Vite)
+### Paso 3: Si hubo cambios en el Frontend Web (React / Vite)
 ```powershell
 cd "D:\Archivos Antonio\CyC\gestor_visitas\frontend"
 
@@ -87,6 +90,31 @@ Copy-Item "D:\Archivos Antonio\CyC\gestor_visitas\frontend\dist\*" -Destination 
 
 # 3. Reiniciar Nginx (opcional, para limpiar caché)
 nssm restart GestorVisitasNginx
+```
+
+### Paso 4: Si hay que recompilar la App Móvil Android (en la PC de Desarrollo)
+La app Android toma la URL del servidor desde `frontend/.env.android`:
+```ini
+VITE_API_BASE_URL=http://192.168.1.70/api
+```
+*(Nota: Cuando el repositorio está dentro de una carpeta de OneDrive, OneDrive suele marcar las subcarpetas de `frontend/android` como Solo Lectura, provocando el error `EPERM: operation not permitted, rmdir` al correr `npm run cap:sync`).*
+
+Para compilar y sincronizar sin errores de permisos en la PC de desarrollo:
+```powershell
+cd "C:\Users\User\OneDrive - frt.utn.edu.ar\CyC\Horas\frontend"
+
+# 1. Compilar bundle en modo Android (lee .env.android)
+npm run build:android
+
+# 2. Quitar atributo de solo lectura de OneDrive y actualizar plugins/assets de Capacitor
+attrib -R "android\*" /S /D
+cmd /c "rmdir /s /q android\capacitor-cordova-android-plugins\build 2>nul"
+npx cap update android
+Copy-Item -Path "dist\*" -Destination "android\app\src\main\assets\public\" -Recurse -Force
+
+# 3. Generar el APK de debug
+cd android
+.\gradlew assembleDebug
 ```
 
 ---
@@ -140,7 +168,7 @@ Dentro del bloque `server { listen 80; ... }`, las rutas deben estar configurada
 ```
 
 ### Regla de Firewall para acceso en Red Local (LAN)
-Para permitir que otras PCs de la red accedan a la IP fija del servidor por el puerto 80:
+Para permitir que otras PCs y los celulares Android de la red accedan a la IP fija del servidor (`192.168.1.70`) por el puerto 80:
 ```powershell
 New-NetFirewallRule -DisplayName "Nginx HTTP 80" -Direction Inbound -LocalPort 80 -Protocol TCP -Action Allow
 ```
@@ -150,7 +178,7 @@ New-NetFirewallRule -DisplayName "Nginx HTTP 80" -Direction Inbound -LocalPort 8
 # --- SERVICIO BACKEND ---
 nssm install GestorVisitasBackend "D:\Archivos Antonio\CyC\gestor_visitas\backend\.venv\Scripts\python.exe" "-u -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
 nssm set GestorVisitasBackend AppDirectory "D:\Archivos Antonio\CyC\gestor_visitas\backend"
-nssm set GestorVisitasBackend AppEnvironmentExtra "DATABASE_URL=postgresql://postgres:1234@127.0.0.1:5432/gestor_visitas" "PYTHONUNBUFFERED=1"
+nssm set GestorVisitasBackend AppEnvironmentExtra "DATABASE_URL=postgresql://postgres:1234@127.0.0.1:5432/gestor_visitas" "PYTHONUNBUFFERED=1" "PYTHONUTF8=1" "PYTHONIOENCODING=utf-8"
 nssm set GestorVisitasBackend AppStdout "D:\Archivos Antonio\CyC\gestor_visitas\logs\backend.log"
 nssm set GestorVisitasBackend AppStderr "D:\Archivos Antonio\CyC\gestor_visitas\logs\backend.log"
 nssm set GestorVisitasBackend DependOnService postgresql-x64-16

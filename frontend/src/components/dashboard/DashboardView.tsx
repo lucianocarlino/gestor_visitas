@@ -425,7 +425,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h2 className="font-bold text-slate-900 flex items-center gap-2 text-sm">
               <Cpu className="w-4 h-4 text-blue-600" />
-              Inventario de Flota
+              Inventario
             </h2>
           </div>
 
