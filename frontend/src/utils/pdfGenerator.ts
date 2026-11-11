@@ -12,6 +12,7 @@ import { exportFileNative, exportFileNativeSafely } from '../platform/nativeFile
 import {
   CodigoMotivo,
   CodigoOrden,
+  CodigoResolucion,
   CodigoTipoServicio,
   CreateVisitDTO,
   Visita,
@@ -218,6 +219,24 @@ export function getOrigenCode(val: unknown): string {
   const prefix = str.split(/[\s-]/)[0];
   const prefixMatch = ORIGEN_OPTIONS.find((o) => o.code.toUpperCase() === prefix.toUpperCase());
   return prefixMatch ? prefixMatch.code : str;
+}
+
+export function getResolucionCode(val: unknown): string {
+  if (!val) return '';
+  const str = String(val).trim();
+  const cleanStr = str.replace(/^_/, '');
+  const entries = Object.entries(CodigoResolucion) as [string, string][];
+  const directMatch = entries.find(
+    ([k]) => k.replace(/^_/, '').toUpperCase() === cleanStr.toUpperCase()
+  );
+  if (directMatch) return directMatch[0].replace(/^_/, '');
+  const valMatch = entries.find(([, v]) => v.toLowerCase() === str.toLowerCase());
+  if (valMatch) return valMatch[0].replace(/^_/, '');
+  const prefix = cleanStr.split(/[\s-]/)[0].replace(/^_/, '');
+  const prefixMatch = entries.find(
+    ([k]) => k.replace(/^_/, '').toUpperCase() === prefix.toUpperCase()
+  );
+  return prefixMatch ? prefixMatch[0].replace(/^_/, '') : cleanStr;
 }
 
 /**
@@ -768,12 +787,13 @@ export function generateVisitPDF(
 
     const shortMotivo = getMotivoCodesList(item.codigo_motivo).join(', ');
     const shortOrigen = getOrigenCode(item.codigo_origen);
+    const shortRes = getResolucionCode(item.codigo_res);
 
     const values = [
       item.numero_de_serie || '',
       shortMotivo,
       shortOrigen,
-      item.codigo_res || '',
+      shortRes,
       item.numero_partes || '',
       item.cantidad ? String(item.cantidad) : '',
       item.otras_acciones || '',

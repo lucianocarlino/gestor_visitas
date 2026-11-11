@@ -21,7 +21,7 @@ from reportlab.lib.utils import ImageReader
 from PIL import Image
 
 from app.db.config import PDF_STORAGE_DIR
-from app.schemas.domain import CreateVisitDTO, ItemEstructura, Visita
+from app.schemas.domain import CodigoResolucion, CreateVisitDTO, ItemEstructura, Visita
 
 # Color Constants
 HEADER_GRAY = Color(220 / 255.0, 220 / 255.0, 220 / 255.0)
@@ -192,6 +192,28 @@ def get_motivo_code(val: Any) -> str:
         if opt["code"].upper() == prefix.upper():
             return opt["code"]
     return s
+
+
+def get_resolucion_code(val: Any) -> str:
+    if not val:
+        return ""
+    if isinstance(val, CodigoResolucion):
+        return val.name.lstrip("_")
+    s = str(val).strip()
+    clean_s = s.lstrip("_")
+    if s in CodigoResolucion.__members__:
+        return s.lstrip("_")
+    if f"_{clean_s}" in CodigoResolucion.__members__:
+        return clean_s
+    for member in CodigoResolucion:
+        if member.value.lower() == s.lower() or member.name.lstrip("_").upper() == clean_s.upper():
+            return member.name.lstrip("_")
+    prefix = re.split(r"[\s-]", s)[0].lstrip("_")
+    if prefix in CodigoResolucion.__members__:
+        return prefix
+    if f"_{prefix}" in CodigoResolucion.__members__:
+        return prefix
+    return clean_s
 
 
 def get_motivo_codes_list(val: Any) -> List[str]:
@@ -694,12 +716,13 @@ def generate_visit_pdf(
 
         short_mot = ", ".join(get_motivo_codes_list(getattr(item, "codigo_motivo", "")))
         short_ori = get_origen_code(getattr(item, "codigo_origen", ""))
+        short_res = get_resolucion_code(getattr(item, "codigo_res", ""))
 
         row_vals = [
             str(getattr(item, "numero_de_serie", "") or ""),
             short_mot,
             short_ori,
-            str(getattr(item, "codigo_res", "") or ""),
+            short_res,
             str(getattr(item, "numero_partes", "") or ""),
             str(getattr(item, "cantidad", "") or ""),
             str(getattr(item, "otras_acciones", "") or ""),

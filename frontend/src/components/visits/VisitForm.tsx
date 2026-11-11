@@ -14,6 +14,7 @@ import {
   MapPin,
   Users,
   Eraser,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { coreApi, visitsApi } from '../../services/apiClient';
@@ -22,6 +23,7 @@ import { getConnectivityStatus } from '../../platform/connectivity';
 import {
   CodigoMotivo,
   CodigoOrden,
+  CodigoResolucion,
   CodigoTipoServicio,
   CreateVisitDTO,
   Empaque,
@@ -67,6 +69,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
 
   // Dynamic Structure Items
   const [estructura, setEstructura] = useState<ItemEstructura[]>([]);
+  const [openMotivoDropdownIdx, setOpenMotivoDropdownIdx] = useState<number | null>(null);
 
   // Signature Canvas
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -131,7 +134,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
       numero_de_serie: banco.id,
       codigo_motivo: [CodigoMotivo.SRT],
       codigo_origen: CodigoOrden.SZR,
-      codigo_res: '',
+      codigo_res: (Object.values(CodigoResolucion)[0] as CodigoResolucion) ?? '',
       numero_partes: '',
       cantidad: '',
       otras_acciones: '',
@@ -140,6 +143,28 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
       tiempo_servicio: 15,
     }));
     setEstructura(tabla);
+  };
+
+  const handleTiempoServicio = (inicio: string, fin: string) => {
+    if (!inicio || !fin) return;
+
+    const [hInicio, mInicio] = inicio.split(':').map(Number);
+    const [hFin, mFin] = fin.split(':').map(Number);
+
+    if (isNaN(hInicio) || isNaN(mInicio) || isNaN(hFin) || isNaN(mFin)) return;
+
+    const inicioEnMinutos = hInicio * 60 + mInicio;
+    const finEnMinutos = hFin * 60 + mFin;
+    const duracionMinutos = Math.max(0, finEnMinutos - inicioEnMinutos);
+
+    setEstructura((prev) => {
+      if (prev.length === 0) return prev;
+      const tiempoPorBanco = Number((duracionMinutos / prev.length).toFixed(2));
+      return prev.map((item) => ({
+        ...item,
+        tiempo_servicio: tiempoPorBanco,
+      }));
+    });
   };
 
   const handleEstructuraChange = (
@@ -505,7 +530,10 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
             <input
               type="time"
               value={horaInicio}
-              onChange={(e) => setHoraInicio(e.target.value)}
+              onChange={(e) => {
+                setHoraInicio(e.target.value);
+                handleTiempoServicio(e.target.value, horaFin);
+              }}
               className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
               required
             />
@@ -516,7 +544,10 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
             <input
               type="time"
               value={horaFin}
-              onChange={(e) => setHoraFin(e.target.value)}
+              onChange={(e) => {
+                setHoraFin(e.target.value);
+                handleTiempoServicio(horaInicio, e.target.value);
+              }}
               className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
               required
             />
@@ -625,35 +656,60 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
                     readOnly
                   />
                 </div>
-                <div className="sm:col-span-4">
-                  <label className="block text-[10px] font-semibold text-slate-600 mb-1">
-                    Cód. Motivo (seleccione uno o más)
-                  </label>
-                  <div className="flex flex-wrap gap-1 p-1.5 bg-white border border-slate-300 rounded-lg">
-                    {Object.entries(CodigoMotivo).map(([k, v]) => {
-                      const currentList = Array.isArray(item.codigo_motivo)
-                        ? item.codigo_motivo
-                        : [item.codigo_motivo];
-                      const isSelected = currentList.some(
-                        (m) => m === v || String(m) === k
-                      );
-                      return (
+                <div className="sm:col-span-2 relative">
+                  <label className="block text-[10px] font-semibold text-slate-600">Cód. Motivo</label>
+                  {(() => {
+                    const currentList = Array.isArray(item.codigo_motivo)
+                      ? item.codigo_motivo
+                      : [item.codigo_motivo];
+                    const selectedEntries = Object.entries(CodigoMotivo).filter(([k, v]) =>
+                      currentList.some((m) => m === v || String(m) === k)
+                    );
+                    const displayLabel =
+                      selectedEntries.length === 1
+                        ? `${selectedEntries[0][0]} - ${selectedEntries[0][1]}`
+                        : selectedEntries.map(([k]) => k).join(', ') || 'Seleccionar...';
+
+                    return (
+                      <>
                         <button
-                          key={k}
                           type="button"
-                          title={`${k} - ${v}`}
-                          onClick={() => toggleItemMotivo(idx, v)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold border transition ${
-                            isSelected
-                              ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
-                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
+                          onClick={() =>
+                            setOpenMotivoDropdownIdx(openMotivoDropdownIdx === idx ? null : idx)
+                          }
+                          className="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 flex items-center justify-between text-left"
                         >
-                          {k} - {v}
+                          <span className="truncate">{displayLabel}</span>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0 ml-1" />
                         </button>
-                      );
-                    })}
-                  </div>
+                        {openMotivoDropdownIdx === idx && (
+                          <div className="absolute z-20 mt-1 w-56 bg-white border border-slate-300 rounded-lg shadow-lg py-1 max-h-60 overflow-auto">
+                            {Object.entries(CodigoMotivo).map(([k, v]) => {
+                              const isSelected = currentList.some(
+                                (m) => m === v || String(m) === k
+                              );
+                              return (
+                                <label
+                                  key={k}
+                                  className="flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-100 cursor-pointer text-xs text-slate-800"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => toggleItemMotivo(idx, v)}
+                                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <span>
+                                    {k} - {v}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] font-semibold text-slate-600">Cód. Origen</label>
@@ -671,13 +727,22 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] font-semibold text-slate-600">Cód. Res.</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. R01"
+                  <select
                     value={item.codigo_res}
-                    onChange={(e) => handleEstructuraChange(idx, 'codigo_res', e.target.value)}
-                    className="w-full p-1.5 bg-white border border-slate-300 rounded text-slate-900"
-                  />
+                    onChange={(e) =>
+                      handleEstructuraChange(idx, 'codigo_res', e.target.value as CodigoResolucion)
+                    }
+                    className="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-slate-900"
+                  >
+                    {Object.entries(CodigoResolucion).map(([k, v]) => {
+                      const cleanCode = k.replace(/^_/, '');
+                      return (
+                        <option key={k} value={v}>
+                          {cleanCode} - {v}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] font-semibold text-slate-600">Nº Partes</label>
@@ -699,7 +764,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
                     placeholder="Cantidad de piezas usadas"
                   />
                 </div>
-                <div className="sm:col-span-4">
+                <div className="sm:col-span-6">
                   <label className="block text-[10px] font-semibold text-slate-600">Acción Realizada</label>
                   <input
                     type="text"
@@ -737,7 +802,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
                   <label className="block text-[10px] font-semibold text-slate-600">Tiempo de servicio (minutos)</label>
                   <input
                     type="number"
-                    step="0.5"
+                    step="any"
                     value={item.tiempo_servicio}
                     onChange={(e) =>
                       handleEstructuraChange(idx, 'tiempo_servicio', Number(e.target.value))

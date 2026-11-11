@@ -9,7 +9,7 @@ from app.db.base import Base, TimestampMixin
 from app.models.common import generate_id
 from app.models.location import EmpaqueModel
 from app.models.technician import TecnicoModel
-from app.schemas.domain import CodigoMotivo, CreateVisitDTO, ItemEstructura, ReporteSinclair, Visita
+from app.schemas.domain import CodigoMotivo, CodigoResolucion, CreateVisitDTO, ItemEstructura, ReporteSinclair, Visita
 
 
 def _serialize_motivos(motivos: list[CodigoMotivo] | CodigoMotivo | str) -> str:
@@ -179,7 +179,7 @@ class ItemEstructuraModel(Base):
     numero_de_serie: Mapped[str] = mapped_column(String(50), default="")
     codigo_motivo: Mapped[str] = mapped_column(String(255), default="")
     codigo_origen: Mapped[str] = mapped_column(String(50), default="")
-    codigo_res: Mapped[str] = mapped_column(String(50))
+    codigo_res: Mapped[str] = mapped_column(String(255), default="")
     numero_partes: Mapped[str] = mapped_column(String(100))
     cantidad: Mapped[str] = mapped_column(String(100))
     otras_acciones: Mapped[str] = mapped_column(Text)
@@ -196,7 +196,7 @@ class ItemEstructuraModel(Base):
             numero_de_serie=data.numero_de_serie,
             codigo_motivo=_serialize_motivos(data.codigo_motivo),
             codigo_origen=data.codigo_origen,
-            codigo_res=data.codigo_res,
+            codigo_res=data.codigo_res.value if isinstance(data.codigo_res, CodigoResolucion) else str(data.codigo_res or ""),
             numero_partes=data.numero_partes,
             cantidad=data.cantidad,
             otras_acciones=data.otras_acciones,

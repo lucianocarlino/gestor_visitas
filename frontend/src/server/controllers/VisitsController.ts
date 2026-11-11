@@ -8,6 +8,7 @@ import JSZip from 'jszip';
 import {
   CodigoMotivo,
   CodigoOrden,
+  CodigoResolucion,
   CodigoTipoServicio,
   Vehiculo,
 } from '../../types/domain';
@@ -22,6 +23,10 @@ export function createVisitsRouter(visitaService: VisitaService = new VisitaServ
     res.json({
       codigos_motivo: Object.entries(CodigoMotivo).map(([k, v]) => ({ key: k, label: v })),
       codigos_orden: Object.entries(CodigoOrden).map(([k, v]) => ({ key: k, label: v })),
+      codigos_resolucion: Object.entries(CodigoResolucion).map(([k, v]) => ({
+        key: k.replace(/^_/, ''),
+        label: v,
+      })),
       codigos_tipo_servicio: Object.entries(CodigoTipoServicio).map(([k, v]) => ({
         key: k,
         label: v,

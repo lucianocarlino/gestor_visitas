@@ -28,6 +28,13 @@ def upgrade() -> None:
         existing_nullable=False,
     )
     op.alter_column(
+        'reporte_items',
+        'codigo_res',
+        existing_type=sa.String(length=50),
+        type_=sa.String(length=255),
+        existing_nullable=False,
+    )
+    op.alter_column(
         'reportes_sinclair',
         'codigo_motivo',
         existing_type=sa.String(length=50),
@@ -41,6 +48,13 @@ def downgrade() -> None:
     op.alter_column(
         'reportes_sinclair',
         'codigo_motivo',
+        existing_type=sa.String(length=255),
+        type_=sa.String(length=50),
+        existing_nullable=False,
+    )
+    op.alter_column(
+        'reporte_items',
+        'codigo_res',
         existing_type=sa.String(length=255),
         type_=sa.String(length=50),
         existing_nullable=False,
