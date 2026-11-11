@@ -193,6 +193,16 @@ export function getMotivoCode(val: unknown): string {
   return prefixMatch ? prefixMatch.code : str;
 }
 
+export function getMotivoCodesList(val: unknown): string[] {
+  if (!val) return [];
+  const rawList = Array.isArray(val)
+    ? val
+    : typeof val === 'string'
+    ? val.split(',').map((s) => s.trim()).filter(Boolean)
+    : [val];
+  return rawList.map((item) => getMotivoCode(item)).filter(Boolean);
+}
+
 /**
  * Extracts strictly the short code string (e.g. "SZR", "CTR") from any input
  */
@@ -423,15 +433,10 @@ export function generateVisitPDF(
 
   // Collect selected codes
   const allMotivoCodes = new Set<string>();
-  const motivoValues = Array.isArray(visit.codigo_motivo) ? visit.codigo_motivo : visit.codigo_motivo ? [visit.codigo_motivo] : [];
-  motivoValues.forEach((m) => {
-    const code = getMotivoCode(m);
-    if (code) allMotivoCodes.add(code);
-  });
+  getMotivoCodesList(visit.codigo_motivo).forEach((code) => allMotivoCodes.add(code));
   if (visit.estructura) {
     visit.estructura.forEach((item) => {
-      const code = getMotivoCode(item.codigo_motivo);
-      if (code) allMotivoCodes.add(code);
+      getMotivoCodesList(item.codigo_motivo).forEach((code) => allMotivoCodes.add(code));
     });
   }
 
@@ -761,7 +766,7 @@ export function generateVisitPDF(
         ? `${item.pct_etiquetado_real}%`
         : '';
 
-    const shortMotivo = getMotivoCode(item.codigo_motivo);
+    const shortMotivo = getMotivoCodesList(item.codigo_motivo).join(', ');
     const shortOrigen = getOrigenCode(item.codigo_origen);
 
     const values = [
@@ -883,7 +888,9 @@ function mapVisitaToCreateVisitDTO(visita: Visita): CreateVisitDTO {
     vehiculo: visita.vehiculo,
     empaque_id: visita.empaque?.id || '',
     tecnico_ids: visita.tecnicos.map((t) => t.id),
-    codigo_motivo: [visita.reporte.codigo_motivo],
+    codigo_motivo: Array.isArray(visita.reporte.codigo_motivo)
+      ? visita.reporte.codigo_motivo
+      : [visita.reporte.codigo_motivo],
     codigo_origen: [visita.reporte.codigo_origen],
     codigo_tipo_servicio: visita.reporte.codigo_tipo_servicio,
     solicitado_por: visita.solicitado_por,

@@ -2,7 +2,7 @@ import datetime
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, JsonValue, model_validator
+from pydantic import BaseModel, JsonValue, field_validator, model_validator
 
 
 class Status(str, Enum):
@@ -70,6 +70,39 @@ AuditAction = Literal[
     "CRITICAL_TOGGLE",
     "BATCH_SYNC",
 ]
+
+
+def _normalize_codigo_motivo_list(value: object) -> list[CodigoMotivo]:
+    if isinstance(value, list):
+        raw_items = value
+    elif isinstance(value, str):
+        raw_items = [part.strip() for part in value.split(",") if part.strip()]
+    elif isinstance(value, CodigoMotivo):
+        raw_items = [value]
+    else:
+        raw_items = []
+
+    resolved: list[CodigoMotivo] = []
+    for item in raw_items:
+        if isinstance(item, CodigoMotivo):
+            resolved.append(item)
+            continue
+        item_str = str(item).strip()
+        if not item_str:
+            continue
+        if item_str in CodigoMotivo.__members__:
+            resolved.append(CodigoMotivo[item_str])
+            continue
+        matched = next(
+            (member for member in CodigoMotivo if member.value.lower() == item_str.lower()),
+            None,
+        )
+        if matched is not None:
+            resolved.append(matched)
+        else:
+            resolved.append(CodigoMotivo(item_str))
+
+    return resolved if resolved else [CodigoMotivo.SRT]
 
 
 class Banco(BaseModel):
@@ -221,7 +254,7 @@ class Consumible(BaseModel):
 
 class ItemEstructura(BaseModel):
     numero_de_serie: str
-    codigo_motivo: CodigoMotivo
+    codigo_motivo: list[CodigoMotivo]
     codigo_origen: CodigoOrden
     codigo_res: str
     numero_partes: str
@@ -231,10 +264,15 @@ class ItemEstructura(BaseModel):
     pct_etiquetado_real: float
     tiempo_servicio: float
 
+    @field_validator("codigo_motivo", mode="before")
+    @classmethod
+    def validate_codigo_motivo(cls, value: object) -> list[CodigoMotivo]:
+        return _normalize_codigo_motivo_list(value)
+
 
 class ReporteSinclair(BaseModel):
     numero: str
-    codigo_motivo: CodigoMotivo
+    codigo_motivo: list[CodigoMotivo]
     codigo_origen: CodigoOrden
     codigo_tipo_servicio: CodigoTipoServicio
     estructura: list[ItemEstructura]
@@ -248,6 +286,11 @@ class ReporteSinclair(BaseModel):
     produccion_etiquetada: str | None = None
     condicion_fruta: str | None = None
     created_at: str
+
+    @field_validator("codigo_motivo", mode="before")
+    @classmethod
+    def validate_codigo_motivo(cls, value: object) -> list[CodigoMotivo]:
+        return _normalize_codigo_motivo_list(value)
 
 
 class Visita(BaseModel):
@@ -283,6 +326,11 @@ class CreateVisitDTO(BaseModel):
     condicion_fruta: str | None = None
     id: str | None = None
     numero: str | None = None
+
+    @field_validator("codigo_motivo", mode="before")
+    @classmethod
+    def validate_codigo_motivo(cls, value: object) -> list[CodigoMotivo]:
+        return _normalize_codigo_motivo_list(value)
 
 
 class CreateReeplaceDTO(BaseModel):

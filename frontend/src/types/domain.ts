@@ -205,7 +205,7 @@ export interface Servicio {
 
 export interface ItemEstructura {
     numero_de_serie: string;
-    codigo_motivo: CodigoMotivo;
+    codigo_motivo: CodigoMotivo | CodigoMotivo[];
     codigo_origen: CodigoOrden;
   codigo_res: string;
   numero_partes: string;
@@ -218,7 +218,7 @@ export interface ItemEstructura {
 
 export interface ReporteSinclair {
   numero: string;
-  codigo_motivo: CodigoMotivo;
+  codigo_motivo: CodigoMotivo | CodigoMotivo[];
   codigo_origen: CodigoOrden;
   codigo_tipo_servicio: CodigoTipoServicio;
   estructura: ItemEstructura[];

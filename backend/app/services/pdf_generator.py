@@ -194,6 +194,19 @@ def get_motivo_code(val: Any) -> str:
     return s
 
 
+def get_motivo_codes_list(val: Any) -> List[str]:
+    if not val:
+        return []
+    if isinstance(val, (list, set, tuple)):
+        raw_items = list(val)
+    elif isinstance(val, str):
+        raw_items = [part.strip() for part in val.split(",") if part.strip()]
+    else:
+        raw_items = [val]
+    codes = [get_motivo_code(item) for item in raw_items]
+    return [c for c in codes if c]
+
+
 def get_origen_code(val: Any) -> str:
     if not val:
         return ""
@@ -411,14 +424,11 @@ def generate_visit_pdf(
 
     # Collect Motivo & Origen Codes
     motivos_set: Set[str] = set()
-    raw_motivos = getattr(visit, "codigo_motivo", [])
-    if isinstance(raw_motivos, (list, set)):
-        for m in raw_motivos:
-            code = get_motivo_code(m)
-            if code:
-                motivos_set.add(code)
-    elif raw_motivos:
-        motivos_set.add(get_motivo_code(raw_motivos))
+    raw_motivos = getattr(visit, "codigo_motivo", []) or (
+        getattr(visit, "reporte", None) and getattr(visit.reporte, "codigo_motivo", [])
+    )
+    for code in get_motivo_codes_list(raw_motivos):
+        motivos_set.add(code)
 
     origenes_set: Set[str] = set()
     raw_origenes = getattr(visit, "codigo_origen", [])
@@ -432,8 +442,7 @@ def generate_visit_pdf(
 
     estructura_list = getattr(visit, "estructura", []) or (getattr(visit, "reporte", None) and getattr(visit.reporte, "estructura", [])) or []
     for item in estructura_list:
-        m_code = get_motivo_code(getattr(item, "codigo_motivo", None))
-        if m_code:
+        for m_code in get_motivo_codes_list(getattr(item, "codigo_motivo", None)):
             motivos_set.add(m_code)
         o_code = get_origen_code(getattr(item, "codigo_origen", None))
         if o_code:
@@ -683,7 +692,7 @@ def generate_visit_pdf(
         t_serv = getattr(item, "tiempo_servicio", None)
         t_serv_str = f"{t_serv} min" if t_serv is not None and str(t_serv) != "" else ""
 
-        short_mot = get_motivo_code(getattr(item, "codigo_motivo", ""))
+        short_mot = ", ".join(get_motivo_codes_list(getattr(item, "codigo_motivo", "")))
         short_ori = get_origen_code(getattr(item, "codigo_origen", ""))
 
         row_vals = [

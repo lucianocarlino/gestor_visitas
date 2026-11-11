@@ -55,7 +55,12 @@ export class StatisticsService {
     for (const v of visitas) {
       vehiculoMap[v.vehiculo] = (vehiculoMap[v.vehiculo] || 0) + 1;
       if (v.reporte) {
-        motivosMap[v.reporte.codigo_motivo] = (motivosMap[v.reporte.codigo_motivo] || 0) + 1;
+        const motivos = Array.isArray(v.reporte.codigo_motivo)
+          ? v.reporte.codigo_motivo
+          : [v.reporte.codigo_motivo];
+        for (const mot of motivos) {
+          motivosMap[mot] = (motivosMap[mot] || 0) + 1;
+        }
         codigosMap[v.reporte.codigo_origen] = (codigosMap[v.reporte.codigo_origen] || 0) + 1;
       }
     }

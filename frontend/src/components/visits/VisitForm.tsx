@@ -129,7 +129,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
     const bancos = empaque?.bancos ?? [];
     const tabla: ItemEstructura[] = bancos.map((banco) => ({
       numero_de_serie: banco.id,
-      codigo_motivo: CodigoMotivo.SRT,
+      codigo_motivo: [CodigoMotivo.SRT],
       codigo_origen: CodigoOrden.SZR,
       codigo_res: '',
       numero_partes: '',
@@ -150,6 +150,27 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
     setEstructura((prev) => {
       const copy = [...prev];
       copy[index] = { ...copy[index], [field]: value };
+      return copy;
+    });
+  };
+
+  const toggleItemMotivo = (index: number, motivoValue: CodigoMotivo) => {
+    setEstructura((prev) => {
+      const copy = [...prev];
+      const current = copy[index].codigo_motivo;
+      const currentList: CodigoMotivo[] = Array.isArray(current)
+        ? current
+        : current
+        ? [current]
+        : [];
+      const exists = currentList.includes(motivoValue);
+      if (exists && currentList.length <= 1) {
+        return prev;
+      }
+      const nextList = exists
+        ? currentList.filter((m) => m !== motivoValue)
+        : [...currentList, motivoValue];
+      copy[index] = { ...copy[index], codigo_motivo: nextList };
       return copy;
     });
   };
@@ -218,7 +239,9 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
     }
 
     const motivosList = estructura
-      .map((item) => item.codigo_motivo)
+      .flatMap((item) =>
+        Array.isArray(item.codigo_motivo) ? item.codigo_motivo : [item.codigo_motivo]
+      )
       .filter((m): m is CodigoMotivo => Boolean(m));
     const origenesList = estructura
       .map((item) => item.codigo_origen)
@@ -602,19 +625,35 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
                     readOnly
                   />
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-semibold text-slate-600">Cód. Motivo</label>
-                  <select
-                    value={item.codigo_motivo}
-                    onChange={(e) => handleEstructuraChange(idx, 'codigo_motivo', e.target.value as CodigoMotivo)}
-                    className="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-slate-900"
-                  >
-                    {Object.entries(CodigoMotivo).map(([k, v]) => (
-                      <option key={k} value={k}>
-                        {k} - {v}
-                      </option>
-                    ))}
-                  </select>
+                <div className="sm:col-span-4">
+                  <label className="block text-[10px] font-semibold text-slate-600 mb-1">
+                    Cód. Motivo (seleccione uno o más)
+                  </label>
+                  <div className="flex flex-wrap gap-1 p-1.5 bg-white border border-slate-300 rounded-lg">
+                    {Object.entries(CodigoMotivo).map(([k, v]) => {
+                      const currentList = Array.isArray(item.codigo_motivo)
+                        ? item.codigo_motivo
+                        : [item.codigo_motivo];
+                      const isSelected = currentList.some(
+                        (m) => m === v || String(m) === k
+                      );
+                      return (
+                        <button
+                          key={k}
+                          type="button"
+                          title={`${k} - ${v}`}
+                          onClick={() => toggleItemMotivo(idx, v)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold border transition ${
+                            isSelected
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {k} - {v}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] font-semibold text-slate-600">Cód. Origen</label>
@@ -660,7 +699,7 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSuccess, onCancel }) => 
                     placeholder="Cantidad de piezas usadas"
                   />
                 </div>
-                <div className="sm:col-span-6">
+                <div className="sm:col-span-4">
                   <label className="block text-[10px] font-semibold text-slate-600">Acción Realizada</label>
                   <input
                     type="text"

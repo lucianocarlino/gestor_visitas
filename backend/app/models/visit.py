@@ -9,7 +9,17 @@ from app.db.base import Base, TimestampMixin
 from app.models.common import generate_id
 from app.models.location import EmpaqueModel
 from app.models.technician import TecnicoModel
-from app.schemas.domain import CreateVisitDTO, ItemEstructura, ReporteSinclair, Visita
+from app.schemas.domain import CodigoMotivo, CreateVisitDTO, ItemEstructura, ReporteSinclair, Visita
+
+
+def _serialize_motivos(motivos: list[CodigoMotivo] | CodigoMotivo | str) -> str:
+    if isinstance(motivos, list):
+        values = [m.value if isinstance(m, CodigoMotivo) else str(m).strip() for m in motivos]
+        cleaned = [v for v in values if v]
+        return ",".join(cleaned) if cleaned else CodigoMotivo.SRT.value
+    if isinstance(motivos, CodigoMotivo):
+        return motivos.value
+    return str(motivos).strip() or CodigoMotivo.SRT.value
 
 
 class VisitaModel(TimestampMixin, Base):
@@ -93,7 +103,7 @@ class ReporteSinclairModel(TimestampMixin, Base):
         ForeignKey("visitas.id", ondelete="CASCADE"), unique=True, index=True
     )
     numero: Mapped[str] = mapped_column(String(30), unique=True, index=True)
-    codigo_motivo: Mapped[str] = mapped_column(String(50))
+    codigo_motivo: Mapped[str] = mapped_column(String(255))
     codigo_origen: Mapped[str] = mapped_column(String(50))
     codigo_tipo_servicio: Mapped[str] = mapped_column(String(50))
     hora_inicio: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -118,7 +128,7 @@ class ReporteSinclairModel(TimestampMixin, Base):
     ) -> "ReporteSinclairModel":
         reporte = cls(
             numero=numero,
-            codigo_motivo=data.codigo_motivo[0] if isinstance(data.codigo_motivo, list) else data.codigo_motivo,
+            codigo_motivo=_serialize_motivos(data.codigo_motivo),
             codigo_origen=data.codigo_origen[0] if isinstance(data.codigo_origen, list) else data.codigo_origen,
             codigo_tipo_servicio=data.codigo_tipo_servicio,
             hora_inicio=datetime.combine(datetime.now().date(), time.fromisoformat(data.hora_inicio)),
@@ -167,7 +177,7 @@ class ItemEstructuraModel(Base):
     )
     orden: Mapped[int] = mapped_column(Integer)
     numero_de_serie: Mapped[str] = mapped_column(String(50), default="")
-    codigo_motivo: Mapped[str] = mapped_column(String(50), default="")
+    codigo_motivo: Mapped[str] = mapped_column(String(255), default="")
     codigo_origen: Mapped[str] = mapped_column(String(50), default="")
     codigo_res: Mapped[str] = mapped_column(String(50))
     numero_partes: Mapped[str] = mapped_column(String(100))
@@ -184,7 +194,7 @@ class ItemEstructuraModel(Base):
         return cls(
             orden=orden,
             numero_de_serie=data.numero_de_serie,
-            codigo_motivo=data.codigo_motivo,
+            codigo_motivo=_serialize_motivos(data.codigo_motivo),
             codigo_origen=data.codigo_origen,
             codigo_res=data.codigo_res,
             numero_partes=data.numero_partes,

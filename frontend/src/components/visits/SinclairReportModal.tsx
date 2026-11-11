@@ -57,7 +57,12 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
     }
     if (reporte.estructura) {
       reporte.estructura.forEach((item) => {
-        if (item.codigo_motivo) set.add(String(item.codigo_motivo));
+        if (!item.codigo_motivo) return;
+        if (Array.isArray(item.codigo_motivo)) {
+          item.codigo_motivo.forEach((m) => m && set.add(String(m)));
+        } else {
+          set.add(String(item.codigo_motivo));
+        }
       });
     }
     return Array.from(set);
@@ -88,7 +93,9 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
       vehiculo: visita.vehiculo,
       empaque_id: visita.empaque?.id || "",
       tecnico_ids: visita.tecnicos.map((t) => t.id),
-      codigo_motivo: [visita.reporte.codigo_motivo],
+      codigo_motivo: Array.isArray(visita.reporte.codigo_motivo)
+        ? visita.reporte.codigo_motivo
+        : [visita.reporte.codigo_motivo],
       codigo_origen: [visita.reporte.codigo_origen],
       codigo_tipo_servicio: visita.reporte.codigo_tipo_servicio,
       solicitado_por: visita.solicitado_por,
@@ -302,7 +309,9 @@ export const SinclairReportModal: React.FC<SinclairReportModalProps> = ({
                           {item.numero_de_serie}
                         </td>
                         <td className="p-2.5  font-medium">
-                          {item.codigo_motivo}
+                          {Array.isArray(item.codigo_motivo)
+                            ? item.codigo_motivo.join(", ")
+                            : item.codigo_motivo}
                         </td>
                         <td className="p-2.5  font-medium">
                           {item.codigo_origen}

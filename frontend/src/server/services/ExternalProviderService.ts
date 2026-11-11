@@ -3,7 +3,7 @@
  * Adheres strictly to SDD and Clean Code standards
  */
 
-import { Visita } from '../../types/domain';
+import { CodigoMotivo, Visita } from '../../types/domain';
 import { IMachineRepository, MachineRepository } from '../repositories/MachineRepository';
 import { IVisitaRepository, VisitaRepository } from '../repositories/VisitaRepository';
 
@@ -63,7 +63,11 @@ export class ExternalProviderService {
       provider_name: 'Sinclair International Equipment Systems',
       generated_at: new Date().toISOString(),
       total_machines_in_field: inFieldCabezales + inFieldCaseteras,
-      total_field_failures: visits.filter((v) => v.reporte.codigo_motivo === 'Emergencia').length,
+      total_field_failures: visits.filter((v) =>
+        Array.isArray(v.reporte.codigo_motivo)
+          ? v.reporte.codigo_motivo.includes(CodigoMotivo.UEM)
+          : v.reporte.codigo_motivo === CodigoMotivo.UEM
+      ).length,
       synced_reports: reportsData,
     };
   }
